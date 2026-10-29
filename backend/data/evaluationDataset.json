@@ -1,0 +1,194 @@
+[
+  {
+    "id": "TC-01",
+    "brandName": "NovaFit",
+    "content": "Hey members! Welcome to NovaFit Premium, available today for ₹999/month. Consult your physician before beginning any exercise routine.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Completely compliant NovaFit post adhering to price, term, tone, and medical disclaimer."
+  },
+  {
+    "id": "TC-02",
+    "brandName": "NovaFit",
+    "content": "Hey users! NovaFit Premium is available for ₹999/month.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation"],
+    "description": "Prohibited terminology: uses 'users' instead of approved 'members'."
+  },
+  {
+    "id": "TC-03",
+    "brandName": "NovaFit",
+    "content": "Hey members! NovaFit Premium is on sale for just ₹799 this month!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["incorrect_price"],
+    "description": "Price violation: quotes ₹799 when approved subscription price is ₹999."
+  },
+  {
+    "id": "TC-04",
+    "brandName": "NovaFit",
+    "content": "Hey members! We promise guaranteed results with 10kg fat loss in 7 days!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "guideline_violation"],
+    "description": "Prohibited terminology ('guaranteed results') and prohibited transformation guarantee."
+  },
+  {
+    "id": "TC-05",
+    "brandName": "NovaFit",
+    "content": "Hey members! India's No. 1 fitness app is here to transform your health for ₹999.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["unsupported_claim"],
+    "description": "Unsupported superlative ranking claim without audited third-party citations."
+  },
+  {
+    "id": "TC-06",
+    "brandName": "GreenBasket",
+    "content": "Hello shoppers! Get fresh farm produce delivered to your doorstep. Standard city delivery is just ₹49, or free on orders over ₹499. Store in a cool dry place or refrigerate immediately upon receipt.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Fully compliant GreenBasket copy using 'shoppers', exact delivery pricing facts, and storage notice."
+  },
+  {
+    "id": "TC-07",
+    "brandName": "GreenBasket",
+    "content": "Calling all buyers! Get your organic vegetables with our delivery fee of ₹49.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation"],
+    "description": "Prohibited terminology: 'buyers' instead of 'shoppers'."
+  },
+  {
+    "id": "TC-08",
+    "brandName": "GreenBasket",
+    "content": "Hello shoppers! Express delivery is now available for only ₹29 on all carts.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["incorrect_price"],
+    "description": "Price violation: quotes ₹29 delivery fee when approved tariff is ₹49."
+  },
+  {
+    "id": "TC-09",
+    "brandName": "GreenBasket",
+    "content": "Hello shoppers! Buy cheap vegetables delivered straight to your home.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation"],
+    "description": "Prohibited terminology: 'cheap vegetables' instead of 'fresh farm produce'."
+  },
+  {
+    "id": "TC-10",
+    "brandName": "FinWise",
+    "content": "Welcome learners! Our Beginner Financial Freedom masterclass is available for ₹499. Mutual fund and securities investments are subject to market risks. Read all scheme related documents carefully.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Fully compliant FinWise post with course price, learners term, and mandatory SEBI disclaimer."
+  },
+  {
+    "id": "TC-11",
+    "brandName": "FinWise",
+    "content": "Calling guaranteed investors! Learn our stock secrets for ₹499.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation"],
+    "description": "Prohibited terminology: 'guaranteed investors' instead of 'learners'."
+  },
+  {
+    "id": "TC-12",
+    "brandName": "FinWise",
+    "content": "Welcome learners! Enroll in our masterclass for only ₹299 today.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["incorrect_price"],
+    "description": "Price violation: quotes ₹299 instead of approved course fee of ₹499."
+  },
+  {
+    "id": "TC-13",
+    "brandName": "FinWise",
+    "content": "Welcome learners! Our course gives you risk free wealth with hot stock tips!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "guideline_violation"],
+    "description": "Prohibited terms ('risk free wealth', 'hot stock tips') and guaranteed return claims."
+  },
+  {
+    "id": "TC-14",
+    "brandName": "TravelNest",
+    "content": "Dear travellers, experience our handcrafted Goa Coastal Serenity 4D/3N holiday package for ₹12,999. Passports must have a minimum validity of 6 months from travel date.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Compliant TravelNest itinerary with approved package pricing, terms, and passport notice."
+  },
+  {
+    "id": "TC-15",
+    "brandName": "TravelNest",
+    "content": "Welcome tourists! Explore Goa with our beach package for ₹12,999.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation"],
+    "description": "Prohibited terminology: 'tourists' instead of approved 'travellers'."
+  },
+  {
+    "id": "TC-16",
+    "brandName": "TravelNest",
+    "content": "Dear travellers, our Goa Coastal Serenity holiday package is now only ₹8,999!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["incorrect_price"],
+    "description": "Price violation: quotes ₹8,999 instead of approved tariff ₹12,999."
+  },
+  {
+    "id": "TC-17",
+    "brandName": "PureGlow",
+    "content": "Introduce our Radiant Niacinamide Serum into your daily skincare routine for ₹699. Perform a patch test 24 hours prior to regular application.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Compliant PureGlow cosmetic post with verified pricing, preferred term, and patch test warning."
+  },
+  {
+    "id": "TC-18",
+    "brandName": "PureGlow",
+    "content": "Our new serum provides a guaranteed cure for eczema and psoriasis!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "guideline_violation"],
+    "description": "Prohibited term 'guaranteed cure' and illegal cosmetic cure claims."
+  },
+  {
+    "id": "TC-19",
+    "brandName": "PureGlow",
+    "content": "Get your Radiant Niacinamide Serum today for just ₹499!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["incorrect_price"],
+    "description": "Price violation: ₹499 instead of approved price ₹699."
+  },
+  {
+    "id": "TC-20",
+    "brandName": "ByteForge",
+    "content": "Welcome customers! Deploy your cloud nodes with ByteForge Starter Cloud Node at ₹1,499/month with 99.95% Availability SLA. Standard tier API requests are throttled at 1,000 requests per minute.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Compliant ByteForge technical cloud announcement with approved pricing, SLA, and rate limit notice."
+  },
+  {
+    "id": "TC-21",
+    "brandName": "ByteForge",
+    "content": "Hey end users! ByteForge provides unhackable cloud infrastructure with infinite scalability.",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "guideline_violation"],
+    "description": "Prohibited terms 'end users', 'unhackable cloud' and impossible uptime guarantees."
+  },
+  {
+    "id": "TC-22",
+    "brandName": "EduSpark",
+    "content": "Calling placement-guaranteed candidates! Enroll for ₹799 and get an instant high salary job!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "guideline_violation"],
+    "description": "Prohibited term 'placement-guaranteed candidates' and fake job guarantee claims."
+  },
+  {
+    "id": "TC-23",
+    "brandName": "FreshBite",
+    "content": "Enjoy our macro-balanced meals for only ₹199. Prepared in a facility that also handles nuts, dairy, soy, and gluten.",
+    "shouldViolate": false,
+    "expectedViolationTypes": [],
+    "description": "Compliant FreshBite meal advertisement with approved price and allergen disclaimer."
+  },
+  {
+    "id": "TC-24",
+    "brandName": "FreshBite",
+    "content": "Reward yourself with cheat meals for only ₹99 with fat melting ingredients!",
+    "shouldViolate": true,
+    "expectedViolationTypes": ["terminology_violation", "incorrect_price"],
+    "description": "Prohibited terms 'cheat meals', 'fat melting ingredients' and incorrect price ₹99."
+  }
+]

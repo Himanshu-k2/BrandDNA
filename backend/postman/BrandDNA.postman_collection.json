@@ -1,0 +1,862 @@
+{
+  "info": {
+    "_postman_id": "branddna-governance-api-v2",
+    "name": "BrandDNA AI Governance API",
+    "description": "Competition-ready Postman collection for the BrandDNA AI Brand Governance Platform.\nBase URL: http://localhost:5001\nOrganized into 9 distinct functional folders covering the entire governance lifecycle.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "brandId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "brandId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health",
+      "item": [
+        {
+          "name": "Root Service Ping",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Returns welcome message and links to health documentation."
+          }
+        },
+        {
+          "name": "System Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Returns system health, database connection state, uptime, and environment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Register New User (Creator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo Content Creator\",\n  \"email\": \"creator@example.test\",\n  \"password\": \"SecurePass2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Public registration endpoint. Default role assigned is 'creator'."
+          }
+        },
+        {
+          "name": "Register Admin User (Privileged Secret)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Workspace Admin\",\n  \"email\": \"admin@example.test\",\n  \"password\": \"SecureAdminPass2026!\",\n  \"role\": \"admin\",\n  \"adminSecretKey\": \"your_admin_invite_secret_here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registers an administrative user. Requires the server's ADMIN_INVITE_SECRET."
+          }
+        },
+        {
+          "name": "Login (Captures authToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('authToken', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@demobrands.test\",\n  \"password\": \"DemoPasswordSecure2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticates user and saves JWT into {{authToken}} variable."
+          }
+        },
+        {
+          "name": "Get Authenticated User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Retrieves the authenticated user profile and organization membership."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Brands",
+      "item": [
+        {
+          "name": "Create Brand Workspace (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AuraTech\",\n  \"description\": \"Next-generation smart wearables and biometric health insights\",\n  \"tone\": \"Innovative, visionary, precision-focused, and accessible\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands"]
+            },
+            "description": "Creates a new brand workspace (Admin only)."
+          }
+        },
+        {
+          "name": "List Brands in Workspace",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) {",
+                  "    pm.collectionVariables.set('brandId', res.data[0].id || res.data[0]._id);",
+                  "    if (res.data.length > 1) {",
+                  "        pm.collectionVariables.set('brandId2', res.data[1].id || res.data[1]._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands"],
+              "query": [{ "key": "limit", "value": "10" }]
+            },
+            "description": "Lists all brand workspaces in the organization and captures brandId."
+          }
+        },
+        {
+          "name": "Retrieve Brand by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}"]
+            },
+            "description": "Retrieves brand details, tone, and visual guidelines."
+          }
+        },
+        {
+          "name": "Update Brand Details (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated brand description for brand governance tracking\",\n  \"tone\": \"Authoritative, encouraging, and clear\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}"]
+            },
+            "description": "Updates brand workspace details (Admin only)."
+          }
+        },
+        {
+          "name": "Archive Brand Workspace (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}"]
+            },
+            "description": "Soft-deletes / archives a brand workspace (Admin only)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Guidelines, Facts, and Terminology",
+      "item": [
+        {
+          "name": "List Brand Guidelines",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/guidelines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "guidelines"]
+            },
+            "description": "Lists approved guidelines for the brand."
+          }
+        },
+        {
+          "name": "Create Brand Guideline (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Substantiated Clinical Claims\",\n  \"category\": \"Claims and disclaimers\",\n  \"ruleText\": \"All fitness efficacy claims must include a verifiable scientific study citation or medical disclaimer.\",\n  \"severity\": \"high\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/guidelines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "guidelines"]
+            },
+            "description": "Creates a new brand guideline (Admin only)."
+          }
+        },
+        {
+          "name": "List Approved Facts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/facts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "facts"]
+            },
+            "description": "Lists verified product specs, pricing, and facts."
+          }
+        },
+        {
+          "name": "Create Approved Fact (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"annual_membership_price\",\n  \"value\": \"₹9,999 per year\",\n  \"category\": \"pricing\",\n  \"sourceReference\": \"FY2026 Board Approved Pricing Sheet\",\n  \"verificationStatus\": \"verified\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/facts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "facts"]
+            },
+            "description": "Registers an approved fact or pricing figure (Admin only)."
+          }
+        },
+        {
+          "name": "List Terminology Rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/terminology",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "terminology"]
+            },
+            "description": "Lists prohibited vs. preferred vocabulary rules."
+          }
+        },
+        {
+          "name": "Create Terminology Rule (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prohibitedTerm\": \"clients\",\n  \"preferredTerm\": \"community members\",\n  \"explanation\": \"We build an inclusive community, not transactional clients.\",\n  \"caseSensitive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/terminology",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "terminology"]
+            },
+            "description": "Registers a prohibited vs. preferred terminology rule (Admin only)."
+          }
+        },
+        {
+          "name": "List Brand Visual Assets",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/visual-assets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "visual-assets"]
+            },
+            "description": "Lists registered visual brand rules, palettes, and logo guidelines."
+          }
+        },
+        {
+          "name": "Register Brand Visual Asset (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NovaFit Primary Color Palette\",\n  \"assetType\": \"color_palette\",\n  \"details\": {\n    \"hexColors\": [\"#FF4500\", \"#1E1E1E\", \"#FFFFFF\"],\n    \"prohibitedColors\": [\"#39FF14\"],\n    \"notes\": \"Electric orange is primary; neon green is strictly prohibited.\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/{{brandId}}/visual-assets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "brands", "{{brandId}}", "visual-assets"]
+            },
+            "description": "Registers visual identity rules and palettes (Admin only)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Text Reviews",
+      "item": [
+        {
+          "name": "Submit Copy for Governance Review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.reviewId) {",
+                  "    pm.collectionVariables.set('reviewId', res.data.reviewId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brandId\": \"{{brandId}}\",\n  \"content\": \"Hey users! India's No. 1 fitness club is now open for just ₹799 per month!\",\n  \"contentType\": \"social_post\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            },
+            "description": "Submits copy. Executes deterministic checks (pricing, terminology) + Gemini contextual analysis."
+          }
+        },
+        {
+          "name": "List Submitted Reviews in Workspace",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"],
+              "query": [{ "key": "limit", "value": "20" }]
+            },
+            "description": "Lists reviews submitted within the user's organization."
+          }
+        },
+        {
+          "name": "Retrieve Review Results by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}"]
+            },
+            "description": "Retrieves comprehensive review report, severity counts, score, and individual findings."
+          }
+        },
+        {
+          "name": "Cross-Brand Differential Evaluation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brandId\": \"{{brandId2}}\",\n  \"content\": \"Calling all buyers! Standard express delivery fee is ₹29.\",\n  \"contentType\": \"social_post\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            },
+            "description": "Evaluates the same copy against a different brand workspace to demonstrate brand-specific governance rules."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. PDF and Image Uploads",
+      "item": [
+        {
+          "name": "Multimodal Document (PDF) Upload Review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.reviewId) {",
+                  "    pm.collectionVariables.set('reviewId', res.data.reviewId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "description": "Select PDF document (<= 20MB, <= 50 pages)" },
+                { "key": "brandId", "value": "{{brandId}}", "type": "text" },
+                { "key": "title", "value": "Q4 Brand Campaign Brochure", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "upload"]
+            },
+            "description": "Uploads a multi-page PDF document for compliance inspection with per-page violation localization."
+          }
+        },
+        {
+          "name": "Multimodal Marketing Image Upload Review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.reviewId) {",
+                  "    pm.collectionVariables.set('reviewId', res.data.reviewId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "description": "Select image file (JPEG, PNG, WebP <= 15MB)" },
+                { "key": "brandId", "value": "{{brandId}}", "type": "text" },
+                { "key": "title", "value": "NovaFit Promotional Poster", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "upload"]
+            },
+            "description": "Uploads an image to inspect both text copy inside the image and visual branding standards (colors, logo rules)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Revisions and Comments",
+      "item": [
+        {
+          "name": "Create Copy Revision (Resubmission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hey members! NovaFit Premium membership is available for ₹999 per month.\",\n  \"submissionNote\": \"Corrected price to approved ₹999 and replaced prohibited word 'users' with 'members'.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/revisions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "revisions"]
+            },
+            "description": "Submits corrected copy. Bumps version number, supersedes previous revision, and re-analyzes content."
+          }
+        },
+        {
+          "name": "Multimodal Revision Upload (PDF/Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "description": "Select corrected document or image" },
+                { "key": "submissionNote", "value": "Fixed membership price and color palette to comply with brand standards", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/revisions/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "revisions", "upload"]
+            },
+            "description": "Uploads corrected document or image file, creating immutable revision v2."
+          }
+        },
+        {
+          "name": "Retrieve Revision History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/revisions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "revisions"]
+            },
+            "description": "Retrieves the complete immutable revision history with findings for each version snapshot."
+          }
+        },
+        {
+          "name": "Retrieve Specific Revision Snapshot",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/revisions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "revisions", "1"]
+            },
+            "description": "Retrieves an exact historical revision snapshot (e.g. version 1)."
+          }
+        },
+        {
+          "name": "Add Review Discussion Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Copy is now compliant with brand voice and approved membership prices.\",\n  \"commentType\": \"general_feedback\",\n  \"versionNumber\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "comments"]
+            },
+            "description": "Appends a collaborative feedback comment to the review discussion thread."
+          }
+        },
+        {
+          "name": "List Review Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "comments"]
+            },
+            "description": "Lists all comments and discussion threads associated with the review."
+          }
+        },
+        {
+          "name": "View Governance Audit Trail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/audit-trail",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "audit-trail"]
+            },
+            "description": "Retrieves chronological audit logs of all lifecycle events and state transitions."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Approvals and Rejections",
+      "item": [
+        {
+          "name": "Submit Content for Human Approval",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "submit"]
+            },
+            "description": "Transitions review from draft/needs_changes into pending_approval."
+          }
+        },
+        {
+          "name": "Request Changes (Reviewer Action)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Please include the medical consultation disclaimer before final sign-off.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/request-changes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "request-changes"]
+            },
+            "description": "Reviewer/Admin requests changes. Transitions status to needs_changes."
+          }
+        },
+        {
+          "name": "Reject Content (Reviewer Action)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Campaign copy violates legal advertising compliance and cannot be approved.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "reject"]
+            },
+            "description": "Reviewer/Admin officially rejects content (reason required)."
+          }
+        },
+        {
+          "name": "Approve Content (Reviewer Action)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Approved by Brand Governance Board for production release.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/{{reviewId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "{{reviewId}}", "approve"]
+            },
+            "description": "Official human sign-off marking review status as approved."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Notifications",
+      "item": [
+        {
+          "name": "List User Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) {",
+                  "    pm.collectionVariables.set('notificationId', res.data[0].id || res.data[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Lists in-app governance notifications for the authenticated user."
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/{{notificationId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "{{notificationId}}", "read"]
+            },
+            "description": "Marks a single notification as read."
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "read-all"]
+            },
+            "description": "Marks all unread notifications as read for the authenticated user."
+          }
+        }
+      ]
+    }
+  ]
+}
