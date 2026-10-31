@@ -8,15 +8,42 @@ import ContentReview from '../models/ContentReview.js';
  */
 export const createReview = async (req, res, next) => {
   try {
-    const { brandId, content, contentType, title, submissionNote } = req.body;
+    const { brandId, content, contentType, title, submissionNote, files } = req.body;
     const organizationId = req.user.organizationId;
     const userId = req.user._id;
+
+    let file = req.file || null;
+    if (!file && Array.isArray(files) && files.length > 0 && files[0]?.fileData) {
+      const first = files[0];
+      let buffer = null;
+      let mimeType = first.fileType || 'application/octet-stream';
+      if (typeof first.fileData === 'string' && first.fileData.startsWith('data:')) {
+        const match = first.fileData.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          buffer = Buffer.from(match[2], 'base64');
+        } else {
+          const commaIdx = first.fileData.indexOf(',');
+          buffer = Buffer.from(first.fileData.slice(commaIdx + 1), 'base64');
+        }
+      } else if (typeof first.fileData === 'string') {
+        buffer = Buffer.from(first.fileData, 'base64');
+      }
+      if (buffer) {
+        file = {
+          buffer,
+          originalname: first.filename || 'uploaded_creative_asset',
+          mimetype: mimeType,
+          size: first.fileSize || buffer.length,
+        };
+      }
+    }
 
     const reviewResult = await executeContentReview({
       brandId,
       content,
       contentType,
-      file: req.file || null,
+      file,
       userId,
       organizationId,
       submissionNote,

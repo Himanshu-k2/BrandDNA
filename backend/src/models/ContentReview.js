@@ -158,6 +158,7 @@ const fileAssetSchema = new mongoose.Schema(
       height: { type: Number, default: null },
     },
     extractedText: { type: String, default: '' },
+    dataUrl: { type: String, default: '' },
     pageSummaries: [
       {
         pageNumber: Number,

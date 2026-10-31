@@ -33,6 +33,7 @@ import {
   AlertCircle,
   Cpu,
   TrendingUp,
+  Download,
 } from 'lucide-react';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
@@ -791,6 +792,114 @@ export default function ReviewDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Content + Sub-tabs */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Creative Media & Instagram Post Inspector */}
+          {review.fileAsset && (review.fileAsset.originalName || review.fileAsset.dataUrl || review.fileAsset.extractedText) && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-teal-50 text-teal-700 border border-teal-200">
+                    {review.fileAsset.mimeType?.startsWith('image') || review.fileAsset.originalName?.match(/\.(png|jpg|jpeg|webp)$/i) ? (
+                      <ImageIcon className="h-5 w-5" />
+                    ) : (
+                      <FileText className="h-5 w-5" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-sm font-bold text-slate-900">
+                        {review.fileAsset.mimeType?.startsWith('image') || review.fileAsset.originalName?.match(/\.(png|jpg|jpeg|webp)$/i)
+                          ? 'Creative Asset & Instagram Post Inspector'
+                          : 'Uploaded Document Asset'}
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
+                        {review.fileAsset.originalName?.split('.').pop() || 'Asset'}
+                      </span>
+                      {review.fileAsset.extractedText && (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Text Extracted & Audited
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {review.fileAsset.originalName || 'Creative Graphic'} · {formatFileSize(review.fileAsset.fileSize)}
+                      {review.fileAsset.dimensions?.width && review.fileAsset.dimensions?.height && (
+                        <span> · {review.fileAsset.dimensions.width} × {review.fileAsset.dimensions.height} px</span>
+                      )}
+                      {review.fileAsset.pageCount && (
+                        <span> · {review.fileAsset.pageCount} page(s)</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {review.fileAsset.dataUrl && (
+                  <a
+                    href={review.fileAsset.dataUrl}
+                    download={review.fileAsset.originalName || 'creative-asset'}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download Asset
+                  </a>
+                )}
+              </div>
+
+              {/* Visual Preview / Instagram Post Frame */}
+              {(review.fileAsset.dataUrl || review.fileAsset.mimeType?.startsWith('image') || review.fileAsset.originalName?.match(/\.(png|jpg|jpeg|webp)$/i)) && (
+                <div className="relative rounded-xl border border-slate-200 bg-slate-900/5 p-4 flex flex-col items-center justify-center overflow-hidden">
+                  {review.fileAsset.dataUrl ? (
+                    <div className="relative group max-w-full">
+                      <img
+                        src={review.fileAsset.dataUrl}
+                        alt={review.fileAsset.originalName || 'Creative preview'}
+                        className="max-h-[460px] w-auto rounded-lg object-contain border border-slate-200 shadow-md bg-white transition-transform duration-200 group-hover:scale-[1.01]"
+                      />
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                        <span className="px-2 py-1 rounded bg-black/75 backdrop-blur-xs text-white text-[11px] font-mono">
+                          {review.fileAsset.dimensions?.width ? `${review.fileAsset.dimensions.width} × ${review.fileAsset.dimensions.height} px` : 'High Res'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-slate-400">
+                      <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs">Image processed for compliance. Details preserved in audit snapshot.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Extracted In-Image OCR Text */}
+              {review.fileAsset.extractedText && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-teal-600" />
+                      Detected Text in Asset (Vision / OCR Transcription)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(review.fileAsset.extractedText);
+                        toast.success('Extracted text copied to clipboard');
+                      }}
+                      className="text-xs font-semibold text-teal-600 hover:text-teal-700 cursor-pointer flex items-center gap-1"
+                    >
+                      Copy Text
+                    </button>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200/80 text-xs font-sans text-slate-800 leading-relaxed whitespace-pre-wrap select-text">
+                    {review.fileAsset.extractedText}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    💡 BrandDNA automatically read and compared this text against brand guidelines, prohibited terms, and approved pricing.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Submitted Content Display */}
           {review.content && (
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-3">

@@ -234,6 +234,7 @@ export const executeContentReview = async ({
         fileSize: doc.fileSize,
         pageCount: doc.totalPages,
         extractedText: doc.fullText,
+        dataUrl: file.mimetype?.includes('pdf') || file.originalname?.endsWith('.pdf') ? `data:${doc.mimeType};base64,${file.buffer.toString('base64')}` : null,
         pageSummaries: doc.pages.map((p) => ({
           pageNumber: p.pageNumber,
           characterCount: p.characterCount,
@@ -268,7 +269,9 @@ export const executeContentReview = async ({
       if (!aiResult.isPartial) methodsRan.push('gemini_multimodal_vision_ai');
 
       const transcribedText = aiResult.extractedText || '';
-      processedContent = transcribedText || (content || '[Image without detected text]');
+      processedContent = transcribedText
+        ? (content && content.trim() ? `${transcribedText}\n\n[Attached Caption]: ${content.trim()}` : transcribedText)
+        : (content || '[Image without detected text]');
 
       fileAsset = {
         originalName: file.originalname,
@@ -276,6 +279,7 @@ export const executeContentReview = async ({
         fileSize: img.fileSize,
         dimensions: img.dimensions,
         extractedText: transcribedText,
+        dataUrl: `data:${img.mimeType};base64,${img.base64}`,
       };
 
       if (img.dominantColor) {
@@ -283,9 +287,9 @@ export const executeContentReview = async ({
         deterministicFindings.push(...colorFindings);
       }
 
-      if (transcribedText) {
+      if (processedContent && processedContent !== '[Image without detected text]') {
         deterministicFindings.push(
-          ...runDeterministicChecks(transcribedText, brandContext, {
+          ...runDeterministicChecks(processedContent, brandContext, {
             reviewModality: 'image-text',
           })
         );

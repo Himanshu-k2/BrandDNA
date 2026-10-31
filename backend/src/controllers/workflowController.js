@@ -37,8 +37,33 @@ export const submitReview = async (req, res, next) => {
  */
 export const createRevision = async (req, res, next) => {
   try {
-    const { content, submissionNote } = req.body;
-    const file = req.file || null;
+    const { content, submissionNote, files } = req.body;
+    let file = req.file || null;
+    if (!file && Array.isArray(files) && files.length > 0 && files[0]?.fileData) {
+      const first = files[0];
+      let buffer = null;
+      let mimeType = first.fileType || 'application/octet-stream';
+      if (typeof first.fileData === 'string' && first.fileData.startsWith('data:')) {
+        const match = first.fileData.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          buffer = Buffer.from(match[2], 'base64');
+        } else {
+          const commaIdx = first.fileData.indexOf(',');
+          buffer = Buffer.from(first.fileData.slice(commaIdx + 1), 'base64');
+        }
+      } else if (typeof first.fileData === 'string') {
+        buffer = Buffer.from(first.fileData, 'base64');
+      }
+      if (buffer) {
+        file = {
+          buffer,
+          originalname: first.filename || 'revised_asset',
+          mimetype: mimeType,
+          size: first.fileSize || buffer.length,
+        };
+      }
+    }
     const { review, revision } = await createReviewRevision(
       req.params.id,
       { content, file, submissionNote },

@@ -99,6 +99,21 @@ export default function CreateReview() {
         continue;
       }
 
+      if (ext === '.txt' || ext === '.md') {
+        const textReader = new FileReader();
+        textReader.onload = (event) => {
+          const text = event.target?.result;
+          if (typeof text === 'string') {
+            setForm((prev) => ({
+              ...prev,
+              content: prev.content ? `${prev.content}\n\n${text}` : text,
+            }));
+            toast.success(`Loaded text from "${file.name}" into review draft`);
+          }
+        };
+        textReader.readAsText(file);
+      }
+
       // Check duplicates
       if (uploadedFiles.some((f) => f.name === file.name && f.size === file.size)) {
         toast.error(`"${file.name}" has already been added.`);
@@ -168,6 +183,98 @@ export default function CreateReview() {
       reader.onerror = (error) => reject(error);
       reader.readAsDataURL(file);
     });
+  };
+
+  const handlePreloadInstagramTest = () => {
+    const novaFit = brands.find((b) => b.name.toLowerCase().includes('novafit')) || brands[0];
+    if (novaFit) {
+      const demoCopy = "Hey users! Join the NovaFit Summer Bootcamp for just ₹799 per month. We are India's No. 1 fitness app! Transform your lifestyle today.";
+      setForm({
+        brandId: novaFit._id,
+        title: 'NovaFit Instagram Summer Promo',
+        contentType: 'instagram_post',
+        content: demoCopy
+      });
+
+      // Generate realistic 1080x1080 Instagram post graphic via Canvas
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Instagram dark brand gradient
+          const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+          grad.addColorStop(0, '#0F172A');
+          grad.addColorStop(0.5, '#1E293B');
+          grad.addColorStop(1, '#0D9488');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1080, 1080);
+
+          // Card container
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+          if (ctx.roundRect) ctx.roundRect(80, 80, 920, 920, 36);
+          else ctx.fillRect(80, 80, 920, 920);
+          ctx.fill();
+
+          // Brand Pill
+          ctx.fillStyle = '#14B8A6';
+          if (ctx.roundRect) ctx.roundRect(140, 140, 320, 64, 32);
+          else ctx.fillRect(140, 140, 320, 64);
+          ctx.fill();
+          ctx.fillStyle = '#042F2E';
+          ctx.font = 'bold 28px sans-serif';
+          ctx.fillText('NOVAFIT OFFICIAL', 175, 182);
+
+          // Headline with Prohibited Term
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 60px sans-serif';
+          ctx.fillText('Calling all users! 💥', 140, 330);
+
+          // Subheadline
+          ctx.fillStyle = '#94A3B8';
+          ctx.font = '34px sans-serif';
+          ctx.fillText('Unlock your summer fitness transformation', 140, 395);
+
+          // Offer Card with Price Violation
+          ctx.fillStyle = '#FFFFFF';
+          if (ctx.roundRect) ctx.roundRect(140, 460, 800, 250, 28);
+          else ctx.fillRect(140, 460, 800, 250);
+          ctx.fill();
+
+          ctx.fillStyle = '#0F172A';
+          ctx.font = 'bold 30px sans-serif';
+          ctx.fillText('SUMMER BOOTCAMP PRO PASS', 190, 540);
+
+          ctx.fillStyle = '#E11D48';
+          ctx.font = 'bold 72px sans-serif';
+          ctx.fillText('₹799 / month', 190, 635);
+
+          ctx.fillStyle = '#64748B';
+          ctx.font = '26px sans-serif';
+          ctx.fillText('(Regular ₹1,499)', 640, 630);
+
+          // Footer Badge with Unsupported Claim
+          ctx.fillStyle = '#F59E0B';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.fillText("⭐ India's No. 1 Fitness App", 140, 820);
+
+          ctx.fillStyle = '#CBD5E1';
+          ctx.font = '26px sans-serif';
+          ctx.fillText('Limited time offer • Valid for first 500 signups', 140, 880);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const file = new File([blob], 'novafit_instagram_creative.png', { type: 'image/png' });
+              validateAndAddFiles([file]);
+              toast.success('Generated and attached NovaFit Instagram creative asset! (1080×1080 PNG)');
+            }
+          }, 'image/png');
+        }
+      } catch (err) {
+        console.error('Failed to generate synthetic canvas', err);
+      }
+    }
   };
 
   const handlePreloadTestCase = () => {
@@ -260,7 +367,17 @@ export default function CreateReview() {
           </div>
         </div>
 
-        <button
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handlePreloadInstagramTest}
+            className="px-3 py-1.5 rounded-xl border border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 text-purple-900 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            title="Generate and attach sample Instagram Post graphic (PNG)"
+          >
+            <ImageIcon className="h-3.5 w-3.5 text-pink-600" />
+            Load Instagram Post Demo 📸
+          </button>
+          <button
           type="button"
           onClick={handlePreloadTestCase}
           className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50/80 hover:bg-teal-100/80 text-teal-800 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
@@ -269,6 +386,7 @@ export default function CreateReview() {
           <Sparkles className="h-3.5 w-3.5 text-teal-600" />
           Load NovaFit Test Scenario ✨
         </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
@@ -312,6 +430,7 @@ export default function CreateReview() {
                 onChange={(e) => setForm({ ...form, contentType: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 capitalize"
               >
+                <option value="instagram_post">Instagram Post / Creative Graphic (PNG, JPG, WebP)</option>
                 <option value="social_post">Social Media Post</option>
                 <option value="advertisement">Paid Advertisement Creative</option>
                 <option value="email">Marketing / Retention Email</option>
