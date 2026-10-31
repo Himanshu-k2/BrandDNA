@@ -25,9 +25,15 @@ export default function Login() {
       const targetRoute = location.state?.from?.pathname || getDashboardRoute(data.user.role);
       navigate(targetRoute, { replace: true });
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || 'Invalid email or password. Please try again.'
-      );
+      if (!err.response) {
+        toast.error('Cannot reach backend server. Check your backend status or VITE_API_BASE_URL.', { duration: 6000 });
+      } else if (err.response.status === 404) {
+        toast.error('Backend URL returned 404 Not Found. Please check your Render backend URL in Vercel.', { duration: 6000 });
+      } else if (err.response.status >= 500) {
+        toast.error('Backend server error (' + err.response.status + '). Check Render backend logs.', { duration: 6000 });
+      } else {
+        toast.error(err.response.data?.message || 'Invalid email or password. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
