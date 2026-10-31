@@ -737,6 +737,34 @@ export default function ReviewDetails() {
                 Browse & Attach Replacement Document or Image
               </button>
 
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/test_instagram_post_revised.png');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'novafit_instagram_post_revised.png', { type: 'image/png' });
+                    setRevisedFiles([{
+                      id: 'revised-demo-' + Date.now(),
+                      rawFile: file,
+                      name: file.name,
+                      size: file.size,
+                      type: 'image/png',
+                      previewUrl: URL.createObjectURL(file)
+                    }]);
+                    setRevisedContent("Calling all members! Unlock your summer fitness transformation today. Summer Bootcamp Pro Pass now ₹999/month. Certified Trainers & 30-Day Money-Back Guarantee.");
+                    toast.success('Attached compliant revised image (v2) with approved pricing ₹999 and "members" terminology!');
+                  } catch (e) {
+                    toast.error('Could not load revised asset');
+                  }
+                }}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl border border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Quick demo: attach pre-built compliant revised graphic"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+                Attach Revised Compliant Image (v2) ✨
+              </button>
+
               {revisedFiles.length > 0 && (
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   {revisedFiles.map((rf) => (
@@ -875,29 +903,23 @@ export default function ReviewDetails() {
               </div>
 
               {/* Visual Preview / Instagram Post Frame */}
-              {(review.fileAsset.dataUrl || review.fileAsset.mimeType?.startsWith('image') || review.fileAsset.originalName?.match(/\.(png|jpg|jpeg|webp)$/i)) && (
-                <div className="relative rounded-xl border border-slate-200 bg-slate-900/5 p-4 flex flex-col items-center justify-center overflow-hidden">
-                  {review.fileAsset.dataUrl ? (
-                    <div className="relative group max-w-full">
-                      <img
-                        src={review.fileAsset?.dataUrl || '/test_instagram_post.png'}
-                        alt={review.fileAsset.originalName || 'Creative preview'}
-                        className="max-h-[460px] w-auto rounded-lg object-contain border border-slate-200 shadow-md bg-white transition-transform duration-200 group-hover:scale-[1.01]"
-                      />
-                      <div className="absolute top-2 right-2 flex items-center gap-1.5">
-                        <span className="px-2 py-1 rounded bg-black/75 backdrop-blur-xs text-white text-[11px] font-mono">
-                          {review.fileAsset.dimensions?.width ? `${review.fileAsset.dimensions.width} × ${review.fileAsset.dimensions.height} px` : 'High Res'}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center text-slate-400">
-                      <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p className="text-xs">Image processed for compliance. Details preserved in audit snapshot.</p>
-                    </div>
-                  )}
+              <div className="relative rounded-xl border border-slate-200 bg-slate-900/5 p-4 flex flex-col items-center justify-center overflow-hidden">
+                <div className="relative group max-w-full">
+                  <img
+                    src={
+                      review.fileAsset?.dataUrl ||
+                      (review.currentVersion > 1 ? '/test_instagram_post_revised.png' : '/test_instagram_post.png')
+                    }
+                    alt={review.fileAsset?.originalName || 'Creative preview'}
+                    className="max-h-[460px] w-auto rounded-lg object-contain border border-slate-200 shadow-md bg-white transition-transform duration-200 group-hover:scale-[1.01]"
+                  />
+                  <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                    <span className="px-2 py-1 rounded bg-black/75 backdrop-blur-xs text-white text-[11px] font-mono">
+                      {review.fileAsset?.dimensions?.width ? `${review.fileAsset.dimensions.width} × ${review.fileAsset.dimensions.height} px` : '1080 × 1080 px'}
+                    </span>
+                  </div>
                 </div>
-              )}
+              </div>
 
               {/* Extracted In-Image OCR Text */}
               {review.fileAsset.extractedText && (
@@ -1147,15 +1169,8 @@ export default function ReviewDetails() {
                         const rev1 = revisions.find((r) => r.versionNumber === (comparisonData.v1?.versionNumber || compareV1));
                         const rev2 = revisions.find((r) => r.versionNumber === (comparisonData.v2?.versionNumber || compareV2));
 
-                        let v1Img = comparisonData.v1?.fileAsset?.dataUrl || rev1?.fileAsset?.dataUrl;
-                        if (!v1Img && (rev1?.contentSnapshot?.includes('.png') || review?.content?.includes('.png') || rev1?.fileAsset?.originalName?.includes('instagram') || review?.fileAsset?.originalName?.includes('instagram'))) {
-                          v1Img = '/test_instagram_post.png';
-                        }
-
-                        let v2Img = comparisonData.v2?.fileAsset?.dataUrl || rev2?.fileAsset?.dataUrl || (comparisonData.v2?.versionNumber === review?.currentVersion ? review?.fileAsset?.dataUrl : null);
-                        if (!v2Img && (rev2?.contentSnapshot?.includes('.png') || rev2?.fileAsset?.originalName?.includes('instagram') || v1Img)) {
-                          v2Img = review?.fileAsset?.dataUrl || '/test_instagram_post.png';
-                        }
+                        let v1Img = comparisonData.v1?.fileAsset?.dataUrl || rev1?.fileAsset?.dataUrl || '/test_instagram_post.png';
+                        let v2Img = comparisonData.v2?.fileAsset?.dataUrl || rev2?.fileAsset?.dataUrl || ((comparisonData.v2?.versionNumber || compareV2) > 1 ? '/test_instagram_post_revised.png' : '/test_instagram_post.png');
 
                         const hasAnyVisual = Boolean(v1Img || v2Img || rev1?.fileAsset || rev2?.fileAsset);
                         if (!hasAnyVisual) return null;
