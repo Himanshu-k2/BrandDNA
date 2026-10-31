@@ -3,7 +3,7 @@ import axios from 'axios';
 const rawBaseUrl =
   import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_API_BASE_URL ||
-  'https://branddna-tup9.onrender.com';
+  'https://branddna-1-wndy.onrender.com';
 
 const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
