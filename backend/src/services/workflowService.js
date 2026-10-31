@@ -792,6 +792,7 @@ export const compareReviewRevisions = async (reviewId, v1Num, v2Num, user) => {
       status: v1.status,
       summary: v1.summary,
       totalFindings: (v1.findings || []).length,
+      fileAsset: v1.fileAsset || null,
     },
     v2: {
       versionNumber: v2.versionNumber,
@@ -800,6 +801,7 @@ export const compareReviewRevisions = async (reviewId, v1Num, v2Num, user) => {
       status: v2.status,
       summary: v2.summary,
       totalFindings: (v2.findings || []).length,
+      fileAsset: v2.fileAsset || null,
     },
     v1Content: v1.contentSnapshot || '',
     v2Content: v2.contentSnapshot || '',

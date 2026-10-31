@@ -319,15 +319,26 @@ export default function CreateReview() {
         });
       }
 
-      const payload = {
-        brandId: form.brandId,
-        title: form.title.trim() || (uploadedFiles[0] ? `Audit: ${uploadedFiles[0].name}` : 'Marketing Campaign Copy'),
-        contentType: form.contentType === 'instagram_post' ? 'social_post' : form.contentType,
-        content: form.content.trim() || (uploadedFiles[0] ? `Visual Creative Asset: ${uploadedFiles[0].name}` : 'Marketing Content Draft'),
-        files: processedFilesPayload
-      };
-
-      const res = await reviewsAPI.create(payload);
+      let res;
+      if (uploadedFiles.length > 0 && uploadedFiles[0]?.rawFile) {
+        const formData = new FormData();
+        formData.append('file', uploadedFiles[0].rawFile);
+        formData.append('brandId', form.brandId);
+        formData.append('title', form.title.trim() || `Audit: ${uploadedFiles[0].name}`);
+        formData.append('contentType', form.contentType === 'instagram_post' ? 'social_post' : form.contentType);
+        if (form.content && form.content.trim()) {
+          formData.append('content', form.content.trim());
+        }
+        res = await reviewsAPI.upload(formData);
+      } else {
+        const payload = {
+          brandId: form.brandId,
+          title: form.title.trim() || 'Marketing Campaign Copy',
+          contentType: form.contentType === 'instagram_post' ? 'social_post' : form.contentType,
+          content: form.content.trim() || 'Marketing Content Draft',
+        };
+        res = await reviewsAPI.create(payload);
+      }
       const createdReview = res.data?.data || res.data;
       const reviewId = createdReview?._id || createdReview?.id;
       toast.success('Analysis complete! Viewing compliance diagnostic...');
