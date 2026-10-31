@@ -9,10 +9,27 @@ import { connectDB, closeDB } from './config/db.js';
 // Backend port is locked to 5001 for competition and frontend consistency
 const PORT = process.env.PORT && process.env.PORT !== '5000' ? process.env.PORT : 5001;
 
-// Connect to MongoDB
-connectDB().catch((err) => {
-  console.error('Initial database connection error:', err.message);
-});
+// Connect to MongoDB and seed if database is new/empty
+connectDB()
+  .then(async (conn) => {
+    if (conn) {
+      try {
+        const Brand = (await import('./models/Brand.js')).default;
+        const count = await Brand.countDocuments();
+        if (count === 0) {
+          console.log('🌱 Database has no brands yet. Pre-seeding demo companies and demo accounts...');
+          const { seedAllDemoData } = await import('../scripts/seedDemoData.js');
+          await seedAllDemoData();
+          console.log('✅ Demo brands and test accounts successfully populated!');
+        }
+      } catch (seedErr) {
+        console.warn('⚠️ Demo auto-seed notice:', seedErr.message);
+      }
+    }
+  })
+  .catch((err) => {
+    console.error('Initial database connection error:', err.message);
+  });
 
 // Start Express server
 const server = app.listen(PORT, () => {

@@ -50,23 +50,35 @@ export const runDeterministicChecks = (content, brandContext, meta = {}) => {
       seenMatches.add(matchedWord.toLowerCase());
 
       const preferred = rule.preferredTerm || rule.replacementSuggestion || 'approved term';
+      const explanationText =
+        rule.explanation ||
+        `The term '${matchedWord}' is prohibited by brand terminology guidelines. Use '${preferred}' instead.`;
 
       findings.push({
         findingId: new mongoose.Types.ObjectId().toString(),
+        title: 'Prohibited Terminology Violation',
+        category: 'Terminology',
         type: 'terminology_violation',
         severity: 'medium',
         problematicText: matchedWord,
-        explanation:
-          rule.explanation ||
-          `The term '${matchedWord}' is prohibited by brand terminology guidelines. Use '${preferred}' instead.`,
+        location: pageNumber ? `Page ${pageNumber}` : 'Text body',
+        explanation: explanationText,
+        expectedValue: preferred,
+        detectedValue: matchedWord,
         suggestedCorrection: rule.replacementSuggestion || rule.preferredTerm,
         sourceType: 'terminology_rule',
         sourceId: rule._id ? rule._id.toString() : null,
+        evidenceType: 'terminology_rule',
+        evidenceId: rule._id ? rule._id.toString() : null,
+        evidenceName: `Terminology Rule: "${rule.prohibitedTerm}" → "${preferred}"`,
+        analysisSource: 'rule_based',
         confidence: 'high',
         analysisStatus: 'confirmed_mismatch',
         pageNumber,
         reviewModality,
-        evidence: pageNumber ? `Prohibited term '${matchedWord}' detected on page ${pageNumber}` : `Prohibited term '${matchedWord}' detected`,
+        evidence: pageNumber
+          ? `Prohibited term '${matchedWord}' detected on page ${pageNumber}`
+          : `Prohibited term '${matchedWord}' detected`,
       });
     }
   }
@@ -118,20 +130,33 @@ export const runDeterministicChecks = (content, brandContext, meta = {}) => {
 
       findings.push({
         findingId: new mongoose.Types.ObjectId().toString(),
+        title: 'Unapproved Pricing Figure',
+        category: 'Pricing',
         type: 'incorrect_price',
         severity: 'high',
         problematicText: found.raw,
+        location: pageNumber ? `Page ${pageNumber}` : 'Text body',
         explanation: `The quoted price of ${found.raw} contradicts the approved brand pricing ${expectedText}.`,
+        expectedValue: primaryFact ? primaryFact.value : 'Approved brand price',
+        detectedValue: found.raw,
         suggestedCorrection: primaryFact
           ? `Replace ${found.raw} with the approved price of ${primaryFact.value}.`
           : 'Use an approved pricing figure.',
         sourceType: 'approved_fact',
         sourceId: primaryFact?._id ? primaryFact._id.toString() : null,
+        evidenceType: 'approved_fact',
+        evidenceId: primaryFact?._id ? primaryFact._id.toString() : null,
+        evidenceName: primaryFact
+          ? `Approved Fact: ${primaryFact.key} (${primaryFact.value})`
+          : 'Brand Approved Pricing',
+        analysisSource: 'rule_based',
         confidence: 'high',
         analysisStatus: 'confirmed_mismatch',
         pageNumber,
         reviewModality,
-        evidence: pageNumber ? `Price discrepancy '${found.raw}' identified on page ${pageNumber}` : `Price discrepancy '${found.raw}' identified`,
+        evidence: pageNumber
+          ? `Price discrepancy '${found.raw}' identified on page ${pageNumber}`
+          : `Price discrepancy '${found.raw}' identified`,
       });
     }
   }
@@ -140,7 +165,7 @@ export const runDeterministicChecks = (content, brandContext, meta = {}) => {
   // 3. Brand Guidelines - Required Phrases
   // -------------------------------------------------------------
   const requiredPhraseGuidelines = guidelines.filter(
-    (g) => g.status === 'active' && g.category === 'Required phrases'
+    (g) => g.status === 'active' && (g.category === 'Required phrases' || g.category?.toLowerCase().includes('phrase'))
   );
 
   for (const guideline of requiredPhraseGuidelines) {
@@ -153,13 +178,22 @@ export const runDeterministicChecks = (content, brandContext, meta = {}) => {
       if (!hasPhrase) {
         findings.push({
           findingId: new mongoose.Types.ObjectId().toString(),
+          title: 'Mandatory Disclaimer / Phrase Missing',
+          category: 'Claims & Disclaimers',
           type: 'required_phrase_missing',
           severity: guideline.severity || 'medium',
           problematicText: '',
-          explanation: `Mandatory phrase missing: "${targetPhrase}" is required by brand guidelines.`,
+          location: pageNumber ? `Page ${pageNumber}` : 'Full document/copy',
+          explanation: `Mandatory phrase missing: "${targetPhrase}" is required by brand guideline "${guideline.title}".`,
+          expectedValue: `"${targetPhrase}"`,
+          detectedValue: 'Missing from content',
           suggestedCorrection: `Include "${targetPhrase}" in the copy.`,
           sourceType: 'brand_guideline',
           sourceId: guideline._id ? guideline._id.toString() : null,
+          evidenceType: 'brand_guideline',
+          evidenceId: guideline._id ? guideline._id.toString() : null,
+          evidenceName: `Brand Guideline: "${guideline.title}"`,
+          analysisSource: 'rule_based',
           confidence: 'high',
           analysisStatus: 'guideline_violation',
           pageNumber,
@@ -197,7 +231,7 @@ export const runDeterministicDocumentChecks = (pages, brandContext) => {
   // Check required phrases globally across the entire document
   const { guidelines = [] } = brandContext;
   const requiredPhraseGuidelines = guidelines.filter(
-    (g) => g.status === 'active' && g.category === 'Required phrases'
+    (g) => g.status === 'active' && (g.category === 'Required phrases' || g.category?.toLowerCase().includes('phrase'))
   );
   for (const guideline of requiredPhraseGuidelines) {
     const quotedMatch = guideline.ruleText.match(/["']([^"']{3,})["']/);
@@ -205,13 +239,22 @@ export const runDeterministicDocumentChecks = (pages, brandContext) => {
     if (targetPhrase && !fullDocText.toLowerCase().includes(targetPhrase.toLowerCase())) {
       allFindings.push({
         findingId: new mongoose.Types.ObjectId().toString(),
+        title: 'Mandatory Document Disclaimer Missing',
+        category: 'Claims & Disclaimers',
         type: 'required_phrase_missing',
         severity: guideline.severity || 'medium',
         problematicText: '',
-        explanation: `Mandatory phrase missing: "${targetPhrase}" is required by brand guidelines across the document.`,
+        location: 'Document-wide',
+        explanation: `Mandatory phrase missing: "${targetPhrase}" is required by brand guideline "${guideline.title}" across the document.`,
+        expectedValue: `"${targetPhrase}"`,
+        detectedValue: 'Missing from document',
         suggestedCorrection: `Include "${targetPhrase}" in the document.`,
         sourceType: 'brand_guideline',
         sourceId: guideline._id ? guideline._id.toString() : null,
+        evidenceType: 'brand_guideline',
+        evidenceId: guideline._id ? guideline._id.toString() : null,
+        evidenceName: `Brand Guideline: "${guideline.title}"`,
+        analysisSource: 'rule_based',
         confidence: 'high',
         analysisStatus: 'guideline_violation',
         pageNumber: null,
@@ -238,8 +281,8 @@ export const runDeterministicImageColorChecks = (dominantColorHex, brandContext)
   const hexNorm = dominantColorHex.trim().toUpperCase();
   const brandProhibited = brandContext.brand?.visualIdentity?.prohibitedColors || [];
   const assetProhibited = (brandContext.visualAssets || [])
-    .filter((a) => a.assetType === 'color_palette' && a.rules?.prohibitedColors)
-    .flatMap((a) => a.rules.prohibitedColors);
+    .filter((a) => a.assetType === 'color_palette' && a.details?.prohibitedColors)
+    .flatMap((a) => a.details.prohibitedColors);
 
   const allProhibited = [...new Set([...brandProhibited, ...assetProhibited])].map((c) =>
     c.trim().toUpperCase()
@@ -255,13 +298,22 @@ export const runDeterministicImageColorChecks = (dominantColorHex, brandContext)
 
       findings.push({
         findingId: new mongoose.Types.ObjectId().toString(),
+        title: 'Prohibited Brand Color Palette',
+        category: 'Visual Assets',
         type: 'color_palette_mismatch',
         severity: 'high',
         problematicText: hexNorm,
+        location: 'Dominant image color',
         explanation: `Image uses prohibited brand color ${hexNorm}, violating brand visual governance guidelines.`,
+        expectedValue: primaryColors?.join(', ') || 'Approved brand colors',
+        detectedValue: hexNorm,
         suggestedCorrection: primarySuggestion,
         sourceType: 'brand_guideline',
         sourceId: null,
+        evidenceType: 'brand_guideline',
+        evidenceId: null,
+        evidenceName: `Brand Visual Palette: Prohibited color ${hexNorm}`,
+        analysisSource: 'rule_based',
         confidence: 'high',
         analysisStatus: 'visual_branding_violation',
         pageNumber: null,
@@ -275,4 +327,3 @@ export const runDeterministicImageColorChecks = (dominantColorHex, brandContext)
 
   return findings;
 };
-

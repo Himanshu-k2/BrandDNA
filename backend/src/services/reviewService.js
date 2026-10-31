@@ -22,10 +22,13 @@ import { validateFileSignature } from '../utils/fileSignature.js';
 
 /**
  * Deduplicates and prioritizes findings between deterministic checks and Gemini AI.
- * Deterministic checks take precedence for exact pricing, facts, and terminology.
+ * Sets analysisSource to 'both' when an issue is detected by both rule-based and AI methods.
  */
 export const combineAndDeduplicateFindings = (deterministicFindings = [], aiFindings = []) => {
-  const finalFindings = [...deterministicFindings];
+  const finalFindings = deterministicFindings.map((det) => ({
+    ...det,
+    analysisSource: det.analysisSource || 'rule_based',
+  }));
 
   for (const aiFinding of aiFindings) {
     const aiText = (aiFinding.problematicText || '').toLowerCase().trim();
@@ -33,29 +36,37 @@ export const combineAndDeduplicateFindings = (deterministicFindings = [], aiFind
     // Check if an existing deterministic finding already covers this exact or overlapping phrase
     const matchIndex = finalFindings.findIndex((det) => {
       const detText = (det.problematicText || '').toLowerCase().trim();
-      if (!detText || !aiText) return false;
-
       const pageMatches =
         !det.pageNumber || !aiFinding.pageNumber || det.pageNumber === aiFinding.pageNumber;
-      const textOverlaps = detText.includes(aiText) || aiText.includes(detText);
+
+      const textOverlaps = detText && aiText && (detText.includes(aiText) || aiText.includes(detText));
       const typesMatch =
         (det.type.includes('price') && aiFinding.type.includes('price')) ||
         (det.type.includes('terminology') && aiFinding.type.includes('terminology')) ||
-        (det.type.includes('fact') && aiFinding.type.includes('fact'));
+        (det.type.includes('fact') && aiFinding.type.includes('fact')) ||
+        (det.type.includes('phrase') && aiFinding.type.includes('phrase')) ||
+        (det.sourceId && aiFinding.sourceId && det.sourceId === aiFinding.sourceId);
 
-      return textOverlaps && typesMatch && pageMatches;
+      return (textOverlaps || (det.type === aiFinding.type && !detText && !aiText)) && typesMatch && pageMatches;
     });
 
     if (matchIndex >= 0) {
-      // Enrich deterministic finding with spatial localization from AI if missing
+      // Flagged by both deterministic and AI analysis
+      finalFindings[matchIndex].analysisSource = 'both';
       if (!finalFindings[matchIndex].boundingBox && aiFinding.boundingBox) {
         finalFindings[matchIndex].boundingBox = aiFinding.boundingBox;
       }
       if (!finalFindings[matchIndex].imageRegion && aiFinding.imageRegion) {
         finalFindings[matchIndex].imageRegion = aiFinding.imageRegion;
       }
+      if (aiFinding.explanation && !finalFindings[matchIndex].explanation.includes(aiFinding.explanation)) {
+        finalFindings[matchIndex].explanation += ` (AI Context: ${aiFinding.explanation})`;
+      }
     } else {
-      finalFindings.push(aiFinding);
+      finalFindings.push({
+        ...aiFinding,
+        analysisSource: aiFinding.analysisSource || 'gemini',
+      });
     }
   }
 
@@ -66,22 +77,31 @@ export const combineAndDeduplicateFindings = (deterministicFindings = [], aiFind
  * Calculates governance metrics, severity counts, and overall compliance score.
  */
 export const calculateReviewSummary = (findings = []) => {
+  let criticalSeverityCount = 0;
   let highSeverityCount = 0;
   let mediumSeverityCount = 0;
   let lowSeverityCount = 0;
 
   for (const f of findings) {
-    if (f.severity === 'high') highSeverityCount += 1;
+    if (f.severity === 'critical') criticalSeverityCount += 1;
+    else if (f.severity === 'high') highSeverityCount += 1;
     else if (f.severity === 'medium') mediumSeverityCount += 1;
     else if (f.severity === 'low') lowSeverityCount += 1;
   }
 
-  // Score starts at 100: -20 for high severity, -10 for medium, -5 for low
-  const rawScore = 100 - (highSeverityCount * 20 + mediumSeverityCount * 10 + lowSeverityCount * 5);
+  // Score starts at 100: -30 critical, -20 high, -10 medium, -5 low
+  const rawScore =
+    100 -
+    (criticalSeverityCount * 30 +
+      highSeverityCount * 20 +
+      mediumSeverityCount * 10 +
+      lowSeverityCount * 5);
   const overallScore = Math.max(0, rawScore);
 
   let recommendation = 'Content aligns with approved brand guidelines and is ready for human review.';
-  if (highSeverityCount > 0) {
+  if (criticalSeverityCount > 0) {
+    recommendation = 'Critical brand or legal policy violations detected that prevent approval.';
+  } else if (highSeverityCount > 0) {
     recommendation = 'Content contains high-severity brand guideline or pricing violations that must be corrected.';
   } else if (mediumSeverityCount > 0) {
     recommendation = 'Content requires tone or terminology adjustments to align with brand standards.';
@@ -91,6 +111,7 @@ export const calculateReviewSummary = (findings = []) => {
 
   return {
     totalFindings: findings.length,
+    criticalSeverityCount,
     highSeverityCount,
     mediumSeverityCount,
     lowSeverityCount,
@@ -102,17 +123,6 @@ export const calculateReviewSummary = (findings = []) => {
 /**
  * Unified Multimodal Review Pipeline.
  * Reviews TEXT, PDF DOCUMENTS, or IMAGES against approved brand rules, facts, terminology, and visual assets.
- *
- * @param {Object} params
- * @param {string} params.brandId - Target brand ID
- * @param {string} [params.content=''] - Text copy if direct text submission
- * @param {string} [params.contentType='text'] - Copy type (e.g., 'text', 'social_post', 'advertisement', 'document', 'image')
- * @param {Object} [params.file] - Uploaded file from multer (buffer, originalname, mimetype, size)
- * @param {string} [params.modality] - Explicit modality ('text', 'document', 'image')
- * @param {string} params.userId - Authenticated user ID
- * @param {string} params.organizationId - User's organization ID
- * @param {string} [params.submissionNote] - Optional submission note
- * @returns {Promise<Object>} Review document and analysis payload
  */
 export const executeContentReview = async ({
   brandId,
@@ -154,7 +164,7 @@ export const executeContentReview = async ({
     visualAssets,
   };
 
-  // Collect guideline and fact version snapshots for provenance and staleness checks
+  // Collect guideline and fact version snapshots
   const guidelineVersions = {};
   for (const g of guidelines) {
     guidelineVersions[g._id.toString()] = g.version || 1;
@@ -164,24 +174,57 @@ export const executeContentReview = async ({
     factVersions[f._id.toString()] = f.version || 1;
   }
 
+  // Preserve full evidence snapshot for historical provenance
+  const evidenceSnapshot = {
+    guidelines: guidelines.map((g) => ({
+      id: g._id.toString(),
+      title: g.title,
+      category: g.category,
+      ruleText: g.ruleText,
+      severity: g.severity,
+      version: g.version || 1,
+    })),
+    facts: facts.map((f) => ({
+      id: f._id.toString(),
+      key: f.key,
+      value: f.value,
+      category: f.category,
+      description: f.description,
+      sourceReference: f.sourceReference,
+      version: f.version || 1,
+    })),
+    terminology: terminologyRules.map((t) => ({
+      id: t._id.toString(),
+      prohibitedTerm: t.prohibitedTerm,
+      preferredTerm: t.preferredTerm,
+      replacementSuggestion: t.replacementSuggestion,
+      explanation: t.explanation,
+    })),
+    visualAssets: visualAssets.map((v) => ({
+      id: v._id.toString(),
+      name: v.name,
+      assetType: v.assetType,
+      details: v.details,
+    })),
+  };
+
   let modality = explicitModality || 'text';
   let processedContent = content || '';
   let fileAsset = null;
   let deterministicFindings = [];
   let aiResult = { findings: [], isPartial: false };
   const warnings = [];
+  const methodsRan = ['deterministic_rule_engine'];
 
   // ============================================================
   // Input Type Processing
   // ============================================================
 
   if (file && file.buffer) {
-    // Validate file signature to detect true type
     const sig = validateFileSignature(file.buffer, file.originalname);
 
     if (sig.category === 'document') {
       modality = 'document';
-      // 1. Extract PDF content and pages
       const doc = await extractDocumentContent(file.buffer, { declaredName: file.originalname });
       processedContent = doc.fullText || (content || '[Document without extractable text]');
 
@@ -205,26 +248,24 @@ export const executeContentReview = async ({
         );
       }
 
-      // 2. Deterministic checks per page
       deterministicFindings = runDeterministicDocumentChecks(doc.pages, brandContext);
 
-      // 3. Gemini document review
       aiResult = await runGeminiDocumentReview({
         pages: doc.pages,
         pdfBuffer: file.buffer,
         brandContext,
       });
+      if (!aiResult.isPartial) methodsRan.push('gemini_document_ai');
     } else if (sig.category === 'image') {
       modality = 'image';
-      // 1. Process image with sharp (dimensions, orientation, validation)
       const img = await processImageContent(file.buffer, { declaredName: file.originalname });
 
-      // 2. Gemini multimodal image review (detects both text in image and visual branding)
       aiResult = await runGeminiImageReview({
         imageBuffer: img.buffer,
         mimeType: img.mimeType,
         brandContext,
       });
+      if (!aiResult.isPartial) methodsRan.push('gemini_multimodal_vision_ai');
 
       const transcribedText = aiResult.extractedText || '';
       processedContent = transcribedText || (content || '[Image without detected text]');
@@ -237,13 +278,11 @@ export const executeContentReview = async ({
         extractedText: transcribedText,
       };
 
-      // 3. Deterministic brand color checks against prohibited colors
       if (img.dominantColor) {
         const colorFindings = runDeterministicImageColorChecks(img.dominantColor, brandContext);
         deterministicFindings.push(...colorFindings);
       }
 
-      // 4. Deterministic checks on transcribed text from image
       if (transcribedText) {
         deterministicFindings.push(
           ...runDeterministicChecks(transcribedText, brandContext, {
@@ -257,13 +296,12 @@ export const executeContentReview = async ({
     modality = 'text';
     processedContent = content || '';
 
-    // Step A: Deterministic Rule Checks
     deterministicFindings = runDeterministicChecks(processedContent, brandContext, {
       reviewModality: 'text',
     });
 
-    // Step B: Gemini Contextual AI Review
     aiResult = await runGeminiReview(processedContent, brandContext);
+    if (!aiResult.isPartial) methodsRan.push('gemini_contextual_ai');
   }
 
   // Combine and deduplicate findings
@@ -282,6 +320,7 @@ export const executeContentReview = async ({
   }
 
   const initialStatus = mergedFindings.length > 0 ? 'needs_changes' : 'pending_approval';
+  const analysisCompletionStatus = aiResult.isPartial ? 'partial' : 'complete';
 
   const checksCompleted = {
     deterministicRules: true,
@@ -303,6 +342,13 @@ export const executeContentReview = async ({
     fileAsset,
     currentVersion: 1,
     status: initialStatus,
+    analysisCompletionStatus,
+    analysisMetadata: {
+      methodsRan,
+      fallbackUsed: Boolean(aiResult.isPartial),
+      geminiAvailable: !aiResult.isPartial,
+      timestamp: analyzedAt,
+    },
     findings: mergedFindings,
     summary,
     checksCompleted,
@@ -310,6 +356,7 @@ export const executeContentReview = async ({
     isPartialAnalysis: aiResult.isPartial,
     guidelineVersions,
     factVersions,
+    evidenceSnapshot,
     analyzedAt,
     isStale: false,
   });
@@ -330,11 +377,19 @@ export const executeContentReview = async ({
     findings: mergedFindings,
     summary,
     status: initialStatus,
+    analysisCompletionStatus,
+    analysisMetadata: {
+      methodsRan,
+      fallbackUsed: Boolean(aiResult.isPartial),
+      geminiAvailable: !aiResult.isPartial,
+      timestamp: analyzedAt,
+    },
     checksCompleted,
     warnings,
     isPartialAnalysis: aiResult.isPartial,
     guidelineVersions,
     factVersions,
+    evidenceSnapshot,
     analyzedAt,
   });
   await revision.save();
@@ -352,6 +407,7 @@ export const executeContentReview = async ({
       findingsCount: mergedFindings.length,
       score: summary.overallScore,
       status: initialStatus,
+      analysisCompletionStatus,
     },
   });
 
@@ -360,6 +416,8 @@ export const executeContentReview = async ({
     brandId: brand._id.toString(),
     brandName: brand.name,
     status: review.status,
+    analysisCompletionStatus: review.analysisCompletionStatus,
+    analysisMetadata: review.analysisMetadata,
     contentType: review.contentType,
     modality: review.modality,
     fileAsset: review.fileAsset,
@@ -368,6 +426,7 @@ export const executeContentReview = async ({
     checksCompleted: review.checksCompleted,
     warnings: review.warnings,
     isPartialAnalysis: review.isPartialAnalysis,
+    evidenceSnapshot: review.evidenceSnapshot,
     createdAt: review.createdAt,
   };
 };

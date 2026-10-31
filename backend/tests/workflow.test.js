@@ -522,4 +522,49 @@ describe('Phase 5: Review Workflow, Revisions, Comments & Approval Tests', () =>
     });
     assert.equal(revRes.status, 403);
   });
+
+  test('10. Compare two revisions via GET /api/reviews/:id/revisions/compare computes line diff and findings resolution', async () => {
+    // 1. Submit v1 with pricing and prohibited term
+    const initRes = await fetch(`${baseUrl}/api/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${creatorToken}`,
+      },
+      body: JSON.stringify({
+        brandId: novaFitBrandId,
+        content: 'NovaFit users get access for ₹799 per month.',
+      }),
+    });
+    const { data: v1Data } = await initRes.json();
+    const reviewId = v1Data.reviewId;
+
+    // 2. Submit v2 fixing both issues
+    const v2Res = await fetch(`${baseUrl}/api/reviews/${reviewId}/revisions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${creatorToken}`,
+      },
+      body: JSON.stringify({
+        content: 'NovaFit members get access for ₹999 per month. Consult your physician before beginning any exercise routine.',
+        submissionNote: 'Corrected terminology and updated pricing to approved rate',
+      }),
+    });
+    assert.equal(v2Res.status, 201);
+
+    // 3. Compare v1 and v2
+    const compareRes = await fetch(`${baseUrl}/api/reviews/${reviewId}/revisions/compare?v1=1&v2=2`, {
+      headers: { Authorization: `Bearer ${creatorToken}` },
+    });
+    assert.equal(compareRes.status, 200);
+    const { data: comp } = await compareRes.json();
+
+    assert.equal(comp.v1.versionNumber, 1);
+    assert.equal(comp.v2.versionNumber, 2);
+    assert.ok(comp.diffSummary.linesAdded >= 0);
+    assert.ok(comp.diffSummary.scoreDelta >= 0);
+    assert.ok(Array.isArray(comp.diffSummary.chunks));
+    assert.ok(comp.findingsComparison.resolved.length > 0);
+  });
 });

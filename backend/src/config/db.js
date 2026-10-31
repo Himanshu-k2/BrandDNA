@@ -1,15 +1,25 @@
 import mongoose from 'mongoose';
 
+let mongoMemoryInstance = null;
+
 /**
  * MongoDB connection helper.
- * Supports connection pooling and graceful error handling.
+ * Supports connection pooling, fallback to embedded in-memory MongoDB for local dev, and graceful error handling.
  */
 export const connectDB = async () => {
-  const uri = process.env.MONGODB_URI;
+  let uri = process.env.MONGODB_URI;
 
   if (!uri) {
-    console.warn('⚠️  MONGODB_URI is not defined in environment variables. Database features will be unavailable.');
-    return null;
+    try {
+      console.log('ℹ️  No MONGODB_URI provided in environment. Starting embedded in-memory MongoDB for local development...');
+      const { MongoMemoryServer } = await import('mongodb-memory-server');
+      mongoMemoryInstance = await MongoMemoryServer.create();
+      uri = mongoMemoryInstance.getUri();
+      console.log(`✅ Embedded in-memory MongoDB active at: ${uri}`);
+    } catch (memErr) {
+      console.warn('⚠️  MONGODB_URI is not defined and could not start in-memory MongoDB:', memErr.message);
+      return null;
+    }
   }
 
   try {
@@ -68,5 +78,11 @@ export const closeDB = async () => {
   if (mongoose.connection.readyState !== 0) {
     await mongoose.connection.close();
     console.log('MongoDB connection closed.');
+  }
+  if (mongoMemoryInstance) {
+    try {
+      await mongoMemoryInstance.stop();
+      console.log('In-memory MongoDB stopped.');
+    } catch {}
   }
 };

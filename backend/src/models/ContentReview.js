@@ -6,6 +6,14 @@ const findingSchema = new mongoose.Schema(
       type: String,
       default: () => new mongoose.Types.ObjectId().toString(),
     },
+    title: {
+      type: String,
+      default: '',
+    },
+    category: {
+      type: String,
+      default: 'General',
+    },
     type: {
       type: String,
       required: true,
@@ -28,15 +36,28 @@ const findingSchema = new mongoose.Schema(
     severity: {
       type: String,
       required: true,
-      enum: ['low', 'medium', 'high'],
+      enum: ['critical', 'high', 'medium', 'low'],
+      default: 'medium',
     },
     problematicText: {
+      type: String,
+      default: '',
+    },
+    location: {
       type: String,
       default: '',
     },
     explanation: {
       type: String,
       required: true,
+    },
+    expectedValue: {
+      type: String,
+      default: '',
+    },
+    detectedValue: {
+      type: String,
+      default: '',
     },
     suggestedCorrection: {
       type: String,
@@ -50,6 +71,23 @@ const findingSchema = new mongoose.Schema(
     sourceId: {
       type: String,
       default: null,
+    },
+    evidenceType: {
+      type: String,
+      default: '',
+    },
+    evidenceId: {
+      type: String,
+      default: null,
+    },
+    evidenceName: {
+      type: String,
+      default: '',
+    },
+    analysisSource: {
+      type: String,
+      enum: ['rule_based', 'gemini', 'both'],
+      default: 'rule_based',
     },
     confidence: {
       type: String,
@@ -94,7 +132,19 @@ const findingSchema = new mongoose.Schema(
       default: 'text',
     },
   },
-  { _id: true }
+  {
+    _id: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        // Expose both camelCase and legacy field aliases for frontend compatibility
+        ret.originalText = ret.problematicText || '';
+        ret.finding = ret.title || ret.type?.replace(/_/g, ' ') || 'Compliance finding';
+        ret.suggestion = ret.suggestedCorrection || '';
+        ret.evidenceSource = ret.evidenceName || ret.evidence || ret.sourceType || '';
+        return ret;
+      },
+    },
+  }
 );
 
 const fileAssetSchema = new mongoose.Schema(
@@ -172,9 +222,21 @@ const contentReviewSchema = new mongoose.Schema(
       default: 'analyzing',
       index: true,
     },
+    analysisCompletionStatus: {
+      type: String,
+      enum: ['complete', 'partial', 'failed'],
+      default: 'complete',
+    },
+    analysisMetadata: {
+      methodsRan: [{ type: String }],
+      fallbackUsed: { type: Boolean, default: false },
+      geminiAvailable: { type: Boolean, default: true },
+      timestamp: { type: Date, default: Date.now },
+    },
     findings: [findingSchema],
     summary: {
       totalFindings: { type: Number, default: 0 },
+      criticalSeverityCount: { type: Number, default: 0 },
       highSeverityCount: { type: Number, default: 0 },
       mediumSeverityCount: { type: Number, default: 0 },
       lowSeverityCount: { type: Number, default: 0 },
@@ -227,6 +289,10 @@ const contentReviewSchema = new mongoose.Schema(
     factVersions: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
+    },
+    evidenceSnapshot: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     analyzedAt: {
       type: Date,

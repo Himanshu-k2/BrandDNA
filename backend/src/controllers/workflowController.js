@@ -5,6 +5,7 @@ import {
   rejectContentReview,
   requestReviewChanges,
   addReviewComment,
+  compareReviewRevisions,
 } from '../services/workflowService.js';
 import ReviewRevision from '../models/ReviewRevision.js';
 import ReviewComment from '../models/ReviewComment.js';
@@ -83,6 +84,28 @@ export const getRevisions = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: revisions.map((r) => r.toJSON()),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   GET /api/reviews/:id/revisions/compare
+ * @route   GET /api/reviews/:id/revisions/compare/:v1/:v2
+ * @desc    Compare two revisions with line diff and findings comparison
+ * @access  Private (Admin, Creator, Reviewer)
+ */
+export const compareRevisions = async (req, res, next) => {
+  try {
+    const v1 = parseInt(req.params.v1 || req.query.v1 || '1', 10);
+    const v2 = parseInt(req.params.v2 || req.query.v2 || '2', 10);
+
+    const comparison = await compareReviewRevisions(req.params.id, v1, v2, req.user);
+
+    res.status(200).json({
+      success: true,
+      data: comparison,
     });
   } catch (error) {
     next(error);

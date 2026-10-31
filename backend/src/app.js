@@ -32,7 +32,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. mobile apps, curl, Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
       return callback(new Error('CORS policy: Not allowed by CORS'));
@@ -79,8 +79,8 @@ app.use('/api/reviews', reviewRoutes);
 // In-app notifications (Phase 5)
 app.use('/api/notifications', notificationRoutes);
 
-// Test routes for middleware verification (active only during automated test runs)
-if (process.env.NODE_ENV === 'test') {
+// Test routes for middleware verification (active during testing / development)
+if (process.env.NODE_ENV !== 'production') {
   app.get('/api/test-admin-only', protect, authorize('admin'), (req, res) => {
     res.json({ success: true, message: 'Welcome Admin' });
   });

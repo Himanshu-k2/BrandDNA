@@ -11,6 +11,7 @@ import {
   createRevision,
   getRevisions,
   getRevisionByVersion,
+  compareRevisions,
   approveReview,
   rejectReview,
   requestChanges,
@@ -56,6 +57,10 @@ router
 
 // Multimodal Revision Upload Endpoint
 router.post('/:id/revisions/upload', protect, reviewRateLimiter, handleUpload, createRevision);
+
+// Revision Comparison Endpoints (must come before :versionNumber param)
+router.get('/:id/revisions/compare', protect, compareRevisions);
+router.get('/:id/revisions/compare/:v1/:v2', protect, compareRevisions);
 
 router.route('/:id/revisions/:versionNumber').get(protect, getRevisionByVersion);
 

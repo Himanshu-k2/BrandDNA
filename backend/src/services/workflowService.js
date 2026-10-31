@@ -166,12 +166,46 @@ export const createReviewRevision = async (
     factVersions[f._id.toString()] = f.version || 1;
   }
 
+  const evidenceSnapshot = {
+    guidelines: guidelines.map((g) => ({
+      id: g._id.toString(),
+      title: g.title,
+      category: g.category,
+      ruleText: g.ruleText,
+      severity: g.severity,
+      version: g.version || 1,
+    })),
+    facts: facts.map((f) => ({
+      id: f._id.toString(),
+      key: f.key,
+      value: f.value,
+      category: f.category,
+      description: f.description,
+      sourceReference: f.sourceReference,
+      version: f.version || 1,
+    })),
+    terminology: terminologyRules.map((t) => ({
+      id: t._id.toString(),
+      prohibitedTerm: t.prohibitedTerm,
+      preferredTerm: t.preferredTerm,
+      replacementSuggestion: t.replacementSuggestion,
+      explanation: t.explanation,
+    })),
+    visualAssets: visualAssets.map((v) => ({
+      id: v._id.toString(),
+      name: v.name,
+      assetType: v.assetType,
+      details: v.details,
+    })),
+  };
+
   let modality = review.modality || 'text';
   let processedContent = content || '';
   let fileAsset = review.fileAsset || null;
   let deterministicFindings = [];
   let aiResult = { findings: [], isPartial: false };
   const warnings = [];
+  const methodsRan = ['deterministic_rule_engine'];
 
   // 2. Process file or text revision
   if (file && file.buffer) {
@@ -207,6 +241,7 @@ export const createReviewRevision = async (
         pdfBuffer: file.buffer,
         brandContext,
       });
+      if (!aiResult.isPartial) methodsRan.push('gemini_document_ai');
     } else if (sig.category === 'image') {
       modality = 'image';
       const img = await processImageContent(file.buffer, { declaredName: file.originalname });
@@ -215,6 +250,7 @@ export const createReviewRevision = async (
         mimeType: img.mimeType,
         brandContext,
       });
+      if (!aiResult.isPartial) methodsRan.push('gemini_multimodal_vision_ai');
 
       const transcribedText = aiResult.extractedText || '';
       processedContent = transcribedText || (content || '[Image without detected text]');
@@ -246,6 +282,7 @@ export const createReviewRevision = async (
       reviewModality: 'text',
     });
     aiResult = await runGeminiReview(processedContent, brandContext);
+    if (!aiResult.isPartial) methodsRan.push('gemini_contextual_ai');
   }
 
   const newVersionNumber = (review.currentVersion || 1) + 1;
@@ -264,6 +301,7 @@ export const createReviewRevision = async (
   }
 
   const initialStatus = mergedFindings.length > 0 ? 'needs_changes' : 'pending_approval';
+  const analysisCompletionStatus = aiResult.isPartial ? 'partial' : 'complete';
 
   // 3. Mark previous revisions as superseded
   await ReviewRevision.updateMany(
@@ -287,6 +325,13 @@ export const createReviewRevision = async (
     findings: mergedFindings,
     summary,
     status: initialStatus,
+    analysisCompletionStatus,
+    analysisMetadata: {
+      methodsRan,
+      fallbackUsed: Boolean(aiResult.isPartial),
+      geminiAvailable: !aiResult.isPartial,
+      timestamp: analyzedAt,
+    },
     checksCompleted: {
       deterministicRules: true,
       terminology: true,
@@ -297,6 +342,7 @@ export const createReviewRevision = async (
     isPartialAnalysis: aiResult.isPartial,
     guidelineVersions,
     factVersions,
+    evidenceSnapshot,
     analyzedAt,
   });
   await revision.save();
@@ -311,11 +357,19 @@ export const createReviewRevision = async (
   review.findings = mergedFindings;
   review.summary = summary;
   review.status = initialStatus;
+  review.analysisCompletionStatus = analysisCompletionStatus;
+  review.analysisMetadata = {
+    methodsRan,
+    fallbackUsed: Boolean(aiResult.isPartial),
+    geminiAvailable: !aiResult.isPartial,
+    timestamp: analyzedAt,
+  };
   review.checksCompleted = revision.checksCompleted;
   review.warnings = warnings;
   review.isPartialAnalysis = revision.isPartialAnalysis;
   review.guidelineVersions = guidelineVersions;
   review.factVersions = factVersions;
+  review.evidenceSnapshot = evidenceSnapshot;
   review.analyzedAt = analyzedAt;
   review.isStale = false;
   review.decision = { status: 'none', decidedBy: null, decidedAt: null, reason: '' };
@@ -335,6 +389,7 @@ export const createReviewRevision = async (
       findingsCount: mergedFindings.length,
       score: summary.overallScore,
       status: initialStatus,
+      analysisCompletionStatus,
     },
   });
 
@@ -615,4 +670,143 @@ export const addReviewComment = async (reviewId, user, { body, commentType = 'ge
   }
 
   return comment.populate('authorId', 'name email role');
+};
+
+/**
+ * Computes a detailed diff between two text strings.
+ */
+export const computeTextDiff = (oldText = '', newText = '') => {
+  const oldLines = oldText.split('\n');
+  const newLines = newText.split('\n');
+  const chunks = [];
+  let linesAdded = 0;
+  let linesRemoved = 0;
+  let linesUnchanged = 0;
+
+  const oldSet = new Set(oldLines);
+  const newSet = new Set(newLines);
+
+  let i = 0;
+  let j = 0;
+
+  while (i < oldLines.length || j < newLines.length) {
+    if (i < oldLines.length && j < newLines.length && oldLines[i] === newLines[j]) {
+      chunks.push({ type: 'unchanged', text: oldLines[i], lineOld: i + 1, lineNew: j + 1 });
+      linesUnchanged++;
+      i++;
+      j++;
+    } else if (j < newLines.length && !oldSet.has(newLines[j])) {
+      chunks.push({ type: 'added', text: newLines[j], lineNew: j + 1 });
+      linesAdded++;
+      j++;
+    } else if (i < oldLines.length && !newSet.has(oldLines[i])) {
+      chunks.push({ type: 'removed', text: oldLines[i], lineOld: i + 1 });
+      linesRemoved++;
+      i++;
+    } else {
+      if (i < oldLines.length) {
+        chunks.push({ type: 'removed', text: oldLines[i], lineOld: i + 1 });
+        linesRemoved++;
+        i++;
+      }
+      if (j < newLines.length) {
+        chunks.push({ type: 'added', text: newLines[j], lineNew: j + 1 });
+        linesAdded++;
+        j++;
+      }
+    }
+  }
+
+  return {
+    linesAdded,
+    linesRemoved,
+    linesUnchanged,
+    chunks,
+  };
+};
+
+/**
+ * Compares two revision snapshots of a review, computing content diff and findings comparison.
+ */
+export const compareReviewRevisions = async (reviewId, v1Num, v2Num, user) => {
+  const review = await ContentReview.findById(reviewId);
+  if (!review) {
+    const error = new Error('Review not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (review.organizationId.toString() !== user.organizationId.toString()) {
+    const error = new Error('Forbidden: You cannot access reviews from another organization');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const v1 = await ReviewRevision.findOne({ reviewId: review._id, versionNumber: v1Num }).populate(
+    'submittedBy',
+    'name email role'
+  );
+  const v2 = await ReviewRevision.findOne({ reviewId: review._id, versionNumber: v2Num }).populate(
+    'submittedBy',
+    'name email role'
+  );
+
+  if (!v1 || !v2) {
+    const error = new Error(`Revisions v${v1Num} and/or v${v2Num} not found`);
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const diff = computeTextDiff(v1.contentSnapshot || '', v2.contentSnapshot || '');
+
+  // Compare findings between v1 and v2
+  const v1FindingKeys = new Set(
+    (v1.findings || []).map((f) => `${f.type}_${(f.problematicText || '').toLowerCase().trim()}`)
+  );
+  const v2FindingKeys = new Set(
+    (v2.findings || []).map((f) => `${f.type}_${(f.problematicText || '').toLowerCase().trim()}`)
+  );
+
+  const resolvedFindings = (v1.findings || []).filter(
+    (f) => !v2FindingKeys.has(`${f.type}_${(f.problematicText || '').toLowerCase().trim()}`)
+  );
+  const persistentFindings = (v2.findings || []).filter((f) =>
+    v1FindingKeys.has(`${f.type}_${(f.problematicText || '').toLowerCase().trim()}`)
+  );
+  const newFindings = (v2.findings || []).filter(
+    (f) => !v1FindingKeys.has(`${f.type}_${(f.problematicText || '').toLowerCase().trim()}`)
+  );
+
+  const scoreDelta = (v2.summary?.overallScore || 0) - (v1.summary?.overallScore || 0);
+
+  return {
+    reviewId: review._id.toString(),
+    v1: {
+      versionNumber: v1.versionNumber,
+      submittedBy: v1.submittedBy,
+      createdAt: v1.createdAt,
+      status: v1.status,
+      summary: v1.summary,
+      totalFindings: (v1.findings || []).length,
+    },
+    v2: {
+      versionNumber: v2.versionNumber,
+      submittedBy: v2.submittedBy,
+      createdAt: v2.createdAt,
+      status: v2.status,
+      summary: v2.summary,
+      totalFindings: (v2.findings || []).length,
+    },
+    v1Content: v1.contentSnapshot || '',
+    v2Content: v2.contentSnapshot || '',
+    diffSummary: {
+      ...diff,
+      scoreDelta,
+    },
+    findingsComparison: {
+      resolved: resolvedFindings,
+      persistent: persistentFindings,
+      new: newFindings,
+    },
+  };
 };

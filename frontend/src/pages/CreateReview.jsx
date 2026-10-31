@@ -220,11 +220,18 @@ export default function CreateReview() {
         files: processedFilesPayload
       };
 
-      const { data } = await reviewsAPI.create(payload);
+      const res = await reviewsAPI.create(payload);
+      const createdReview = res.data?.data || res.data;
+      const reviewId = createdReview?._id || createdReview?.id;
       toast.success('Analysis complete! Viewing compliance diagnostic...');
-      navigate(`/reviews/${data._id}`);
+      if (reviewId) {
+        navigate('/reviews/' + reviewId);
+      } else {
+        navigate('/reviews');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to complete content review');
+    } finally {
       setSubmitting(false);
     }
   };
