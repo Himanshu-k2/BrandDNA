@@ -322,8 +322,8 @@ export default function CreateReview() {
       const payload = {
         brandId: form.brandId,
         title: form.title.trim() || (uploadedFiles[0] ? `Audit: ${uploadedFiles[0].name}` : 'Marketing Campaign Copy'),
-        contentType: form.contentType,
-        content: form.content.trim(),
+        contentType: form.contentType === 'instagram_post' ? 'social_post' : form.contentType,
+        content: form.content.trim() || (uploadedFiles[0] ? `Visual Creative Asset: ${uploadedFiles[0].name}` : 'Marketing Content Draft'),
         files: processedFilesPayload
       };
 
@@ -337,7 +337,11 @@ export default function CreateReview() {
         navigate('/reviews');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to complete content review');
+      const errorMsg =
+        err.response?.data?.errors?.map((e) => `${e.field ? `${e.field}: ` : ''}${e.message}`).join(', ') ||
+        err.response?.data?.message ||
+        'Failed to complete content review';
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
     }
