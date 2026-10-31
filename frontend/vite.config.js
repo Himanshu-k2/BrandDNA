@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'https://branddna-tup9.onrender.com',
+        target: 'https://branddna-1-wndy.onrender.com',
         changeOrigin: true,
         secure: false
       }
