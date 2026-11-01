@@ -4,6 +4,9 @@ import { BradProvider } from '@/components/brad/BradProvider';
 import { SessionProvider, useSession, type Role } from '@/state/session';
 import { AlertsPage } from '@/screens/AlertsPage';
 import { AuditLedger } from '@/screens/AuditLedger';
+import { BrandManagerAssets } from '@/screens/BrandManagerAssets';
+import { BrandManagerDashboard } from '@/screens/BrandManagerDashboard';
+import { BrandManagerUploads } from '@/screens/BrandManagerUploads';
 import { BrandWorkspaces } from '@/screens/BrandWorkspaces';
 import { GuidelinesHub } from '@/screens/GuidelinesHub';
 import { HomeDashboard } from '@/screens/HomeDashboard';
@@ -17,14 +20,18 @@ import { SettingsPage } from '@/screens/SettingsPage';
 import { SubmissionsPage } from '@/screens/SubmissionsPage';
 import { UsersPage } from '@/screens/UsersPage';
 
-/** `/dashboard?role=` → Creator Dashboard, Platform Dashboard (admin) or Approvals (reviewer). */
+/** `/dashboard?role=` → Creator Dashboard, Platform Dashboard (admin), Brand Manager Dashboard, or Approvals (reviewer). */
 function Dashboard() {
   const [params] = useSearchParams();
   const { persona } = useSession();
   const param = params.get('role');
-  const view: Role = param === 'creator' || param === 'reviewer' || param === 'admin' ? param : persona.role;
+  const view: Role =
+    param === 'creator' || param === 'reviewer' || param === 'admin' || param === 'brand_manager'
+      ? param
+      : persona.role;
   if (view === 'reviewer') return <ReviewerQueue />;
-  return <HomeDashboard key={view} view={view} />;
+  if (view === 'brand_manager') return <BrandManagerDashboard />;
+  return <HomeDashboard key={view} view={view as 'creator' | 'admin'} />;
 }
 
 const router = createBrowserRouter([
@@ -37,6 +44,8 @@ const router = createBrowserRouter([
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/dashboard/content', element: <SubmissionsPage scope="mine" /> },
       { path: '/dashboard/queue', element: <ReviewerQueue /> },
+      { path: '/brand-manager/assets', element: <BrandManagerAssets /> },
+      { path: '/brand-manager/uploads', element: <BrandManagerUploads /> },
       { path: '/reviews/:id', element: <ReviewStudio /> },
       { path: '/submissions', element: <SubmissionsPage scope="all" /> },
       { path: '/brands', element: <BrandWorkspaces /> },

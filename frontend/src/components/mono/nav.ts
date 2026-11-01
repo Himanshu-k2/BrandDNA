@@ -24,12 +24,21 @@ const on =
     paths.some(path => (path.endsWith('*') ? pathname.startsWith(path.slice(0, -1)) : pathname === path));
 
 const unread = (role: Role) => {
-  const items = ALERTS.filter(alert => alert.audience.includes(role));
+  const targetRole = role === 'brand_manager' ? 'reviewer' : role;
+  const items = ALERTS.filter(alert => alert.audience.includes(targetRole));
   return { value: items.length, urgent: items.some(alert => alert.urgent) };
 };
 
 /** Persona → menu. The shell, states and styling are shared; only these items differ. */
 export const NAV: Record<Role, NavItem[]> = {
+  brand_manager: [
+    { label: 'Brand Dashboard', icon: LayoutGrid, to: dashboardPath('brand_manager'), match: on('/dashboard') },
+    { label: 'Brand Asset Library', icon: Building2, to: '/brand-manager/assets', match: on('/brand-manager/assets') },
+    { label: 'Guideline Ingestion', icon: BookOpen, to: '/brand-manager/uploads', match: on('/brand-manager/uploads') },
+    { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
+    { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') },
+    { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('brand_manager') }
+  ],
   reviewer: [
     { label: 'Approvals', icon: Inbox, to: dashboardPath('reviewer'), match: on('/dashboard', '/dashboard/queue', '/reviews/*'), badge: { full: 'Needs sign-off', short: 'Sign-off' } },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },

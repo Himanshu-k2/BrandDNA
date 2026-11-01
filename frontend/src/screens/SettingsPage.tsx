@@ -14,6 +14,11 @@ const PERMISSIONS: Record<Role, Array<{ label: string; allowed: boolean }>> = {
     { label: 'Manage team roles & brand workspaces', allowed: true },
     { label: 'Master override on sign-off', allowed: true }
   ],
+  brand_manager: [
+    { label: 'Manage brand asset libraries & hex swatches', allowed: true },
+    { label: 'Ingest guidelines & approve rule updates', allowed: true },
+    { label: 'Sign-off on brand compliance reviews', allowed: true }
+  ],
   reviewer: [
     { label: 'Inspect revision diffs & audit trail', allowed: true },
     { label: 'Request changes with required notes', allowed: true },

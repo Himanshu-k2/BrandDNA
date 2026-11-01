@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-export type Role = 'creator' | 'reviewer' | 'admin';
+export type Role = 'creator' | 'reviewer' | 'brand_manager' | 'admin';
 
 export interface Persona {
   role: Role;
@@ -19,6 +19,14 @@ export const PERSONAS: Record<Role, Persona> = {
     title: 'Workspace Admin',
     org: 'Enterprise Brand Director',
     email: 'admin@demobrands.test'
+  },
+  brand_manager: {
+    role: 'brand_manager',
+    name: 'Priya Kapoor',
+    initials: 'PK',
+    title: 'Brand Manager',
+    org: 'Brand Asset Operations',
+    email: 'brandmanager@branddna.com'
   },
   reviewer: {
     role: 'reviewer',
@@ -43,6 +51,7 @@ export const canApprove = (role: Role) => role !== 'creator';
 /** Short role names shown in the sidebar role pill. */
 export const ROLE_LABEL: Record<Role, string> = {
   reviewer: 'Reviewer',
+  brand_manager: 'Brand Manager',
   admin: 'Platform Admin',
   creator: 'Content Creator'
 };
@@ -60,7 +69,9 @@ const STORAGE_KEY = 'branddna.role';
 
 function readRole(): Role {
   const stored = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
-  return stored === 'admin' || stored === 'reviewer' || stored === 'creator' ? stored : 'creator';
+  return stored === 'admin' || stored === 'brand_manager' || stored === 'reviewer' || stored === 'creator'
+    ? stored
+    : 'creator';
 }
 
 export function SessionProvider({ children }: { children: ReactNode }) {

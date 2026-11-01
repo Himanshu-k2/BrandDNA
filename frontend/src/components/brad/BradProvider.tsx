@@ -24,6 +24,7 @@ export interface BradMessage {
 export const SUGGESTIONS: Record<Role, string[]> = {
   creator: ['Check my content against brand rules', 'Explain a rejected submission', 'Find a brand guideline'],
   reviewer: ['Summarize what needs sign-off', 'Explain a compliance finding', 'Show urgent reviews'],
+  brand_manager: ['Show approved brand colors and hex values', 'Review ingested guidelines', 'Audit logo clear-space rules'],
   admin: ['Show system alerts', 'Explain a recent audit event', 'Help with roles and permissions']
 };
 

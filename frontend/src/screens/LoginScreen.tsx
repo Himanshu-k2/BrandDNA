@@ -14,8 +14,13 @@ import { dashboardPath, PERSONAS, useSession, type Role } from '@/state/session'
 import { authAPI } from '@/api/auth';
 
 const DEMO_PASSWORD = 'branddna-demo';
-const ORDER: Role[] = ['creator', 'reviewer', 'admin'];
-const DEMO_LABEL: Record<Role, string> = { creator: 'Creator', reviewer: 'Reviewer', admin: 'Admin' };
+const ORDER: Role[] = ['creator', 'reviewer', 'brand_manager', 'admin'];
+const DEMO_LABEL: Record<Role, string> = {
+  creator: 'Creator',
+  reviewer: 'Reviewer',
+  brand_manager: 'Brand Manager',
+  admin: 'Admin'
+};
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Status = 'idle' | 'loading' | 'google' | 'error';
