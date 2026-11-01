@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   ArrowRight,
   ArrowUpRight,
-  ChevronDown,
   Crown,
   ExternalLink,
   FileText,
@@ -130,7 +129,7 @@ const BRAND_RISKS: Record<string, ViolationItem[]> = {
 export function BrandManagerDashboard() {
   const { persona } = useSession();
   const navigate = useNavigate();
-  const [selectedBrand, setSelectedBrand] = useState<string>('novafit');
+  const selectedBrand = 'novafit';
   const [activeBrandList, setActiveBrandList] = useState<any[]>([...BRANDS]);
   const [banner, setBanner] = useState<'offer' | 'sent' | 'hidden'>('offer');
 
@@ -193,29 +192,12 @@ export function BrandManagerDashboard() {
   return (
     <>
       {/* ── Header ── */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <RevealText
-            text={`Hello, ${firstName}!`}
-            className="font-display text-display font-semibold tracking-tight text-ink"
-            delay={0.2}
-          />
-          {/* Active Brand Switcher Pill */}
-          <div className="relative">
-            <select
-              value={selectedBrand}
-              onChange={e => setSelectedBrand(e.target.value)}
-              className="press flex h-9 cursor-pointer appearance-none items-center gap-2 rounded-full border border-silver bg-paper pr-8 pl-3.5 text-caption font-medium text-ink shadow-sm transition-colors hover:border-mid focus-visible:outline-2 focus-visible:outline-ink"
-            >
-              {activeBrandList.map(b => (
-                <option key={b.id} value={b.id}>
-                  Brand: {b.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-graphite" />
-          </div>
-        </div>
+      <header className="flex items-center justify-between gap-4">
+        <RevealText
+          text={`Hello, ${firstName}!`}
+          className="font-display text-display font-semibold tracking-tight text-ink"
+          delay={0.2}
+        />
 
         <div className="flex items-center gap-2.5">
           <NotificationBell />
