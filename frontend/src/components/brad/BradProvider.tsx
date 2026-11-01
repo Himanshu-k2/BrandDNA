@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { useSession, type Role } from '@/state/session';
+import { useSession, type Role, ROLE_LABEL } from '@/state/session';
 import type { ExpressionId } from './face/BradFace';
 import { BradError, sendMessageToBrad, type BradErrorKind, type BradReply } from './service';
 import { useActiveWorkspace } from './workspace';
+import { getUnreadMessagesForRole, markMessageAsRead, type PersonaDispatchMessage } from '@/lib/personaMessages';
 
 export interface BradMessage {
   id: string;
@@ -60,6 +61,7 @@ interface BradValue {
   setNudgeDone: () => void;
   /** Brad has something new: never opened this session, or replies arrived while closed. */
   unread: boolean;
+  openWithPersonaMessage: (msg: PersonaDispatchMessage) => void;
 }
 
 const BradContext = createContext<BradValue | null>(null);
@@ -199,12 +201,70 @@ export function BradProvider({ children }: { children: ReactNode }) {
     flash('attentive', 1400);
   };
 
+  const [hasUnreadPersonaMsg, setHasUnreadPersonaMsg] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      setHasUnreadPersonaMsg(getUnreadMessagesForRole(persona.role).length > 0);
+    };
+    check();
+    window.addEventListener('branddna:persona_message', check);
+    return () => window.removeEventListener('branddna:persona_message', check);
+  }, [persona.role]);
+
+  const openWithPersonaMessage = useCallback(
+    (msg: PersonaDispatchMessage) => {
+      markMessageAsRead(msg.id);
+      setHasUnreadPersonaMsg(getUnreadMessagesForRole(persona.role).length > 0);
+      setOpenState(true);
+      setIntroPlayed(true);
+      push({
+        from: 'brad',
+        text: `📬 **Message from ${msg.fromName} (${ROLE_LABEL[msg.fromRole]})**:\n\n> "${msg.content}"\n\nWould you like me to send a reply back to ${msg.fromName.split(' ')[0]}? Click a suggested response below or type your reply.`,
+        chips: [
+          `Reply to ${msg.fromName.split(' ')[0]}: "Got it, reviewing now!"`,
+          `Reply to ${msg.fromName.split(' ')[0]}: "Approved! Looks ready to publish."`,
+          `Reply to ${msg.fromName.split(' ')[0]}: "Please check the latest revision."`,
+        ],
+        reveal: true,
+      });
+      flash('excited', 1800);
+    },
+    [persona.role, flash]
+  );
+
+  // If chat opens normally while unread persona messages exist, deliver them into the conversation
+  useEffect(() => {
+    if (open) {
+      const unreadList = getUnreadMessagesForRole(persona.role);
+      if (unreadList.length > 0) {
+        setIntroPlayed(true);
+        unreadList.forEach(msg => {
+          push({
+            from: 'brad',
+            text: `📬 **Message from ${msg.fromName} (${ROLE_LABEL[msg.fromRole]})**:\n\n> "${msg.content}"\n\nWould you like me to send a reply back to ${msg.fromName.split(' ')[0]}? Click a suggested response below or type your reply.`,
+            chips: [
+              `Reply to ${msg.fromName.split(' ')[0]}: "Got it, reviewing now!"`,
+              `Reply to ${msg.fromName.split(' ')[0]}: "Approved! Looks ready to publish."`,
+              `Reply to ${msg.fromName.split(' ')[0]}: "Please check the latest revision."`,
+            ],
+            reveal: true,
+          });
+          markMessageAsRead(msg.id);
+        });
+        setHasUnreadPersonaMsg(false);
+        flash('excited', 1800);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, persona.role, flash]);
+
   const bradCount = messages.filter(message => message.from === 'brad').length;
   const [seen, setSeen] = useState(0);
   useEffect(() => {
     if (open) setSeen(bradCount);
   }, [open, bradCount]);
-  const unread = !open && (!introPlayed || bradCount > seen);
+  const unread = !open && (!introPlayed || bradCount > seen || hasUnreadPersonaMsg);
 
   const expression: ExpressionId = mood ?? (thinking ? 'attentive' : userTyping ? 'curious' : hover ? 'attentive' : 'neutral');
 
@@ -230,7 +290,8 @@ export function BradProvider({ children }: { children: ReactNode }) {
     introPlayed,
     nudgeDone,
     setNudgeDone: () => setNudge(true),
-    unread
+    unread,
+    openWithPersonaMessage,
   };
 
   return <BradContext.Provider value={value}>{children}</BradContext.Provider>;

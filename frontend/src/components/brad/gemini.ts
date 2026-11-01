@@ -158,3 +158,4 @@ ${message}`;
 
   throw lastError || new Error('All Gemini model attempts failed');
 }
+

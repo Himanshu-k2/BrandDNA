@@ -3,8 +3,9 @@
  * Connected to Google Gemini Generative AI (direct + backend API) with intelligent contextual fallback.
  */
 import client from '@/api/client';
-import { type Role } from '@/state/session';
+import { type Role, PERSONAS, ROLE_LABEL } from '@/state/session';
 import { askGeminiDirect, isGeminiDirectActive } from './gemini';
+import { parseRecipientRole, extractMessageContent, sendPersonaMessage } from '@/lib/personaMessages';
 
 export interface BradContext {
   role: Role;
@@ -79,6 +80,42 @@ export async function sendMessageToBrad(
   sent.push(now);
 
   if (/simulate (an )?error/i.test(message)) throw new BradError('failed', 'failed');
+
+  // Intercept inter-persona message command (dispatch across roles with notification)
+  const targetRole = parseRecipientRole(message);
+  const isMessageCommand =
+    /^(hey\s+brad[,\s]*)?(please\s+)?(can\s+you\s+)?(reply\s*(to)?|message|tell|send(\s+a)?\s+message\s+to|notify|contact|ping|dispatch(\s+to)?)\b/i.test(message.trim()) ||
+    (/\b(message|tell|notify|ping|reply)\b/i.test(message) && (message.includes(':') || /\b(that|saying)\b/i.test(message)));
+
+  if (targetRole && isMessageCommand) {
+    if (targetRole === context.role) {
+      return {
+        outcome: 'unknown',
+        text: `You are currently logged in as **${context.personaName} (${ROLE_LABEL[context.role]})**. You can send messages to the other personas: **Brand Manager**, **Brand Reviewer**, **Platform Admin**, or **Content Creator**.`,
+      };
+    }
+
+    const content = extractMessageContent(message, targetRole);
+    const targetPersona = PERSONAS[targetRole];
+    const roleLabel = ROLE_LABEL[targetRole];
+
+    if (content && content.length > 0) {
+      const dispatched = sendPersonaMessage(context.role, targetRole, content);
+      return {
+        outcome: 'done',
+        text: `✓ **Message sent to ${targetPersona.name} (${roleLabel})**!\n\n> "${dispatched.content}"\n\nWhen ${targetPersona.name.split(' ')[0]} logs in, an alert pop-up will appear from their **Ask Brad** bot capsule with your message and quick reply options.`,
+        actions: [
+          { label: `Switch to ${roleLabel} demo`, to: `/dashboard?role=${targetRole}` },
+          { label: 'View Submissions', to: '/submissions' },
+        ],
+      };
+    } else {
+      return {
+        outcome: 'answer',
+        text: `What would you like me to tell **${targetPersona.name} (${roleLabel})**?\n\nFor example, try:\n\`message ${targetPersona.name.split(' ')[0]}: please review the new NovaFit banner\``,
+      };
+    }
+  }
 
   // Track 1: Direct Google Gemini API (if key is configured in browser or VITE_GEMINI_API_KEY)
   if (isGeminiDirectActive()) {
