@@ -49,6 +49,6 @@ export const NAV: Record<Role, NavItem[]> = {
     { label: 'Creator Dashboard', icon: LayoutGrid, to: dashboardPath('creator'), match: on('/dashboard') },
     { label: 'New Content', icon: CirclePlus, to: '/reviews/new', match: on('/reviews/new') },
     { label: 'My Submissions & Drafts', icon: FilePen, to: '/dashboard/content', match: pathname => pathname === '/dashboard/content' || (pathname.startsWith('/reviews/') && pathname !== '/reviews/new') },
-    { label: 'Brand Guidelines Hub', icon: BookOpen, to: '/guidelines', match: on('/guidelines') }
+    { label: 'Brand Guidelines', icon: Building2, to: '/brands', match: on('/brands') }
   ]
 };

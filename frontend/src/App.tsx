@@ -33,6 +33,12 @@ function Dashboard() {
   return <HomeDashboard key={view} view={view} />;
 }
 
+function GuidelinesRoute() {
+  const { persona } = useSession();
+  if (persona.role === 'creator') return <BrandWorkspaces />;
+  return <GuidelinesHub />;
+}
+
 const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   { path: '/login', element: <LoginScreen />, errorElement: <RouteError /> },
@@ -52,7 +58,7 @@ const router = createBrowserRouter([
       { path: '/notifications', element: <AlertsPage /> },
       { path: '/admin/users', element: <UsersPage /> },
       { path: '/audit', element: <AuditLedger /> },
-      { path: '/guidelines', element: <GuidelinesHub /> },
+      { path: '/guidelines', element: <GuidelinesRoute /> },
       { path: '/settings', element: <SettingsPage /> },
       // Dev reference for the logo system — intentionally not in the navigation.
       { path: '/brand', element: <LogoGuidelines /> },
