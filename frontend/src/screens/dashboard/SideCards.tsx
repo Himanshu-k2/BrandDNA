@@ -4,27 +4,39 @@ import { MonoAvatar } from '@/components/mono/Brand';
 import { ACTIVITIES, reviewCounts, type View } from './data';
 import { SectionHeader, SeeAll } from '@/components/mono/ui';
 
-const listPath = (view: View) => (view === 'creator' ? '/dashboard/content' : view === 'admin' ? '/dashboard/queue' : '/submissions');
+const listPath = (view: View) => {
+  if (view === 'creator') return '/dashboard/content';
+  if (view === 'brand_manager') return '/brand-manager/assets';
+  return '/dashboard/queue';
+};
 
 /** Card radius 24, padding 16 → icon chip radius 8. */
-export function AdvisorCard() {
+export function AdvisorCard({ view }: { view?: View } = {}) {
   const navigate = useNavigate();
+  const isBrandManager = view === 'brand_manager';
+  const targetUrl = isBrandManager ? '/brand-manager/uploads' : '/reviews/rev-1049';
+  const title = isBrandManager ? 'NovaFit guideline staging' : 'NovaFit pricing rule updated';
+  const desc = isBrandManager
+    ? '6 extracted rules from NovaFit_Brand_Guidelines_2026.pdf staged and verified with 98% confidence. Ready for activation.'
+    : '₹999/mo is now the only approved membership price across every channel. Older drafts will be flagged.';
+  const btnLabel = isBrandManager ? 'Review Staging' : 'Learn More';
+
   return (
     <section className="flex flex-col gap-4">
-      <SectionHeader title="Brand Advisor" action={<SeeAll to="/reviews/rev-1049" />} />
+      <SectionHeader title="Brand Advisor" action={<SeeAll to={targetUrl} />} />
       <div className="flex gap-3 rounded-panel border border-silver bg-paper shadow-soft p-4">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-chip bg-silver/40 text-ink">
           <Bell className="size-5" strokeWidth={1.5} />
         </span>
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-ui font-semibold text-ink">NovaFit pricing rule updated</p>
-          <p className="text-caption leading-copy text-graphite">₹999/mo is now the only approved membership price across every channel. Older drafts will be flagged.</p>
+          <p className="text-ui font-semibold text-ink">{title}</p>
+          <p className="text-caption leading-copy text-graphite">{desc}</p>
           <button
             type="button"
-            onClick={() => navigate('/reviews/rev-1049')}
+            onClick={() => navigate(targetUrl)}
             className="press mt-2 h-8 w-max cursor-pointer rounded-full border border-silver bg-paper px-4 text-caption font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
           >
-            Learn More
+            {btnLabel}
           </button>
         </div>
       </div>

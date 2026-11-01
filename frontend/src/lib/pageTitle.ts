@@ -3,7 +3,7 @@ import type { Role } from '@/state/session';
 const DASHBOARD: Record<Role, string> = {
   creator: 'Creator Dashboard',
   admin: 'Platform Dashboard',
-  reviewer: 'Approvals',
+  reviewer: 'Reviewer Dashboard',
   brand_manager: 'Brand Manager Dashboard'
 };
 

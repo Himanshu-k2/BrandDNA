@@ -1,7 +1,7 @@
 import { QUEUE, SUBMISSIONS } from '@/data/demo';
 
 export type Period = 'day' | 'week' | 'month' | 'year';
-export type View = 'creator' | 'reviewer' | 'admin';
+export type View = 'creator' | 'reviewer' | 'brand_manager' | 'admin';
 
 export const PERIODS: Array<{ id: Period; label: string; window: string; factor: number }> = [
   { id: 'day', label: 'Day', window: 'last 24 hours', factor: 1 / 7 },
@@ -32,6 +32,12 @@ export const STATS: Record<View, Stat[]> = {
     { label: 'Approved & sealed', value: 74, previous: 65, accent: 'dark' },
     { label: 'Changes requested', value: 18, previous: 21 },
     { label: 'Approval rate', value: 77, previous: 74, percent: true, accent: 'orange' }
+  ],
+  brand_manager: [
+    { label: 'Verified brand assets', value: 384, previous: 360 },
+    { label: 'Turnaround velocity', value: 18, previous: 22 },
+    { label: 'Active brand rules', value: 142, previous: 130, accent: 'dark' },
+    { label: 'Brand health score', value: 94, previous: 90, percent: true, accent: 'orange' }
   ],
   admin: [
     { label: 'Assets audited', value: 212, previous: 190 },
@@ -150,6 +156,13 @@ export function reviewCounts(view: View) {
       { label: 'Awaiting sign-off', value: lane('urgent') },
       { label: 'Changes requested', value: lane('changes') },
       { label: 'Sealed today', value: lane('approved') }
+    ];
+  }
+  if (view === 'brand_manager') {
+    return [
+      { label: 'Rule approvals pending', value: 6 },
+      { label: 'Policy change requests', value: 4 },
+      { label: 'Certified assets sealed', value: 18 }
     ];
   }
   return [

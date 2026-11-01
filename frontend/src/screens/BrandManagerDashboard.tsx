@@ -1,73 +1,139 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import {
+  AlertTriangle,
   ArrowRight,
-  BookOpen,
-  Check,
+  ArrowUpRight,
+  Building2,
   ChevronDown,
-  Copy,
+  Crown,
   ExternalLink,
-  FileCheck,
   FileText,
   FileUp,
   Layers,
   Palette,
   ShieldAlert,
   ShieldCheck,
-  Type
+  Type,
+  X
 } from 'lucide-react';
 import { RevealText } from '@/components/mono/RevealText';
-import { Button, Card, ICON, Pill } from '@/components/mono/ui';
-import SpotlightCard from '@/components/react-bits/SpotlightCard';
-import { BRANDS } from '@/data/demo';
-import { BRAND_STATS } from '@/data/platform';
+import { Card, Pill, SectionHeader, SeeAll, Stagger, ICON } from '@/components/mono/ui';
+import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
+import { BRANDS } from '@/data/demo';
 import { brandsAPI } from '@/api/brands';
+import { OverviewCard } from './dashboard/OverviewCard';
+import { AuditCard } from './dashboard/AuditCard';
+import { ActivityCard, AdvisorCard, ReviewsCard } from './dashboard/SideCards';
 
-const BRAND_PALETTES: Record<string, {
-  primary: { name: string; hex: string; note: string };
-  secondary: { name: string; hex: string; note: string };
-  prohibited: { name: string; hex: string; note: string };
-  headingFont: string;
-  bodyFont: string;
-  logoClearance: string;
-  priceFact: string;
-}> = {
-  novafit: {
-    primary: { name: 'Electric Orange', hex: '#FF4500', note: 'Primary signature color (6.7:1 contrast)' },
-    secondary: { name: 'Dark Slate & Paper', hex: '#1E1E1E', note: 'Secondary surface background' },
-    prohibited: { name: 'Neon Green', hex: '#39FF14', note: 'Strictly prohibited from all marketing materials' },
-    headingFont: 'Inter SemiBold (600)',
-    bodyFont: 'Inter Regular (400)',
-    logoClearance: '24px minimum clear space on all sides',
-    priceFact: 'Approved subscription: ₹999/month (Quoting ₹799 is prohibited)'
-  },
-  omnicloud: {
-    primary: { name: 'Cyan Tech', hex: '#00E5FF', note: 'Primary digital asset anchor' },
-    secondary: { name: 'Obsidian Black', hex: '#0B0F19', note: 'Enterprise backdrop' },
-    prohibited: { name: 'Crimson Red', hex: '#FF0033', note: 'Prohibited in product UI and ad banners' },
-    headingFont: 'Space Grotesk Bold (700)',
-    bodyFont: 'Roboto Mono (400)',
-    logoClearance: '32px perimeter clearance required',
-    priceFact: 'Starting tier: ₹24,99,000 enterprise annual SLA'
-  },
-  apex: {
-    primary: { name: 'Apex Navy', hex: '#0A2540', note: 'Core institutional tone' },
-    secondary: { name: 'Clean Platinum', hex: '#F4F5F7', note: 'Clean banking surface' },
-    prohibited: { name: 'Hot Pink', hex: '#FF007F', note: 'Prohibited across regulatory disclosures' },
-    headingFont: 'Inter Display Medium (500)',
-    bodyFont: 'Inter Regular (400)',
-    logoClearance: '28px boundary on marketing decks',
-    priceFact: 'High-Yield Savings: 6.8% APY certified'
-  }
+interface ViolationItem {
+  id: string;
+  category: 'color' | 'pricing' | 'logo' | 'typography';
+  title: string;
+  detail: string;
+  severity: 'critical' | 'high' | 'medium';
+  count: number;
+  actionLabel: string;
+  actionTo: string;
+}
+
+const BRAND_RISKS: Record<string, ViolationItem[]> = {
+  novafit: [
+    {
+      id: 'v1',
+      category: 'color',
+      title: 'Prohibited Color Flagged: #39FF14 Neon Green',
+      detail: '14 promotional creatives blocked across Instagram & Facebook ad campaigns. Neon green violates brand visual standards.',
+      severity: 'critical',
+      count: 14,
+      actionLabel: 'Review Submissions',
+      actionTo: '/submissions'
+    },
+    {
+      id: 'v2',
+      category: 'pricing',
+      title: 'Unapproved Pricing Claim: ₹799 vs Certified ₹999',
+      detail: '9 draft copies attempted to quote ₹799/month promotional pricing. Official certified subscription tier is ₹999/month.',
+      severity: 'high',
+      count: 9,
+      actionLabel: 'Inspect Pricing Rule',
+      actionTo: '/brand-manager/assets'
+    },
+    {
+      id: 'v3',
+      category: 'logo',
+      title: 'Logo Clear-Space Perimeter Breach (< 24px)',
+      detail: '6 hero banners exported with text and graphics encroaching within the 24px logo margin boundary.',
+      severity: 'medium',
+      count: 6,
+      actionLabel: 'View Clear Space Specs',
+      actionTo: '/brand-manager/assets'
+    },
+    {
+      id: 'v4',
+      category: 'typography',
+      title: 'Disallowed Font Weight (Inter 800 ExtraBold)',
+      detail: '4 landing page designs used ExtraBold weight. Approved standard is Inter SemiBold (600) for hero display copy.',
+      severity: 'medium',
+      count: 4,
+      actionLabel: 'Inspect Typography',
+      actionTo: '/brand-manager/assets'
+    }
+  ],
+  omnicloud: [
+    {
+      id: 'o1',
+      category: 'color',
+      title: 'Prohibited Color Flagged: #FF0033 Crimson Red',
+      detail: '8 enterprise slides blocked for using unauthorized crimson red in product terminal graphics.',
+      severity: 'critical',
+      count: 8,
+      actionLabel: 'Review Submissions',
+      actionTo: '/submissions'
+    },
+    {
+      id: 'o2',
+      category: 'pricing',
+      title: 'Enterprise Tier SLA Discrepancy',
+      detail: '5 contracts quoted outdated ₹19,99,000 baseline SLA. Official certified price is ₹24,99,000.',
+      severity: 'high',
+      count: 5,
+      actionLabel: 'Inspect Pricing Rule',
+      actionTo: '/brand-manager/assets'
+    }
+  ],
+  apex: [
+    {
+      id: 'a1',
+      category: 'color',
+      title: 'Prohibited Accent: #FF007F Hot Pink',
+      detail: '7 retail banking promo cards flagged for using hot pink in disclosure copy.',
+      severity: 'critical',
+      count: 7,
+      actionLabel: 'Review Submissions',
+      actionTo: '/submissions'
+    },
+    {
+      id: 'a2',
+      category: 'pricing',
+      title: 'APY Yield Rate Disclosure Missing',
+      detail: '6 investment banners omitted mandatory 6.8% APY regulatory certification disclaimer.',
+      severity: 'high',
+      count: 6,
+      actionLabel: 'Inspect Pricing Rule',
+      actionTo: '/brand-manager/assets'
+    }
+  ]
 };
 
 export function BrandManagerDashboard() {
   const { persona } = useSession();
   const navigate = useNavigate();
   const [selectedBrand, setSelectedBrand] = useState<string>('novafit');
-  const [copiedHex, setCopiedHex] = useState<string | null>(null);
   const [activeBrandList, setActiveBrandList] = useState<any[]>([...BRANDS]);
+  const [banner, setBanner] = useState<'offer' | 'sent' | 'hidden'>('offer');
 
   useEffect(() => {
     brandsAPI.getAll().then(res => {
@@ -86,290 +152,238 @@ export function BrandManagerDashboard() {
   }, []);
 
   const currentBrand = activeBrandList.find(b => b.id === selectedBrand) || activeBrandList[0];
-  const stats = BRAND_STATS[selectedBrand as keyof typeof BRAND_STATS] || BRAND_STATS['novafit'];
-  const palette = BRAND_PALETTES[selectedBrand] || BRAND_PALETTES['novafit'];
+  const firstName = persona.name.split(' ')[0];
+  const violations = BRAND_RISKS[selectedBrand] || BRAND_RISKS['novafit'];
 
-  const copyToClipboard = async (hex: string) => {
-    try {
-      await navigator.clipboard.writeText(hex);
-      setCopiedHex(hex);
-      setTimeout(() => setCopiedHex(null), 2000);
-    } catch {}
+  const categoryIcon = (category: ViolationItem['category']) => {
+    switch (category) {
+      case 'color':
+        return <Palette className="size-4" strokeWidth={1.5} />;
+      case 'pricing':
+        return <ShieldCheck className="size-4" strokeWidth={1.5} />;
+      case 'logo':
+        return <Layers className="size-4" strokeWidth={1.5} />;
+      case 'typography':
+        return <Type className="size-4" strokeWidth={1.5} />;
+    }
+  };
+
+  const severityBadge = (severity: ViolationItem['severity']) => {
+    switch (severity) {
+      case 'critical':
+        return (
+          <span className="flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-caption font-semibold text-danger">
+            <ShieldAlert className="size-3" strokeWidth={2} /> Critical
+          </span>
+        );
+      case 'high':
+        return (
+          <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-caption font-semibold text-amber-700">
+            <AlertTriangle className="size-3" strokeWidth={2} /> High Priority
+          </span>
+        );
+      case 'medium':
+        return (
+          <span className="flex items-center gap-1 rounded-full bg-silver/60 px-2.5 py-0.5 text-caption font-medium text-graphite">
+            Medium
+          </span>
+        );
+    }
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* ── Page Header & Brand Workspace Selector ── */}
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-1">
-          <RevealText
-            text={`Brand Workspace: ${currentBrand.name}`}
-            className="font-display text-display font-semibold tracking-tight text-ink"
-            delay={0.08}
-          />
-          <p className="max-w-2xl text-body text-graphite">
-            Welcome, {persona.name.split(' ')[0]}. Govern colors, typography standards, logo clearance, and ingest guideline documents into live asset rules.
-          </p>
-        </div>
-
+    <>
+      {/* ── Header ── */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          {/* Active Brand Switcher */}
+          <RevealText
+            text={`Hello, ${firstName}!`}
+            className="font-display text-display font-semibold tracking-tight text-ink"
+            delay={0.2}
+          />
+          {/* Active Brand Switcher Pill */}
           <div className="relative">
             <select
               value={selectedBrand}
               onChange={e => setSelectedBrand(e.target.value)}
-              className="press flex h-11 cursor-pointer appearance-none items-center gap-2 rounded-full border border-silver bg-paper pr-10 pl-4 text-ui font-medium text-ink shadow-sm transition-colors hover:border-mid focus-visible:outline-2 focus-visible:outline-ink"
+              className="press flex h-9 cursor-pointer appearance-none items-center gap-2 rounded-full border border-silver bg-paper pr-8 pl-3.5 text-caption font-medium text-ink shadow-sm transition-colors hover:border-mid focus-visible:outline-2 focus-visible:outline-ink"
             >
               {activeBrandList.map(b => (
                 <option key={b.id} value={b.id}>
-                  Workspace: {b.name}
+                  Brand: {b.name}
                 </option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-graphite" />
+            <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-graphite" />
           </div>
+        </div>
 
-          <Button
-            size="md"
-            variant="secondary"
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
             onClick={() => navigate('/brand-manager/uploads')}
+            className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-silver bg-paper px-5 text-ui font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
           >
-            <FileUp className="size-4" {...ICON} /> Ingest Guideline PDF
-          </Button>
-
-          <Button
-            size="md"
+            <FileUp className="size-5" strokeWidth={1.5} />
+            Ingest Guidelines
+          </button>
+          <button
+            type="button"
             onClick={() => navigate('/brand-manager/assets')}
+            className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-ink px-6 text-ui font-medium text-paper transition-[background-color,transform] duration-200 ease-(--ease-refined) hover:scale-[1.02] hover:bg-graphite focus-visible:outline-2 focus-visible:outline-ink"
           >
-            <Palette className="size-4" {...ICON} /> Asset Library
-          </Button>
+            <Building2 className="size-5" strokeWidth={1.5} />
+            Asset Library
+          </button>
         </div>
       </header>
 
-      {/* ── Top Bento Metrics Grid (Spotlight Cards) ── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SpotlightCard className="flex flex-col gap-2 rounded-panel border border-silver bg-paper p-5 shadow-soft">
-          <div className="flex items-center justify-between text-caption text-graphite">
-            <span>Approved Visual Assets</span>
-            <Palette className="size-4 text-ink" {...ICON} />
-          </div>
-          <span className="font-display text-3xl font-semibold tracking-tight text-ink tabular-nums">
-            {stats.assets.toLocaleString()}
-          </span>
-          <span className="text-caption text-graphite">Active swatches, type & logo specs</span>
-        </SpotlightCard>
-
-        <SpotlightCard className="flex flex-col gap-2 rounded-panel border border-silver bg-paper p-5 shadow-soft">
-          <div className="flex items-center justify-between text-caption text-graphite">
-            <span>Compliance Pass Rate</span>
-            <ShieldCheck className="size-4 text-success" {...ICON} />
-          </div>
-          <span className="font-display text-3xl font-semibold tracking-tight text-ink tabular-nums">
-            {stats.passRate}%
-          </span>
-          <span className="text-caption text-success font-medium">+2.1% this reporting cycle</span>
-        </SpotlightCard>
-
-        <SpotlightCard className="flex flex-col gap-2 rounded-panel border border-silver bg-paper p-5 shadow-soft">
-          <div className="flex items-center justify-between text-caption text-graphite">
-            <span>Active Guideline Rules</span>
-            <BookOpen className="size-4 text-ink" {...ICON} />
-          </div>
-          <span className="font-display text-3xl font-semibold tracking-tight text-ink tabular-nums">
-            {stats.rules}
-          </span>
-          <span className="text-caption text-graphite">Enforced across deterministic engine</span>
-        </SpotlightCard>
-
-        <SpotlightCard className="flex flex-col gap-2 rounded-panel border border-silver bg-paper p-5 shadow-soft">
-          <div className="flex items-center justify-between text-caption text-graphite">
-            <span>Review Turnaround</span>
-            <FileCheck className="size-4 text-ink" {...ICON} />
-          </div>
-          <span className="font-display text-3xl font-semibold tracking-tight text-ink tabular-nums">
-            1.8 hrs
-          </span>
-          <span className="text-caption text-graphite">Average sign-off velocity</span>
-        </SpotlightCard>
-      </div>
-
-      {/* ── Main Two-Column Layout ── */}
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* Left Column (7 cols): Brand Visual Standards & Palette */}
-        <div className="flex flex-col gap-6 lg:col-span-7">
-          <Card className="flex flex-col gap-6 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-item bg-ink text-paper">
-                  <Palette className="size-5" {...ICON} />
-                </span>
-                <div>
-                  <h2 className="font-display text-subheading font-semibold text-ink">Core Brand Colors & Palette</h2>
-                  <p className="text-caption text-graphite">Verified hex values extracted from approved brand guidelines</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/brand-manager/assets')}>
-                View full library <ArrowRight className="size-4" {...ICON} />
-              </Button>
-            </div>
-
-            {/* Color Swatch Tiles */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {/* Primary */}
-              <div className="flex flex-col gap-2 rounded-item border border-silver p-3">
-                <div
-                  className="h-16 w-full rounded-min shadow-inner flex items-end justify-end p-2"
-                  style={{ backgroundColor: palette.primary.hex }}
+      {/* ── Top Governance Banner ── */}
+      <AnimatePresence initial={false}>
+        {banner !== 'hidden' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: DURATION.base, ease: EASE }}
+            className="overflow-hidden"
+          >
+            <div className="mt-6 flex items-center gap-3 rounded-panel bg-silver/48 p-2 pl-4" role="status">
+              <Crown className="size-5 shrink-0 text-ink" strokeWidth={1.5} />
+              <p className="min-w-0 flex-1 truncate text-ui text-ink">
+                {banner === 'offer'
+                  ? `Active brand workspace: ${currentBrand.name}. 6 staged guideline rules awaiting production sign-off.`
+                  : 'Staged guidelines confirmed. Production engine synchronized.'}
+              </p>
+              {banner === 'offer' && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/brand-manager/uploads')}
+                  className="press flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded-item bg-paper px-3 text-caption font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
                 >
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(palette.primary.hex)}
-                    className="flex h-7 items-center gap-1 rounded bg-black/60 px-2 text-caption text-white backdrop-blur-sm transition-transform hover:scale-105"
+                  Review Staging
+                  <ArrowUpRight className="size-4" strokeWidth={1.5} />
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label="Dismiss"
+                onClick={() => setBanner('hidden')}
+                className="press flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-item text-graphite transition-colors hover:bg-paper hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+              >
+                <X className="size-5" strokeWidth={1.5} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Canonical Two-Column Persona Layout ── */}
+      <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Left 2/3 Column: Performance Metrics, Audit Volume, and Priority Action Items */}
+        <div className="flex min-w-0 flex-col gap-8">
+          <Stagger index={1}>
+            <OverviewCard view="brand_manager" />
+          </Stagger>
+
+          <Stagger index={2}>
+            <AuditCard />
+          </Stagger>
+
+          {/* High-Priority Compliance Violations & Required Brand Actions */}
+          <Stagger index={3}>
+            <section className="flex flex-col gap-4">
+              <SectionHeader
+                title="High-priority compliance risks & actions"
+                action={<SeeAll to="/submissions" />}
+              />
+              <Card className="flex flex-col divide-y divide-silver overflow-hidden p-0">
+                {violations.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-silver/10"
                   >
-                    {copiedHex === palette.primary.hex ? <Check className="size-3" /> : <Copy className="size-3" />}
-                    <span>{palette.primary.hex}</span>
-                  </button>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-ui font-semibold text-ink">{palette.primary.name}</span>
-                  <span className="text-caption text-graphite">Primary brand anchor</span>
-                </div>
-              </div>
+                    <div className="flex items-start gap-3.5 min-w-0">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-chip bg-silver/30 text-ink mt-0.5">
+                        {categoryIcon(item.category)}
+                      </span>
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-ui font-semibold text-ink">{item.title}</span>
+                          {severityBadge(item.severity)}
+                          <span className="rounded-full bg-silver/40 px-2 py-0.5 text-caption font-medium text-graphite">
+                            {item.count} flagged
+                          </span>
+                        </div>
+                        <p className="text-caption leading-copy text-graphite max-w-xl">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </div>
 
-              {/* Secondary */}
-              <div className="flex flex-col gap-2 rounded-item border border-silver p-3">
-                <div
-                  className="h-16 w-full rounded-min shadow-inner flex items-end justify-end p-2"
-                  style={{ backgroundColor: palette.secondary.hex }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(palette.secondary.hex)}
-                    className="flex h-7 items-center gap-1 rounded bg-black/60 px-2 text-caption text-white backdrop-blur-sm transition-transform hover:scale-105"
-                  >
-                    {copiedHex === palette.secondary.hex ? <Check className="size-3" /> : <Copy className="size-3" />}
-                    <span>{palette.secondary.hex}</span>
-                  </button>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-ui font-semibold text-ink">{palette.secondary.name}</span>
-                  <span className="text-caption text-graphite">Surface backdrop</span>
-                </div>
-              </div>
-
-              {/* Prohibited */}
-              <div className="flex flex-col gap-2 rounded-item border border-danger/40 bg-danger/5 p-3">
-                <div
-                  className="h-16 w-full rounded-min shadow-inner flex items-end justify-end p-2 border border-danger/30"
-                  style={{ backgroundColor: palette.prohibited.hex }}
-                >
-                  <span className="flex h-7 items-center gap-1 rounded bg-danger px-2 text-caption text-white font-medium">
-                    <ShieldAlert className="size-3" /> BANNED
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-ui font-semibold text-danger">{palette.prohibited.name}</span>
-                  <span className="text-caption text-danger/80">Strictly prohibited</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Typography & Logo Standards Summary */}
-            <div className="grid grid-cols-1 gap-4 border-t border-silver pt-4 sm:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-item bg-silver/20 p-3.5">
-                <Type className="size-5 shrink-0 text-ink mt-0.5" {...ICON} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-caption font-semibold text-ink">Typography Standard</span>
-                  <span className="text-ui font-medium text-ink">{palette.headingFont}</span>
-                  <span className="text-caption text-graphite">Body: {palette.bodyFont}</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-item bg-silver/20 p-3.5">
-                <Layers className="size-5 shrink-0 text-ink mt-0.5" {...ICON} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-caption font-semibold text-ink">Logo Clear Space</span>
-                  <span className="text-ui font-medium text-ink">{palette.logoClearance}</span>
-                  <span className="text-caption text-graphite">Prohibited: No skewing or recoloring</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Official Verified Fact Pill */}
-            <div className="rounded-item border border-silver bg-silver/10 p-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <ShieldCheck className="size-5 shrink-0 text-success" />
-                <span className="truncate text-caption font-medium text-ink">{palette.priceFact}</span>
-              </div>
-              <Pill variant="solid" caps={false} className="shrink-0">
-                Verified Fact
-              </Pill>
-            </div>
-          </Card>
-        </div>
-
-        {/* Right Column (5 cols): Guideline PDF Ingestion Pipeline */}
-        <div className="flex flex-col gap-6 lg:col-span-5">
-          <Card className="flex flex-col gap-5 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-item bg-ink text-paper">
-                  <BookOpen className="size-5" {...ICON} />
-                </span>
-                <div>
-                  <h2 className="font-display text-subheading font-semibold text-ink">Guideline Ingestion</h2>
-                  <p className="text-caption text-graphite">Document intelligence extraction</p>
-                </div>
-              </div>
-              <Pill variant="silver" caps={false}>
-                AI Engine Active
-              </Pill>
-            </div>
-
-            <p className="text-body text-graphite leading-relaxed">
-              Upload PDF brand manuals to automatically parse color tokens, font hierarchy, logo clearance, and pricing rules into active governance rules.
-            </p>
-
-            {/* Pre-packaged Guideline Templates */}
-            <div className="flex flex-col gap-2">
-              <span className="text-caption font-semibold text-ink">Available Reference Guidelines:</span>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between rounded-item border border-silver p-3 transition-colors hover:bg-silver/20">
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="size-5 text-ink" />
-                    <div className="flex flex-col">
-                      <span className="text-caption font-medium text-ink">NovaFit_Brand_Guidelines_2026.pdf</span>
-                      <span className="text-caption text-graphite">Official palette, weights & ₹999 pricing</span>
+                    <div className="flex items-center gap-2 shrink-0 sm:self-center">
+                      <button
+                        type="button"
+                        onClick={() => navigate(item.actionTo)}
+                        className="press flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-silver bg-paper px-4 text-caption font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
+                      >
+                        {item.actionLabel}
+                        <ArrowRight className="size-3.5" />
+                      </button>
                     </div>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => navigate('/brand-manager/uploads')}>
-                    Parse <ExternalLink className="size-3.5" />
-                  </Button>
-                </div>
+                ))}
 
-                <div className="flex items-center justify-between rounded-item border border-silver p-3 transition-colors hover:bg-silver/20">
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="size-5 text-ink" />
-                    <div className="flex flex-col">
-                      <span className="text-caption font-medium text-ink">VoltAuto_Brand_Guidelines_2026.pdf</span>
-                      <span className="text-caption text-graphite">Cyan palette, typography & EV facts</span>
+                {/* Staged Guideline Documents awaiting production sign-off */}
+                <div className="flex flex-col gap-3 bg-silver/15 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-chip bg-ink text-paper mt-0.5">
+                      <FileText className="size-5" {...ICON} />
+                    </span>
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-ui font-semibold text-ink">
+                          {currentBrand.name}_Brand_Guidelines_2026.pdf
+                        </span>
+                        <Pill variant="solid" caps={false}>
+                          Staged · 98% Confidence
+                        </Pill>
+                      </div>
+                      <p className="text-caption leading-copy text-graphite">
+                        Document Intelligence extracted 6 active rules: primary palette, prohibited colors, typography weights, logo clear space, and certified pricing facts.
+                      </p>
                     </div>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => navigate('/brand-manager/uploads')}>
-                    Parse <ExternalLink className="size-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-2 flex flex-col gap-2">
-              <Button size="lg" onClick={() => navigate('/brand-manager/uploads')}>
-                <FileUp className="size-4" {...ICON} /> Upload & Extract PDF
-              </Button>
-            </div>
-          </Card>
+                  <div className="flex items-center gap-2 shrink-0 sm:self-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/brand-manager/uploads')}
+                      className="press flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-ink px-4 text-caption font-medium text-paper transition-transform hover:scale-102 focus-visible:outline-2 focus-visible:outline-ink"
+                    >
+                      Open Ingestion Studio
+                      <ExternalLink className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            </section>
+          </Stagger>
+        </div>
+
+        {/* Right 1/3 Column (320px): Brand Advisor, Reviews / Governance Counts, Recent Activity */}
+        <div className="flex min-w-0 flex-col gap-8">
+          <Stagger index={4}>
+            <AdvisorCard view="brand_manager" />
+          </Stagger>
+          <Stagger index={5}>
+            <ReviewsCard view="brand_manager" />
+          </Stagger>
+          <Stagger index={6}>
+            <ActivityCard />
+          </Stagger>
         </div>
       </div>
-    </div>
+    </>
   );
 }

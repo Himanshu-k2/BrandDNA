@@ -20,7 +20,7 @@ import { SettingsPage } from '@/screens/SettingsPage';
 import { SubmissionsPage } from '@/screens/SubmissionsPage';
 import { UsersPage } from '@/screens/UsersPage';
 
-/** `/dashboard?role=` → Creator Dashboard, Platform Dashboard (admin), Brand Manager Dashboard, or Approvals (reviewer). */
+/** `/dashboard?role=` → Creator Dashboard, Reviewer Dashboard, Platform Dashboard (admin), or Brand Manager Dashboard. */
 function Dashboard() {
   const [params] = useSearchParams();
   const { persona } = useSession();
@@ -29,9 +29,8 @@ function Dashboard() {
     param === 'creator' || param === 'reviewer' || param === 'admin' || param === 'brand_manager'
       ? param
       : persona.role;
-  if (view === 'reviewer') return <ReviewerQueue />;
   if (view === 'brand_manager') return <BrandManagerDashboard />;
-  return <HomeDashboard key={view} view={view as 'creator' | 'admin'} />;
+  return <HomeDashboard key={view} view={view} />;
 }
 
 const router = createBrowserRouter([

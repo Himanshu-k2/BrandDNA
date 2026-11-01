@@ -44,7 +44,12 @@ export function OverviewCard({ view }: { view: View }) {
   // Orange hero first, dark card second, then the white cards.
   const rank = (stat: Stat) => (stat.accent === 'orange' ? 0 : stat.accent === 'dark' ? 1 : 2);
   const stats = [...STATS[view]].sort((a, b) => rank(a) - rank(b));
-  const listPath = view === 'creator' ? '/dashboard/content' : view === 'admin' ? '/dashboard/queue' : '/submissions';
+  const listPath =
+    view === 'creator'
+      ? '/dashboard/content'
+      : view === 'brand_manager'
+        ? '/brand-manager/assets'
+        : '/dashboard/queue';
   return (
     <section className="flex flex-col gap-4">
       <SectionHeader title="Overview performance" action={<PeriodToggle value={period} onChange={setPeriod} />} />

@@ -40,7 +40,8 @@ export const NAV: Record<Role, NavItem[]> = {
     { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('brand_manager') }
   ],
   reviewer: [
-    { label: 'Approvals', icon: Inbox, to: dashboardPath('reviewer'), match: on('/dashboard', '/dashboard/queue', '/reviews/*'), badge: { full: 'Needs sign-off', short: 'Sign-off' } },
+    { label: 'Reviewer Dashboard', icon: LayoutGrid, to: dashboardPath('reviewer'), match: on('/dashboard') },
+    { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Needs sign-off', short: 'Sign-off' } },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
     { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') },
     { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('reviewer') }

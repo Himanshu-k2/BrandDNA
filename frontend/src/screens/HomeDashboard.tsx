@@ -11,12 +11,21 @@ import type { View } from './dashboard/data';
 import { OverviewCard } from './dashboard/OverviewCard';
 import { ActivityCard, AdvisorCard, ReviewsCard } from './dashboard/SideCards';
 
-/** Creator Dashboard and Platform Dashboard (admin) — rendered inside the shared AppFrame. */
-export function HomeDashboard({ view }: { view: Exclude<View, 'reviewer'> }) {
+/** Dashboard for Creator, Reviewer, Admin, or Brand Manager — rendered inside the shared AppFrame. */
+export function HomeDashboard({ view }: { view: View }) {
   const { persona } = useSession();
   const navigate = useNavigate();
   const [banner, setBanner] = useState<'offer' | 'sent' | 'hidden'>('offer');
   const firstName = persona.name.split(' ')[0];
+
+  const getAction = () => {
+    if (view === 'creator') return { label: 'New Content', icon: CirclePlus, to: '/reviews/new' };
+    if (view === 'brand_manager') return { label: 'Asset Library', icon: Globe, to: '/brand-manager/assets' };
+    return { label: 'Open Queue', icon: Globe, to: '/dashboard/queue' };
+  };
+
+  const action = getAction();
+  const ActionIcon = action.icon;
 
   return (
     <>
@@ -24,11 +33,11 @@ export function HomeDashboard({ view }: { view: Exclude<View, 'reviewer'> }) {
         <RevealText text={`Hello, ${firstName}!`} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.2} />
         <button
           type="button"
-          onClick={() => navigate(view === 'creator' ? '/reviews/new' : '/dashboard/queue')}
+          onClick={() => navigate(action.to)}
           className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-ink px-6 text-ui font-medium text-paper transition-[background-color,transform] duration-200 ease-(--ease-refined) hover:scale-[1.02] hover:bg-graphite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
-          {view === 'creator' ? <CirclePlus className="size-5" strokeWidth={1.5} /> : <Globe className="size-5" strokeWidth={1.5} />}
-          {view === 'creator' ? 'New Content' : 'Open Queue'}
+          <ActionIcon className="size-5" strokeWidth={1.5} />
+          {action.label}
         </button>
       </header>
 
@@ -81,7 +90,7 @@ export function HomeDashboard({ view }: { view: Exclude<View, 'reviewer'> }) {
         </div>
         <div className="flex min-w-0 flex-col gap-8">
           <Stagger index={3}>
-            <AdvisorCard />
+            <AdvisorCard view={view} />
           </Stagger>
           <Stagger index={4}>
             <ReviewsCard view={view} />
