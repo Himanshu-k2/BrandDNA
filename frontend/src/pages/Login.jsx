@@ -159,7 +159,7 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={() => handleQuickLogin('brandmanager@branddna.com', 'password123')}
+                onClick={() => handleQuickLogin('brandmanager@branddna.com', 'DemoPasswordSecure2026!')}
                 className="flex flex-col items-center p-2 text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl border border-indigo-200 transition-all cursor-pointer"
                 title="Brand Manager: Brand identity, PDF/image upload, staged rule approval"
               >

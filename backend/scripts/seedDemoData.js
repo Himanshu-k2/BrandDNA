@@ -1081,6 +1081,22 @@ export const seedAllDemoData = async (targetOrgId, adminUserId) => {
     await reviewerUser.save();
   }
 
+  let managerUser = (await User.findOne({ email: 'brandmanager@branddna.com' })) || (await User.findOne({ email: 'brandmanager@demobrands.test' }));
+  if (!managerUser) {
+    managerUser = new User({
+      name: 'Priya Kapoor',
+      email: 'brandmanager@branddna.com',
+      passwordHash: 'DemoPasswordSecure2026!',
+      role: 'admin',
+      organizationId: primaryOrgId,
+    });
+    await managerUser.save();
+    console.log(`👤 Created Demo Brand Manager: ${managerUser.email}`);
+  } else if (managerUser.organizationId.toString() !== primaryOrgId.toString() && !targetOrgId) {
+    managerUser.organizationId = primaryOrgId;
+    await managerUser.save();
+  }
+
   let creatorUser = await User.findOne({ email: 'creator@demobrands.test' });
   if (!creatorUser) {
     creatorUser = new User({
