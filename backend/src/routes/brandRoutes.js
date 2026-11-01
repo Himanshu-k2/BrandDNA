@@ -22,6 +22,13 @@ import {
   createVisualAsset,
   getVisualAssetsByBrand,
 } from '../controllers/visualAssetController.js';
+import { handleUpload } from '../middleware/uploadMiddleware.js';
+import {
+  getBrandDocuments,
+  getBrandDocumentById,
+  uploadBrandDocument,
+  reviewExtractedItem,
+} from '../controllers/guidelineDocumentController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
@@ -79,5 +86,21 @@ router
   .route('/:id/visual-assets')
   .post(protect, authorize('admin'), validateBody(createVisualAssetSchema), createVisualAsset)
   .get(protect, getVisualAssetsByBrand);
+
+// ========================
+// Guideline Document Intelligence & Staging
+// ========================
+router
+  .route('/:id/documents')
+  .get(protect, getBrandDocuments)
+  .post(protect, handleUpload, uploadBrandDocument);
+
+router
+  .route('/:id/documents/:docId')
+  .get(protect, getBrandDocumentById);
+
+router
+  .route('/:id/documents/:docId/items/:itemId')
+  .patch(protect, reviewExtractedItem);
 
 export default router;
