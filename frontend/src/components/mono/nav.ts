@@ -1,5 +1,4 @@
-import { Bell, BookOpen, Building2, CirclePlus, ClipboardList, FileCheck, FilePen, Inbox, LayoutGrid, UserCog, type LucideIcon } from 'lucide-react';
-import { ALERTS } from '@/data/platform';
+import { BookOpen, Building2, CirclePlus, ClipboardList, FileCheck, FilePen, Inbox, LayoutGrid, UserCog, type LucideIcon } from 'lucide-react';
 import { dashboardPath, type Role } from '@/state/session';
 
 export interface NavBadge {
@@ -23,12 +22,6 @@ const on =
   (pathname: string) =>
     paths.some(path => (path.endsWith('*') ? pathname.startsWith(path.slice(0, -1)) : pathname === path));
 
-const unread = (role: Role) => {
-  const targetRole = role === 'brand_manager' ? 'reviewer' : role;
-  const items = ALERTS.filter(alert => alert.audience.includes(targetRole));
-  return { value: items.length, urgent: items.some(alert => alert.urgent) };
-};
-
 /** Persona → menu. The shell, states and styling are shared; only these items differ. */
 export const NAV: Record<Role, NavItem[]> = {
   brand_manager: [
@@ -36,15 +29,13 @@ export const NAV: Record<Role, NavItem[]> = {
     { label: 'Brand Asset Library', icon: Building2, to: '/brand-manager/assets', match: on('/brand-manager/assets') },
     { label: 'Guideline Ingestion', icon: BookOpen, to: '/brand-manager/uploads', match: on('/brand-manager/uploads') },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
-    { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') },
-    { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('brand_manager') }
+    { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') }
   ],
   reviewer: [
     { label: 'Reviewer Dashboard', icon: LayoutGrid, to: dashboardPath('reviewer'), match: on('/dashboard') },
     { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Needs sign-off', short: 'Sign-off' } },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
-    { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') },
-    { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('reviewer') }
+    { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') }
   ],
   admin: [
     { label: 'Platform Dashboard', icon: LayoutGrid, to: dashboardPath('admin'), match: on('/dashboard') },
@@ -52,14 +43,12 @@ export const NAV: Record<Role, NavItem[]> = {
     { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') },
     { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Sign-off', short: 'Sign-off' } },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
-    { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') },
-    { label: 'System Alerts', icon: Bell, to: '/alerts', match: on('/alerts'), count: unread('admin') }
+    { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') }
   ],
   creator: [
     { label: 'Creator Dashboard', icon: LayoutGrid, to: dashboardPath('creator'), match: on('/dashboard') },
     { label: 'New Content', icon: CirclePlus, to: '/reviews/new', match: on('/reviews/new') },
     { label: 'My Submissions & Drafts', icon: FilePen, to: '/dashboard/content', match: pathname => pathname === '/dashboard/content' || (pathname.startsWith('/reviews/') && pathname !== '/reviews/new') },
-    { label: 'Brand Guidelines Hub', icon: BookOpen, to: '/guidelines', match: on('/guidelines') },
-    { label: 'Notifications', icon: Bell, to: '/notifications', match: on('/notifications'), count: unread('creator') }
+    { label: 'Brand Guidelines Hub', icon: BookOpen, to: '/guidelines', match: on('/guidelines') }
   ]
 };
