@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Check,
   CheckCircle2,
   CloudUpload,
@@ -13,8 +12,7 @@ import {
   ShieldCheck,
   Type
 } from 'lucide-react';
-import { RevealText } from '@/components/mono/RevealText';
-import { Button, Card, ICON, Pill } from '@/components/mono/ui';
+import { Button, Card, ICON, PageHeader, Pill } from '@/components/mono/ui';
 import { useFrame } from '@/components/mono/AppFrame';
 
 interface ExtractedRule {
@@ -104,40 +102,25 @@ export function BrandManagerUploads() {
   return (
     <div className="flex flex-col gap-8">
       {/* ── Page Header ── */}
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard?role=brand_manager')}
-            aria-label="Back to dashboard"
-            className="press flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper text-ink shadow-sm transition-colors hover:bg-silver/20 focus-visible:outline-ink"
-          >
-            <ArrowLeft className="size-5" {...ICON} />
-          </button>
-          <div className="flex flex-col gap-1">
-            <RevealText
-              text="Guideline Ingestion & Document Intelligence"
-              className="font-display text-display font-semibold tracking-tight text-ink"
-              delay={0.06}
-            />
-            <p className="max-w-2xl text-body text-graphite">
-              Upload PDF brand manuals to automatically extract official color palettes, font weights, logo clearance, and pricing rules.
-            </p>
+      <PageHeader
+        title="Guideline Ingestion & Document Intelligence"
+        subtitle="Upload PDF brand manuals to automatically extract official color palettes, font weights, logo clearance, and pricing rules."
+        onBack={() => navigate('/dashboard?role=brand_manager')}
+        backAriaLabel="Back to dashboard"
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="md" variant="secondary" onClick={() => loadSamplePdf('novafit')}>
+              Load NovaFit PDF
+            </Button>
+            <Button size="md" variant="secondary" onClick={() => loadSamplePdf('voltauto')}>
+              Load VoltAuto PDF
+            </Button>
+            <Button size="md" onClick={() => navigate('/brand-manager/assets')}>
+              View Asset Library
+            </Button>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <Button size="md" variant="secondary" onClick={() => loadSamplePdf('novafit')}>
-            Load NovaFit PDF
-          </Button>
-          <Button size="md" variant="secondary" onClick={() => loadSamplePdf('voltauto')}>
-            Load VoltAuto PDF
-          </Button>
-          <Button size="md" onClick={() => navigate('/brand-manager/assets')}>
-            View Asset Library
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       {/* ── Upload Box & Dropzone ── */}
       <Card className="flex flex-col gap-5 p-6">

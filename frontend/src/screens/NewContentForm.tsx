@@ -285,7 +285,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
       {/* ── Page Header ── */}
       <header className="flex flex-col gap-3">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={requestLeave}
@@ -321,7 +321,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
           </div>
         </div>
 
-        <p className="max-w-2xl text-body text-graphite">
+        <p className="max-w-2xl text-body text-graphite pl-[52px]">
           Upload your copy, documents, or images. We'll check them against your brand guidelines before they go to review.
         </p>
       </header>

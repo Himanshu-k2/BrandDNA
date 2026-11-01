@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, CircleAlert, CircleCheck, X, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CircleAlert, CircleCheck, X, type LucideIcon } from 'lucide-react';
 import CountUp from '@/components/react-bits/CountUp';
 import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
@@ -199,14 +199,44 @@ export function SeeAll({ to, label = 'See All' }: { to: string; label?: string }
   );
 }
 
-/** Page title (animated reveal) + subtitle + primary actions on the right. */
-export function PageHeader({ title, subtitle, actions, eyebrow }: { title: string; subtitle?: ReactNode; actions?: ReactNode; eyebrow?: ReactNode }) {
+/** Page title (animated reveal) + subtitle + primary actions on the right. Supports optional onBack with pixel-perfect alignment. */
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  eyebrow,
+  onBack,
+  backAriaLabel = 'Go back'
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+  eyebrow?: ReactNode;
+  onBack?: () => void;
+  backAriaLabel?: string;
+}) {
   return (
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
         {eyebrow && <div className="flex flex-wrap items-center gap-2 text-caption text-graphite">{eyebrow}</div>}
-        <RevealText key={title} text={title} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.08} />
-        {subtitle && <p className="max-w-2xl text-body text-graphite">{subtitle}</p>}
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label={backAriaLabel}
+              className="press flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper text-ink shadow-sm transition-[background-color,transform] duration-200 hover:bg-silver/24 active:scale-95 focus-visible:outline-2 focus-visible:outline-ink"
+            >
+              <ArrowLeft className="size-5" {...ICON} />
+            </button>
+          )}
+          <RevealText key={title} text={title} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.08} />
+        </div>
+        {subtitle && (
+          <p className={cn('max-w-2xl text-body text-graphite', onBack && 'pl-[52px]')}>
+            {subtitle}
+          </p>
+        )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>

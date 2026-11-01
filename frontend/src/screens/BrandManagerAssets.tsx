@@ -1,20 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Check,
   ChevronDown,
   CircleAlert,
   Copy,
   Layers,
   Palette,
-  Plus,
   ShieldAlert,
   ShieldCheck,
   Type
 } from 'lucide-react';
-import { RevealText } from '@/components/mono/RevealText';
-import { Button, Card, ICON, Pill } from '@/components/mono/ui';
+import { Card, ICON, PageHeader, Pill } from '@/components/mono/ui';
 import { useFrame } from '@/components/mono/AppFrame';
 
 interface AssetPalette {
@@ -129,29 +126,12 @@ export function BrandManagerAssets() {
   return (
     <div className="flex flex-col gap-8">
       {/* ── Page Header ── */}
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard?role=brand_manager')}
-            aria-label="Back to dashboard"
-            className="press flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper text-ink shadow-sm transition-colors hover:bg-silver/20 focus-visible:outline-ink"
-          >
-            <ArrowLeft className="size-5" {...ICON} />
-          </button>
-          <div className="flex flex-col gap-1">
-            <RevealText
-              text={`Brand Asset Library: ${brand.name}`}
-              className="font-display text-display font-semibold tracking-tight text-ink"
-              delay={0.06}
-            />
-            <p className="max-w-2xl text-body text-graphite">
-              Official color palettes, typography standards, logo clear space rules, and verified pricing facts.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
+      <PageHeader
+        title={`Brand Asset Library: ${brand.name}`}
+        subtitle="Official color palettes, typography standards, logo clear space rules, and verified pricing facts."
+        onBack={() => navigate('/dashboard?role=brand_manager')}
+        backAriaLabel="Back to dashboard"
+        actions={
           <div className="relative">
             <select
               value={selectedBrand}
@@ -164,12 +144,8 @@ export function BrandManagerAssets() {
             </select>
             <ChevronDown className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-graphite" />
           </div>
-
-          <Button size="md" onClick={() => navigate('/brand-manager/uploads')}>
-            <Plus className="size-4" {...ICON} /> Ingest from PDF
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       {/* ── Section 1: Color Palette System ── */}
       <Card className="flex flex-col gap-6 p-6">
