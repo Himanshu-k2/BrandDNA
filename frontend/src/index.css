@@ -1,25 +1,194 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* BrandDNA design tokens — single shared set (mono grayscale system). */
+@theme {
+  /* Fonts: Aptos for display, Inter for everything else. No third family. */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Palette: Almost Black + four grays carry all layout, type and chrome. Tailwind's
+     default palette is cleared so off-palette utilities cannot compile. */
+  --color-*: initial;
+  --color-ink: #070d0d; /* Almost Black (brand) — replaces the former True Black */
+  --color-graphite: #343434; /* Soft Graphite */
+  --color-mid: #777777; /* Middle Gray — placeholders, borders, 12px labels (4.48:1 on white) */
+  --color-silver: #d6d6d6; /* Pale Silver */
+  --color-paper: #ffffff; /* Clean White */
+
+  /* Brand accent — Blaze Orange. Restrained: hero stat card, chart highlight +
+     hatched secondary series, progress fills, nav indicator, one highlight CTA,
+     Brad's unread dot, small selection details. NEVER text or thin icons on light
+     surfaces, never white text on it (2.9:1), never status. Ink on orange = 6.7:1. */
+  --color-brand-orange: #ff6700;
+  --color-brand-orange-hover: #e65c00;
+  --color-brand-orange-tint: #fff1e8; /* backgrounds only */
+  --color-brand-orange-border: #ffd2b3;
+
+  /* Muted status layer — reserved for status semantics only (StatusBadge,
+     SeverityBadge, Banner, FieldMessage, Toast via components/mono/status.tsx).
+     Never use for layout, decoration or brand. Each ink colour clears 4.5:1 on
+     its tint and on white; meaning is always doubled with an icon and text. */
+  --color-success: #3f6b4e; /* Sage — approved, compliant, ready */
+  --color-success-tint: #eef3ef;
+  --color-success-line: #c9d9cd;
+  --color-warning: #7a5a1e; /* Ochre — pending, in review, medium */
+  --color-warning-tint: #f7f2e7;
+  --color-warning-line: #e3d5b5;
+  --color-danger: #8a3b36; /* Brick — needs changes, critical/high, errors */
+  --color-danger-tint: #f6eceb;
+  --color-danger-line: #e2c4c1;
+  --color-info: #3c5a78; /* Slate — informational, invited */
+  --color-info-tint: #edf1f5;
+  --color-info-line: #c6d2de;
+
+  --font-display: 'Aptos', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Type scale ×1.25 from a 16px body (caption = body ÷ 1.33). */
+  --text-caption: 0.75rem; /* 12px */
+  --text-caption--line-height: 1.4;
+  --text-body: 1rem; /* 16px paragraphs */
+  --text-body--line-height: 1.6;
+  --text-ui: 1rem; /* 16px single-line UI: labels, buttons, nav */
+  --text-ui--line-height: 1.4;
+  --text-subheading: 1.25rem; /* 20px */
+  --text-subheading--line-height: 1.4;
+  --text-heading: 1.5625rem; /* 25px */
+  --text-heading--line-height: 1.4;
+  --text-display: 2rem; /* 32px */
+  --text-display--line-height: 1.4;
+
+  --leading-tight-ui: 1.4;
+  --leading-copy: 1.6;
+
+  /* Radii — nested values follow inner = outer − padding. */
+  --radius-shell: 2rem; /* 32 app shell, login panel */
+  --radius-panel: 1.5rem; /* 24 cards, banner */
+  --radius-nav: 1.25rem; /* 20 = shell 32 − sidebar padding 12 */
+  --radius-item: 1rem; /* 16 = shell 32 − 16 pad, or panel 24 − 8 pad */
+  --radius-inset: 0.75rem; /* 12 = item 16 − 4 pad (segmented pill) */
+  --radius-chip: 0.5rem; /* 8 = panel 24 − 16 pad, or item 16 − 8 pad */
+  --radius-min: 0.25rem; /* 4 floor */
+
+  --shadow-float: 0 1px 2px rgb(7 13 13 / 0.04), 0 32px 64px -32px rgb(7 13 13 / 0.16);
+  --shadow-soft: 0 1px 2px rgb(7 13 13 / 0.04), 0 16px 32px -24px rgb(7 13 13 / 0.12);
+  --shadow-lift: 0 1px 2px rgb(7 13 13 / 0.06), 0 8px 24px -16px rgb(7 13 13 / 0.24);
+
+  --ease-refined: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 4/8pt spacing steps for reuse outside Tailwind utilities. */
+:root {
+  /* Brand aliases for non-Tailwind consumers (<Logo />, SVG). The source values
+     live in @theme above; the wordmark uses --font-display (Aptos). */
+  --brand-orange: var(--color-brand-orange); /* Blaze Orange (logo + accent) */
+  --brand-orange-hover: var(--color-brand-orange-hover);
+  --brand-orange-tint: var(--color-brand-orange-tint);
+  --brand-orange-border: var(--color-brand-orange-border);
+
+  /* Hatch: an SVG <pattern> of 45° stripes, 2px Blaze Orange lines with a 4px gap
+     (tile = 6·√2 so the stripes repeat seamlessly). Flat; never animated.
+     In inline SVG charts use <HatchPattern /> (components/mono/accent.tsx). */
+  --hatch-orange: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8.485' height='8.485'%3E%3Cdefs%3E%3Cpattern id='h' width='6' height='6' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'%3E%3Crect width='2' height='6' fill='%23FF6700'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23h)'/%3E%3C/svg%3E");
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 600ms;
+}
 
 @layer base {
+  html {
+    color-scheme: light;
+  }
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-paper font-body text-ink antialiased;
+  }
+  ::selection {
+    @apply bg-silver;
   }
 }
 
-/* Custom modern scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Mono surfaces opt in to the grayscale system. */
+@utility mono {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  font-feature-settings: normal;
+  & ::selection {
+    background-color: var(--color-silver);
+  }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+@utility mono-wash {
+  /* Flat Pale Silver wash on white — no gradients in the system. */
+  background-color: color-mix(in srgb, var(--color-silver) 32%, var(--color-paper));
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
+
+/* Hatched orange fill (secondary chart series, legend swatches). */
+@utility hatch-orange {
+  background-image: var(--hatch-orange);
+  background-size: 8.485px 8.485px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+
+@utility press {
+  transition: transform var(--duration-fast) var(--ease-refined);
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Brad: word-by-word reply reveal (type size and line height are inherited). */
+@keyframes brad-word {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.brad-word {
+  display: inline-block;
+  animation: brad-word var(--duration-fast) var(--ease-refined) both;
+}
+
+/* Brad typing dots and listening bars. */
+@keyframes brad-dot {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes brad-bar {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mono *,
+  .mono *::before,
+  .mono *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
