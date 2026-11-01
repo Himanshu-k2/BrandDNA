@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { brandsAPI } from '../api/brands';
 import {
   UploadCloud,
@@ -476,11 +477,92 @@ export default function BrandManagerUploads() {
     }
   };
 
+  const syncItemToBrandSpecs = (item, brandName) => {
+    const brandKey = (brandName || '').toLowerCase().includes('volt') ? 'voltauto' : 'novafit';
+    let localSpecs = {};
+    try {
+      localSpecs = JSON.parse(localStorage.getItem(`branddna_approved_brand_specs_${brandKey}`) || '{}');
+    } catch {}
+
+    if (!localSpecs.assets) localSpecs.assets = [];
+
+    if (item.type === 'visual_asset' && /color/i.test(item.title)) {
+      const hexes = item.content.match(/#[0-9a-fA-F]{6}/gi);
+      if (hexes && hexes.length > 0) {
+        localSpecs.primaryColor = hexes[0].toUpperCase();
+        if (hexes.length > 1) localSpecs.secondaryColor = hexes[1].toUpperCase();
+        if (hexes.length > 2) localSpecs.accentColor = hexes[2].toUpperCase();
+      }
+      const prohMatch = item.content.match(/prohibited.*?([#[0-9a-fA-F]{6}]+)/i);
+      if (prohMatch) localSpecs.prohibitedColor = prohMatch[1].toUpperCase();
+    } else if (item.type === 'visual_asset' && /typography|font/i.test(item.title)) {
+      if (!localSpecs.fonts) localSpecs.fonts = {};
+      if (/inter/i.test(item.content)) {
+        localSpecs.fonts.heading = 'Inter SemiBold';
+        localSpecs.fonts.headingWeight = '600';
+        localSpecs.fonts.primary = 'Inter Regular';
+        localSpecs.fonts.primaryWeight = '400';
+        localSpecs.fonts.secondary = 'Montserrat Bold';
+        localSpecs.fonts.secondaryWeight = '700';
+      } else if (/space grotesk/i.test(item.content)) {
+        localSpecs.fonts.heading = 'Space Grotesk Bold';
+        localSpecs.fonts.headingWeight = '700';
+        localSpecs.fonts.primary = 'Roboto Mono Regular';
+        localSpecs.fonts.primaryWeight = '400';
+      }
+    }
+
+    if (!localSpecs.assets.some((a) => a.name === item.title)) {
+      localSpecs.assets.push({
+        _id: 'approved_' + item._id,
+        name: item.title,
+        type: item.type === 'visual_asset' && /color/i.test(item.title) ? 'color' : item.type === 'visual_asset' && /typo|font/i.test(item.title) ? 'typography' : item.type === 'visual_asset' ? 'logo' : item.type === 'fact' ? 'claim' : 'guideline',
+        data: item.factValue || (item.prohibitedTerm ? `${item.prohibitedTerm} → ${item.preferredTerm}` : item.title),
+        description: item.content,
+        approvedAt: 'Just now'
+      });
+    }
+
+    try {
+      localStorage.setItem(`branddna_approved_brand_specs_${brandKey}`, JSON.stringify(localSpecs));
+    } catch {}
+  };
+
+  const handleApproveAll = async () => {
+    if (!selectedDoc || !selectedDoc.extractedItems) return;
+    const brandName = selectedBrand?.name || (selectedDoc.filename.toLowerCase().includes('volt') ? 'VoltAuto' : 'NovaFit');
+
+    const updatedItems = selectedDoc.extractedItems.map((item) => {
+      syncItemToBrandSpecs(item, brandName);
+      return { ...item, status: 'approved' };
+    });
+
+    const updatedDoc = {
+      ...selectedDoc,
+      extractedItems: updatedItems,
+      status: 'completed'
+    };
+
+    setSelectedDoc(updatedDoc);
+    setDocuments((prev) => prev.map((d) => (d._id === updatedDoc._id ? updatedDoc : d)));
+    const localDocs = getLocalDocs().map((d) => (d._id === updatedDoc._id ? updatedDoc : d));
+    saveLocalDocs(localDocs);
+
+    toast.success(`All ${updatedItems.length} candidate rules approved & synchronized to ${brandName} brand assets!`);
+  };
+
   const handleReviewItem = async (itemId, action) => {
     if (!selectedDoc) return;
     setActionLoading(itemId);
 
     try {
+      if (action === 'approve') {
+        const approvedItem = selectedDoc.extractedItems.find((i) => i._id === itemId);
+        if (approvedItem) {
+          const brandName = selectedBrand?.name || (selectedDoc.filename.toLowerCase().includes('volt') ? 'VoltAuto' : 'NovaFit');
+          syncItemToBrandSpecs(approvedItem, brandName);
+        }
+      }
       // Attempt backend review call if server doc
       if (!selectedDoc._id.startsWith('doc_')) {
         try {
@@ -752,9 +834,27 @@ export default function BrandManagerUploads() {
               </p>
             </div>
             {selectedDoc && (
-              <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100">
-                {selectedDoc.extractedItems?.length || 0} candidate items found
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100">
+                  {selectedDoc.extractedItems?.length || 0} candidate items
+                </span>
+                {selectedDoc.extractedItems?.some((i) => i.status === 'pending') && (
+                  <button
+                    type="button"
+                    onClick={handleApproveAll}
+                    className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    Approve All Rules
+                  </button>
+                )}
+                <Link
+                  to="/brand-manager/assets"
+                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg flex items-center gap-1 transition-colors"
+                >
+                  View Brand Asset Library →
+                </Link>
+              </div>
             )}
           </div>
 

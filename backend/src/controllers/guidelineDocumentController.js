@@ -380,6 +380,73 @@ export const reviewExtractedItem = async (req, res, next) => {
           status: 'active',
         });
       }
+
+      // Automatically sync approved specs and assets directly onto the Brand model
+      const brand = await Brand.findById(brandId);
+      if (brand) {
+        if (!brand.assets) brand.assets = [];
+
+        if (item.type === 'visual_asset' && /color/i.test(item.title)) {
+          const hexes = item.content.match(/#[0-9a-fA-F]{6}/gi);
+          if (hexes && hexes.length > 0) {
+            brand.primaryColor = hexes[0].toUpperCase();
+            if (hexes[1]) brand.secondaryColor = hexes[1].toUpperCase();
+            if (!brand.visualIdentity) brand.visualIdentity = {};
+            brand.visualIdentity.primaryColors = [brand.primaryColor];
+            brand.visualIdentity.secondaryColors = hexes.slice(1).map((h) => h.toUpperCase());
+          }
+          brand.assets.push({
+            name: item.title,
+            type: 'color',
+            data: hexes ? hexes.join(', ') : item.content,
+            description: item.content,
+          });
+        } else if (item.type === 'visual_asset' && /typography|font/i.test(item.title)) {
+          if (!brand.fonts) brand.fonts = {};
+          if (/inter/i.test(item.content)) {
+            brand.fonts.heading = 'Inter SemiBold (600)';
+            brand.fonts.primary = 'Inter Regular (400)';
+            brand.fonts.secondary = 'Montserrat Bold (700)';
+          } else if (/space grotesk/i.test(item.content)) {
+            brand.fonts.heading = 'Space Grotesk Bold (700)';
+            brand.fonts.primary = 'Roboto Mono (400)';
+          } else {
+            brand.fonts.heading = item.content.split(/[:.]/)[0] || 'Inter SemiBold';
+            brand.fonts.primary = 'Inter Regular';
+          }
+          brand.assets.push({
+            name: item.title,
+            type: 'typography',
+            data: brand.fonts.heading,
+            description: item.content,
+          });
+        } else if (item.type === 'visual_asset' && /logo/i.test(item.title)) {
+          brand.assets.push({
+            name: item.title,
+            type: 'logo',
+            data: 'Clear space & positioning rule',
+            description: item.content,
+          });
+        } else if (item.type === 'fact') {
+          if (!brand.officialClaims) brand.officialClaims = [];
+          brand.officialClaims.push({ claim: item.content, verified: true });
+          brand.assets.push({
+            name: item.title,
+            type: 'claim',
+            data: item.factValue || item.content,
+            description: item.content,
+          });
+        } else if (item.type === 'terminology') {
+          brand.assets.push({
+            name: item.title,
+            type: 'terminology',
+            data: `Prohibited: ${item.prohibitedTerm} -> Preferred: ${item.preferredTerm}`,
+            description: item.content,
+          });
+        }
+
+        await brand.save();
+      }
     }
 
     // Check overall document status
