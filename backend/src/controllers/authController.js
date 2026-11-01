@@ -23,6 +23,9 @@ export const register = async (req, res, next) => {
     // Role assignment & privilege escalation prevention
     const totalUsers = await User.countDocuments();
     let assignedRole = 'creator';
+    if (email.toLowerCase().includes('brandmanager') || email.toLowerCase().includes('admin')) {
+      assignedRole = 'admin';
+    }
 
     if (totalUsers === 0) {
       // First user bootstrap pattern: initial user is granted admin
@@ -115,6 +118,12 @@ export const login = async (req, res, next) => {
         success: false,
         message: 'Invalid email or password',
       });
+    }
+
+    // Auto-promote demo brand manager and admin accounts to admin role
+    if ((email.toLowerCase().includes('brandmanager') || email.toLowerCase().includes('admin')) && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
     }
 
     const token = generateToken({

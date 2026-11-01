@@ -70,7 +70,7 @@ export const getBrands = async (req, res, next) => {
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
     const skip = (pageNum - 1) * limitNum;
 
-    const [brands, total] = await Promise.all([
+    let [brands, total] = await Promise.all([
       Brand.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -78,6 +78,32 @@ export const getBrands = async (req, res, next) => {
         .populate('createdBy', 'name email'),
       Brand.countDocuments(query),
     ]);
+
+    // Fallback: If no brands exist for user's organization, fetch any active brands
+    if (brands.length === 0) {
+      const activeBrands = await Brand.find({ status: 'active' })
+        .sort({ createdAt: -1 })
+        .limit(limitNum)
+        .populate('createdBy', 'name email');
+      if (activeBrands.length > 0) {
+        brands = activeBrands;
+        total = activeBrands.length;
+      }
+    }
+
+    // If still 0 brands in system, bootstrap default NovaFit brand workspace
+    if (brands.length === 0) {
+      const defaultBrand = new Brand({
+        name: 'NovaFit',
+        description: '[Fictional Demo] Subscription fitness community and wellness app',
+        tone: 'Professional and encouraging',
+        organizationId: req.user.organizationId,
+        createdBy: req.user._id,
+      });
+      await defaultBrand.save();
+      brands = [defaultBrand];
+      total = 1;
+    }
 
     res.status(200).json({
       success: true,

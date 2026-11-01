@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { brandsAPI } from '../api/brands';
 import {
   UploadCloud,
@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Edit2,
   Check,
-  X
+  X,
+  PlusCircle,
+  FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -23,28 +25,16 @@ export default function BrandManagerUploads() {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadFileName, setUploadFileName] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+
+  const fileInputRef = useRef(null);
 
   // Form for raw text upload fallback
   const [textInput, setTextInput] = useState('');
   const [docTitle, setDocTitle] = useState('');
   const [activeTab, setActiveTab] = useState('file'); // 'file' or 'text'
-
-  const loadData = async () => {
-    try {
-      const { data: brandRes } = await brandsAPI.getAll();
-      const list = brandRes.data || [];
-      setBrands(list);
-      if (list.length > 0) {
-        setSelectedBrand(list[0]);
-        await loadDocs(list[0]._id);
-      }
-    } catch {
-      toast.error('Failed to load brands');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadDocs = async (brandId) => {
     try {
@@ -63,6 +53,44 @@ export default function BrandManagerUploads() {
     }
   };
 
+  const loadData = async () => {
+    try {
+      const { data: brandRes } = await brandsAPI.getAll();
+      let list = brandRes.data || [];
+
+      // If no brands returned, attempt to create default NovaFit workspace
+      if (list.length === 0) {
+        try {
+          const { data: created } = await brandsAPI.create({
+            name: 'NovaFit',
+            description: '[Fictional Demo] Subscription fitness community and wellness app',
+            tone: 'Professional and encouraging'
+          });
+          if (created?.data) {
+            list = [created.data];
+          }
+        } catch (e) {
+          console.warn('Auto-create brand fallback:', e);
+        }
+      }
+
+      setBrands(list);
+      if (list.length > 0) {
+        setSelectedBrand(list[0]);
+        await loadDocs(list[0]._id);
+      } else {
+        // Create an in-memory fallback brand so upload is never blocked
+        const fallbackBrand = { _id: 'default', name: 'NovaFit' };
+        setBrands([fallbackBrand]);
+        setSelectedBrand(fallbackBrand);
+      }
+    } catch {
+      toast.error('Failed to load brands');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -76,65 +104,130 @@ export default function BrandManagerUploads() {
 
   const handleDocSelect = async (docId) => {
     try {
-      const { data } = await brandsAPI.getDocument(selectedBrand._id, docId);
+      const brandId = selectedBrand?._id || 'default';
+      const { data } = await brandsAPI.getDocument(brandId, docId);
       setSelectedDoc(data.document);
     } catch {
       toast.error('Error fetching document items');
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedBrand) return;
+  const processFileUpload = async (file) => {
+    if (!file) return;
+
+    // Resolve active brand target
+    let activeBrandId = selectedBrand?._id;
+    if (!activeBrandId || activeBrandId === 'default') {
+      if (brands.length > 0 && brands[0]._id !== 'default') {
+        activeBrandId = brands[0]._id;
+        setSelectedBrand(brands[0]);
+      } else {
+        try {
+          const { data: created } = await brandsAPI.create({
+            name: 'NovaFit',
+            description: 'Brand workspace',
+            tone: 'Professional and encouraging'
+          });
+          if (created?.data) {
+            activeBrandId = created.data._id;
+            setBrands([created.data]);
+            setSelectedBrand(created.data);
+          }
+        } catch {
+          activeBrandId = 'default';
+        }
+      }
+    }
 
     const formData = new FormData();
     formData.append('file', file);
 
     setUploading(true);
+    setUploadFileName(file.name);
     try {
-      const { data } = await brandsAPI.uploadDocument(selectedBrand._id, formData);
-      toast.success('Document uploaded and candidate rules extracted!');
-      await loadDocs(selectedBrand._id);
-      setSelectedDoc(data.document);
+      const { data } = await brandsAPI.uploadDocument(activeBrandId, formData);
+      toast.success(`'${file.name}' processed! Candidate rules extracted.`);
+      await loadDocs(activeBrandId);
+      if (data.document) {
+        setSelectedDoc(data.document);
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Upload failed');
+      toast.error(err.response?.data?.message || err.message || 'Upload failed');
     } finally {
       setUploading(false);
-      e.target.value = null;
+      setUploadFileName('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+    }
+  };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFileUpload(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      processFileUpload(file);
     }
   };
 
   const handleTextUpload = async (e) => {
     e.preventDefault();
-    if (!textInput.trim() || !selectedBrand) {
+    if (!textInput.trim()) {
       toast.error('Please enter guidelines text');
       return;
     }
 
+    const brandId = selectedBrand?._id || 'default';
     setUploading(true);
+    setUploadFileName(docTitle.trim() || 'brand_guidelines_text.txt');
     try {
-      const { data } = await brandsAPI.uploadDocumentData(selectedBrand._id, {
+      const { data } = await brandsAPI.uploadDocumentData(brandId, {
         filename: docTitle.trim() || 'brand_guidelines_text.txt',
         rawText: textInput
       });
       toast.success('Guidelines analyzed! Candidate rules extracted.');
       setTextInput('');
       setDocTitle('');
-      await loadDocs(selectedBrand._id);
-      setSelectedDoc(data.document);
+      await loadDocs(brandId);
+      if (data.document) {
+        setSelectedDoc(data.document);
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Processing failed');
+      toast.error(err.response?.data?.message || err.message || 'Processing failed');
     } finally {
       setUploading(false);
+      setUploadFileName('');
     }
   };
 
   const handleReviewItem = async (itemId, action) => {
-    if (!selectedDoc || !selectedBrand) return;
+    if (!selectedDoc) return;
+    const brandId = selectedBrand?._id || 'default';
     setActionLoading(itemId);
     try {
       const { data } = await brandsAPI.reviewExtractedItem(
-        selectedBrand._id,
+        brandId,
         selectedDoc._id,
         itemId,
         { action }
@@ -187,33 +280,36 @@ export default function BrandManagerUploads() {
             </p>
           </div>
 
-          {brands.length > 0 && (
-            <div className="bg-navy-800 p-2 rounded-xl border border-navy-700">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block px-2">Active Brand</span>
-              <select
-                value={selectedBrand?._id || ''}
-                onChange={(e) => handleBrandChange(e.target.value)}
-                className="bg-transparent text-white font-bold text-sm px-2 py-1 outline-none cursor-pointer"
-              >
-                {brands.map((b) => (
-                  <option key={b._id} value={b._id} className="bg-navy-900 text-white">
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="bg-navy-800 p-2.5 rounded-xl border border-navy-700 min-w-[200px]">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block px-2">Active Brand Workspace</span>
+            <select
+              value={selectedBrand?._id || ''}
+              onChange={(e) => handleBrandChange(e.target.value)}
+              className="bg-transparent text-white font-bold text-sm px-2 py-1 outline-none cursor-pointer w-full"
+            >
+              {brands.map((b) => (
+                <option key={b._id} value={b._id} className="bg-navy-900 text-white">
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Upload Box */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-base font-bold text-slate-900">Upload Guideline Source</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900">Upload Guideline Source</h2>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 font-bold border border-teal-200">
+              Target: {selectedBrand?.name || 'NovaFit'}
+            </span>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('file')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'file'
                   ? 'bg-teal-50 text-teal-700 border border-teal-200'
                   : 'text-slate-500 hover:text-slate-800'
@@ -223,7 +319,7 @@ export default function BrandManagerUploads() {
             </button>
             <button
               onClick={() => setActiveTab('text')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'text'
                   ? 'bg-teal-50 text-teal-700 border border-teal-200'
                   : 'text-slate-500 hover:text-slate-800'
@@ -235,26 +331,57 @@ export default function BrandManagerUploads() {
         </div>
 
         {activeTab === 'file' ? (
-          <div className="border-2 border-dashed border-teal-200 hover:border-teal-400 rounded-2xl p-8 text-center bg-teal-50/30 transition-colors">
+          <div
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer select-none ${
+              isDragging
+                ? 'border-teal-500 bg-teal-100/40 ring-4 ring-teal-200/50'
+                : 'border-teal-200 hover:border-teal-400 bg-teal-50/30'
+            }`}
+          >
             <input
+              ref={fileInputRef}
               type="file"
               id="file-upload"
               accept=".pdf,.png,.jpg,.jpeg,.txt,.md"
-              onChange={handleFileUpload}
+              onChange={handleFileInputChange}
               disabled={uploading}
               className="hidden"
             />
-            <label htmlFor="file-upload" className="cursor-pointer block">
-              <UploadCloud className="h-10 w-10 text-teal-600 mx-auto mb-3" />
+            <div className="max-w-md mx-auto pointer-events-none">
+              <UploadCloud
+                className={`h-12 w-12 mx-auto mb-3 transition-transform ${
+                  isDragging ? 'text-teal-600 scale-110' : 'text-teal-600'
+                }`}
+              />
               <p className="text-sm font-bold text-slate-800">
-                {uploading ? 'Analyzing document with AI...' : 'Click to upload PDF or brand guidelines document'}
+                {uploading
+                  ? `Analyzing "${uploadFileName}" with Document Intelligence...`
+                  : isDragging
+                  ? 'Drop guideline PDF here to start analysis...'
+                  : 'Click to upload or Drag & Drop PDF brand guidelines here'}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Supports PDF, PNG, JPG, and Markdown (up to 15MB)</p>
-            </label>
+              <p className="text-xs text-slate-500 mt-1">
+                Supports PDF, PNG, JPG, and Markdown (up to 15MB)
+              </p>
+
+              <button
+                type="button"
+                className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+                Browse Files
+              </button>
+            </div>
+
             {uploading && (
               <div className="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-teal-700">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Parsing text and extracting candidate rules...
+                Parsing document text and extracting candidate rules...
               </div>
             )}
           </div>
@@ -266,7 +393,7 @@ export default function BrandManagerUploads() {
                 type="text"
                 value={docTitle}
                 onChange={(e) => setDocTitle(e.target.value)}
-                placeholder="e.g. Q3 Brand Guidelines Addendum"
+                placeholder="e.g. NovaFit Q3 Brand Addendum"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
@@ -303,7 +430,7 @@ export default function BrandManagerUploads() {
 
           <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
             {documents.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No documents uploaded</p>
+              <p className="text-xs text-slate-400 py-6 text-center">No documents uploaded yet</p>
             ) : (
               documents.map((doc) => (
                 <button
@@ -321,7 +448,7 @@ export default function BrandManagerUploads() {
                     </span>
                     <span
                       className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                        doc.status === 'approved'
+                        doc.status === 'approved' || doc.status === 'completed'
                           ? 'bg-emerald-100 text-emerald-800'
                           : doc.status === 'partially_approved'
                           ? 'bg-blue-100 text-blue-800'
@@ -355,7 +482,7 @@ export default function BrandManagerUploads() {
               </p>
             </div>
             {selectedDoc && (
-              <span className="text-xs text-slate-500">
+              <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100">
                 {selectedDoc.extractedItems?.length || 0} candidate items found
               </span>
             )}
@@ -363,7 +490,7 @@ export default function BrandManagerUploads() {
 
           {!selectedDoc ? (
             <div className="text-center py-12 text-slate-400 text-xs">
-              Select or upload a document to inspect candidate rules.
+              Upload a brand guideline PDF or select an uploaded document to inspect candidate rules.
             </div>
           ) : selectedDoc.extractedItems?.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-xs">
