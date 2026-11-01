@@ -9,6 +9,7 @@
  * Scope guard: answers only use data from the user's CURRENT brand workspace and
  * only routes their role can open. Other brands' data is never returned.
  */
+import client from '@/api/client';
 import { NAV } from '@/components/mono/nav';
 import { BRANDS, QUEUE, SUBMISSIONS } from '@/data/demo';
 import { ALERTS, AUDIT_LOG, BRAND_STATS, GUIDELINES, USERS } from '@/data/platform';
@@ -70,7 +71,7 @@ const wait = (ms: number, signal?: AbortSignal) =>
     });
   });
 
-/** The single function the UI calls. Swap its body for a real backend. */
+/** The single function the UI calls. Connects to backend Gemini endpoint with fallback. */
 export async function sendMessageToBrad(message: string, context: BradContext, options: { signal?: AbortSignal } = {}): Promise<BradReply> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new BradError('offline', 'offline');
   const now = Date.now();
@@ -78,8 +79,19 @@ export async function sendMessageToBrad(message: string, context: BradContext, o
   if (sent.length >= RATE_MAX) throw new BradError('rate_limited', 'rate_limited');
   sent.push(now);
 
-  await wait(700 + Math.random() * 700 + (context.deepSearch ? 1400 : 0), options.signal);
   if (/simulate (an )?error/i.test(message)) throw new BradError('failed', 'failed');
+
+  try {
+    const res = await client.post('/api/chat/brad', { message, context }, { signal: options.signal });
+    if (res.data?.reply) {
+      return res.data.reply;
+    }
+  } catch (err: any) {
+    if (err?.name === 'CanceledError' || err?.name === 'AbortError') throw err;
+    console.warn('Backend Brad chat fallback:', err?.message);
+  }
+
+  await wait(600 + (context.deepSearch ? 600 : 0), options.signal);
   return answer(message, context);
 }
 

@@ -11,6 +11,7 @@ import terminologyRoutes from './routes/terminologyRoutes.js';
 import visualAssetRoutes from './routes/visualAssetRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
 import { authorize } from './middleware/roleMiddleware.js';
 import { verifyOrgAccess } from './middleware/orgMiddleware.js';
@@ -78,6 +79,9 @@ app.use('/api/reviews', reviewRoutes);
 
 // In-app notifications (Phase 5)
 app.use('/api/notifications', notificationRoutes);
+
+// Brad AI conversational chatbot endpoint (Gemini-backed)
+app.use('/api/chat', chatRoutes);
 
 // Test routes for middleware verification (active during testing / development)
 if (process.env.NODE_ENV !== 'production') {
