@@ -17,3 +17,4 @@ export const reviewsAPI = {
     client.get(`/api/reviews/${id}/revisions/compare`, { params: { v1, v2 } }),
   getAuditTrail: (id: string) => client.get(`/api/reviews/${id}/audit-trail`),
 };
+

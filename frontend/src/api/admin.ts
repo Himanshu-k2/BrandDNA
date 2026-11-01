@@ -5,3 +5,4 @@ export const adminAPI = {
   getUsers: (params?: any) => client.get('/api/admin/users', { params }).catch(() => ({ data: [] })),
   updateUserRole: (id: string, role: string) => client.patch(`/api/admin/users/${id}/role`, { role }),
 };
+

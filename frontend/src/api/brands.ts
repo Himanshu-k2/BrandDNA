@@ -23,3 +23,4 @@ export const brandsAPI = {
   reviewExtractedItem: (id: string, docId: string, itemId: string, data: any) =>
     client.patch(`/api/brands/${id}/documents/${docId}/items/${itemId}`, data),
 };
+

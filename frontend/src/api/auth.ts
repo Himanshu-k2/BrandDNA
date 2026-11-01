@@ -17,3 +17,4 @@ export const authAPI = {
   login: (data: LoginPayload) => client.post('/api/auth/login', data),
   getMe: () => client.get('/api/auth/me'),
 };
+

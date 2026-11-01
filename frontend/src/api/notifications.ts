@@ -5,3 +5,4 @@ export const notificationsAPI = {
   markAsRead: (id: string) => client.patch(`/api/notifications/${id}/read`),
   markAllAsRead: () => client.post('/api/notifications/read-all'),
 };
+
