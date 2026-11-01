@@ -85,8 +85,8 @@ export const QUEUE: QueueItem[] = [
     submitted: '18 mins ago',
     score: 98,
     counts: { critical: 0, high: 1, medium: 1 },
-    snippet: 'Only ₹999 per month for premium members. Join the most affordable premium fitness community.',
-    flags: ['₹999 per month', 'members'],
+    snippet: '',
+    flags: [],
     lane: 'urgent',
     due: 'Due Fri 5:00 PM EST'
   },

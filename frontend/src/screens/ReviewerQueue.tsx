@@ -26,24 +26,6 @@ const SELF_APPROVAL =
 
 const PRESETS = ['Adjust tone of voice', 'Verify pricing accuracy', 'Remove unbacked claims', 'Add required disclaimer'];
 
-function Snippet({ text, flags }: { text: string; flags: string[] }) {
-  if (!flags.length) return <>{text}</>;
-  const pattern = new RegExp(`(${flags.map(flag => flag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
-  return (
-    <>
-      {text.split(pattern).map((part, i) =>
-        flags.includes(part) ? (
-          <mark key={i} className="rounded-min bg-silver px-1 font-medium text-ink">
-            {part}
-          </mark>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
-}
-
 /** Severity counts in the muted status layer (always with text). */
 function SeverityPills({ counts }: { counts: QueueItem['counts'] }) {
   return (
@@ -88,12 +70,7 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
         </div>
 
         {item.lane !== 'approved' && (
-          <>
-            <SeverityPills counts={item.counts} />
-            <p className="rounded-min border border-silver bg-silver/24 p-4 text-body text-graphite">
-              <Snippet text={item.snippet} flags={item.flags} />
-            </p>
-          </>
+          <SeverityPills counts={item.counts} />
         )}
 
         {item.note && (
