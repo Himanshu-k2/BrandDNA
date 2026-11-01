@@ -50,14 +50,14 @@ const router = Router();
 // ========================
 router
   .route('/')
-  .post(protect, authorize('admin'), validateBody(createBrandSchema), createBrand)
+  .post(protect, authorize('admin', 'brand_manager'), validateBody(createBrandSchema), createBrand)
   .get(protect, getBrands);
 
 router
   .route('/:id')
   .get(protect, getBrandById)
-  .patch(protect, authorize('admin'), validateBody(updateBrandSchema), updateBrand)
-  .delete(protect, authorize('admin'), deleteBrand);
+  .patch(protect, authorize('admin', 'brand_manager'), validateBody(updateBrandSchema), updateBrand)
+  .delete(protect, authorize('admin', 'brand_manager'), deleteBrand);
 
 // ========================
 // Nested Sub-resources
@@ -66,25 +66,25 @@ router
 // Guidelines for brand
 router
   .route('/:id/guidelines')
-  .post(protect, authorize('admin'), validateBody(createGuidelineSchema), createGuideline)
+  .post(protect, authorize('admin', 'brand_manager'), validateBody(createGuidelineSchema), createGuideline)
   .get(protect, getGuidelinesByBrand);
 
 // Facts for brand
 router
   .route('/:id/facts')
-  .post(protect, authorize('admin'), validateBody(createFactSchema), createFact)
+  .post(protect, authorize('admin', 'brand_manager'), validateBody(createFactSchema), createFact)
   .get(protect, getFactsByBrand);
 
 // Terminology rules for brand
 router
   .route('/:id/terminology')
-  .post(protect, authorize('admin'), validateBody(createTerminologySchema), createTerminology)
+  .post(protect, authorize('admin', 'brand_manager'), validateBody(createTerminologySchema), createTerminology)
   .get(protect, getTerminologyByBrand);
 
 // Visual assets for brand
 router
   .route('/:id/visual-assets')
-  .post(protect, authorize('admin'), validateBody(createVisualAssetSchema), createVisualAsset)
+  .post(protect, authorize('admin', 'brand_manager'), validateBody(createVisualAssetSchema), createVisualAsset)
   .get(protect, getVisualAssetsByBrand);
 
 // ========================
