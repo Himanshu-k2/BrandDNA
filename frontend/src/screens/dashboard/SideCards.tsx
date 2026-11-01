@@ -79,7 +79,7 @@ export function ActivityCard() {
             >
               <span className="relative">
                 <MonoAvatar initials={item.initials} tone={index % 2 ? 'silver' : 'graphite'} />
-                <span aria-hidden className="absolute -right-1 -bottom-1 size-4 rounded-full border-2 border-paper bg-ink" />
+                <span aria-hidden className="absolute -right-1 -bottom-1 size-4 rounded-full border-2 border-paper bg-brand-orange" />
               </span>
               <span className="flex min-w-0 flex-col">
                 <span className="text-caption leading-copy text-graphite">
