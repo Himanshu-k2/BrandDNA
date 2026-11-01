@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
  * @returns {string} Signed JWT token
  */
 export const generateToken = (payload) => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'branddna-dev-secret-jwt-key-32chars-minimum-entropy' : null);
   if (!secret) {
     throw new Error('JWT_SECRET is not configured in environment variables');
   }
@@ -24,7 +24,7 @@ export const generateToken = (payload) => {
  * @returns {Object} Decoded payload
  */
 export const verifyToken = (token) => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'branddna-dev-secret-jwt-key-32chars-minimum-entropy' : null);
   if (!secret) {
     throw new Error('JWT_SECRET is not configured in environment variables');
   }
