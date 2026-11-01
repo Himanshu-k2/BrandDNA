@@ -92,3 +92,4 @@ describe('Brad AI Conversational Chat Tests', () => {
     assert.ok(data.reply.text.includes('#39FF14'));
   });
 });
+

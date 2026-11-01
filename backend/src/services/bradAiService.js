@@ -248,3 +248,4 @@ Please respond as Brad according to your system instructions in valid JSON forma
     return getFallbackReply(message, context);
   }
 }
+

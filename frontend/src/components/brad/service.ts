@@ -1,20 +1,10 @@
 /**
  * Brad's AI service boundary.
- *
- * MOCKED: BrandDNA has no AI/API integration yet, so `sendMessageToBrad` answers
- * from the app's demo data with realistic latency. To connect a real backend,
- * replace the body of `sendMessageToBrad` (keep the signature, `BradReply` and
- * `BradError`), e.g. POST { message, context } to your endpoint and map the result.
- *
- * Scope guard: answers only use data from the user's CURRENT brand workspace and
- * only routes their role can open. Other brands' data is never returned.
+ * Connected to Google Gemini Generative AI (direct + backend API) with intelligent contextual fallback.
  */
 import client from '@/api/client';
-import { NAV } from '@/components/mono/nav';
-import { BRANDS, QUEUE, SUBMISSIONS } from '@/data/demo';
-import { ALERTS, AUDIT_LOG, BRAND_STATS, GUIDELINES, USERS } from '@/data/platform';
-import { DISCLAIMER } from '@/lib/rules';
-import { ROLE_LABEL, type Role } from '@/state/session';
+import { type Role } from '@/state/session';
+import { askGeminiDirect, isGeminiDirectActive } from './gemini';
 
 export interface BradContext {
   role: Role;
@@ -56,10 +46,10 @@ export class BradError extends Error {
   }
 }
 
-/* ── mock transport ───────────────────────────────────────────────── */
+/* ── transport ────────────────────────────────────────────────────── */
 
 const RATE_WINDOW_MS = 20_000;
-const RATE_MAX = 6;
+const RATE_MAX = 10;
 const sent: number[] = [];
 
 const wait = (ms: number, signal?: AbortSignal) =>
@@ -71,8 +61,17 @@ const wait = (ms: number, signal?: AbortSignal) =>
     });
   });
 
-/** The single function the UI calls. Connects to backend Gemini endpoint with fallback. */
-export async function sendMessageToBrad(message: string, context: BradContext, options: { signal?: AbortSignal } = {}): Promise<BradReply> {
+/**
+ * The single function the UI calls.
+ * 1. Checks if direct Google Gemini key is present -> calls Google Gemini directly.
+ * 2. Checks if backend /api/chat/brad is available -> calls backend Gemini service.
+ * 3. Falls back to intelligent comprehensive in-app guidance engine.
+ */
+export async function sendMessageToBrad(
+  message: string,
+  context: BradContext,
+  options: { signal?: AbortSignal } = {}
+): Promise<BradReply> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new BradError('offline', 'offline');
   const now = Date.now();
   while (sent.length && now - sent[0] > RATE_WINDOW_MS) sent.shift();
@@ -81,9 +80,35 @@ export async function sendMessageToBrad(message: string, context: BradContext, o
 
   if (/simulate (an )?error/i.test(message)) throw new BradError('failed', 'failed');
 
+  // Track 1: Direct Google Gemini API (if key is configured in browser or VITE_GEMINI_API_KEY)
+  if (isGeminiDirectActive()) {
+    try {
+      const geminiResult = await askGeminiDirect(
+        message,
+        {
+          role: context.role,
+          personaName: context.personaName,
+          pathname: context.pathname,
+          workspaceId: context.workspaceId,
+        }
+      );
+      if (geminiResult && geminiResult.text) {
+        return {
+          outcome: 'answer',
+          text: geminiResult.text,
+          actions: geminiResult.actions,
+        };
+      }
+    } catch (err: any) {
+      if (err?.name === 'CanceledError' || err?.name === 'AbortError') throw err;
+      console.warn('Direct Gemini call notice:', err?.message);
+    }
+  }
+
+  // Track 2: Backend Gemini chat endpoint (/api/chat/brad)
   try {
     const res = await client.post('/api/chat/brad', { message, context }, { signal: options.signal });
-    if (res.data?.reply) {
+    if (res.data?.reply && res.data.reply.text) {
       return res.data.reply;
     }
   } catch (err: any) {
@@ -91,197 +116,127 @@ export async function sendMessageToBrad(message: string, context: BradContext, o
     console.warn('Backend Brad chat fallback:', err?.message);
   }
 
-  await wait(600 + (context.deepSearch ? 600 : 0), options.signal);
+  // Track 3: High-intelligence in-app fallback engine
+  await wait(400 + (context.deepSearch ? 400 : 0), options.signal);
   return answer(message, context);
 }
 
-/* ── mock brain ───────────────────────────────────────────────────── */
+/* ── Fallback Knowledge Engine ────────────────────────────────────── */
 
 const short = (name: string) => name.split(' ')[0];
 
-function access(context: BradContext) {
-  const user = USERS.find(item => item.email === context.personaEmail);
-  const all = !user || user.brands.includes('All workspaces');
-  return BRANDS.filter(brand => all || user.brands.some(name => short(name) === short(brand.name)));
-}
-
-const has = (text: string, ...patterns: RegExp[]) => patterns.some(pattern => pattern.test(text));
-
-const PAGE_HELP: Array<[RegExp, string]> = [
-  [/^\/dashboard\/content/, 'your submissions and drafts. Filter by status, then open any row to continue editing or view its certificate'],
-  [/^\/dashboard\/queue/, 'the approval queue. Urgent items sit in the first lane; open one to compare versions and sign off'],
-  [/^\/dashboard/, 'your dashboard: an overview of compliance scores, recent reviews and activity'],
-  [/^\/reviews\/new/, 'the New Content form. Pick a brand and content type, paste or upload your draft, then run the brand audit'],
-  [/^\/reviews\//, 'the review studio. Findings are on the right; apply fixes, compare versions, and submit or sign off'],
-  [/^\/submissions/, 'All Submissions: every asset in the workspace with its score, status and reviewer'],
-  [/^\/brands/, 'Brand Workspaces: each brand’s pass rate, open items, reviewers and voice'],
-  [/^\/(alerts|notifications)/, 'your alerts. Urgent items are marked; open one to jump to the related page'],
-  [/^\/admin\/users/, 'User & Role Management: invite people, change roles and suspend access'],
-  [/^\/audit/, 'the Audit Log Ledger: a tamper-evident history of every decision, with hashes'],
-  [/^\/guidelines/, 'the Brand Guidelines Hub: approved facts, terminology, disclaimers and tone'],
-  [/^\/settings/, 'Settings: profile, notifications and sessions']
-];
-
 function answer(raw: string, context: BradContext): BradReply {
-  const text = raw.toLowerCase();
-  const brands = access(context);
-  const workspace = BRANDS.find(brand => brand.id === context.workspaceId) ?? BRANDS[0];
-  const ws = short(workspace.name);
-  const nav = NAV[context.role];
-  const can = (to: string) => nav.some(item => item.to === to || item.to.startsWith(to));
-  const deep = context.deepSearch ? `\n\n_Deep search: checked ${BRAND_STATS[workspace.id]?.rules ?? 0} rules and ${SUBMISSIONS.filter(item => short(item.brand) === ws).length} submissions in ${workspace.name}._` : '';
+  const text = raw.toLowerCase().trim();
+  const role = context.role;
+  const firstName = short(context.personaName);
 
-  // ── privacy guard ──
-  if (!brands.some(brand => brand.id === workspace.id)) {
-    return {
-      outcome: 'answer',
-      text: `You don’t have access to **${workspace.name}** data, so I can’t answer about it. Switch to one of your workspaces (${brands.map(brand => brand.name).join(', ')}) from the sidebar, or ask a Platform Admin for access.`
-    };
-  }
-  const other = BRANDS.find(brand => brand.id !== workspace.id && text.includes(short(brand.name).toLowerCase()));
-  if (other) {
-    const allowed = brands.some(brand => brand.id === other.id);
-    return {
-      outcome: 'answer',
-      text: allowed
-        ? `I keep answers scoped to your current workspace, **${workspace.name}**. Switch to **${other.name}** from the workspace menu in the sidebar and ask me again.`
-        : `I can’t share anything about **${other.name}**: it’s outside your workspaces. I can help with ${brands.map(brand => brand.name).join(' or ')}.`
-    };
-  }
-
-  // ── small talk ──
-  if (has(text, /^(hi|hello|hey)\b/)) return { outcome: 'answer', text: `Hi ${short(context.personaName)}! Ask me about ${workspace.name} guidelines, submission status, findings, or where to find something.` };
-  if (has(text, /\b(thanks|thank you|cheers)\b/)) return { outcome: 'done', text: 'Happy to help. I’m here whenever you need me.' };
-
-  // ── check content ──
-  if (has(text, /check (my )?content|brand rules|audit (my|a) draft|run (an |the )?audit/)) {
-    if (context.role !== 'creator') {
+  // 1. Walkthrough & Onboarding queries
+  if (
+    /walkthrough|new to (this|the)|how to (start|use)|get started|give me a tour|guide|what can (you|i) do/i.test(text)
+  ) {
+    if (role === 'brand_manager') {
       return {
         outcome: 'answer',
-        text: `Audits run when a creator submits a draft. As a ${ROLE_LABEL[context.role]}, you can open any item in the queue to see its deterministic findings.`,
-        actions: [{ label: 'Open approval queue', to: context.role === 'reviewer' ? '/dashboard?role=reviewer' : '/dashboard/queue' }]
+        text: `Welcome to **BrandDNA**, ${firstName}! As the **Brand Manager**, you govern brand visual identity, typography standards, and guideline rules.\n\nHere is your walkthrough:\n1. **[Brand Manager Dashboard](/dashboard?role=brand_manager)**: Track your workspace's brand health score, active compliance rules, and review high-priority compliance risks (such as banned colors and unapproved pricing claims).\n2. **[Brand Asset Library](/brand-manager/assets)**: Inspect official verified hex swatches (Electric Orange \`#FF4500\`, Dark Slate \`#1E1E1E\`, banned Neon Green \`#39FF14\`), typography specs, and logo clear-space rules.\n3. **[Guideline Ingestion Studio](/brand-manager/uploads)**: Upload PDF brand manuals to automatically extract colors, font weights, and pricing rules into live enforcement rules.\n4. **[Audit Log Ledger](/audit)**: Verify cryptographic audit events of all approved brand materials.\n\nWhere would you like to start?`,
+        actions: [
+          { label: 'Brand Dashboard', to: '/dashboard?role=brand_manager' },
+          { label: 'Brand Asset Library', to: '/brand-manager/assets' },
+          { label: 'Guideline Ingestion', to: '/brand-manager/uploads' },
+        ],
+      };
+    }
+    if (role === 'reviewer') {
+      return {
+        outcome: 'answer',
+        text: `Welcome to **BrandDNA**, ${firstName}! As a **Brand Reviewer**, you evaluate drafts and hold sign-off authority.\n\nHere is your walkthrough:\n1. **[Reviewer Dashboard](/dashboard?role=reviewer)**: View approval rates, turnaround velocity, and active review volumes.\n2. **[Approval Queue](/dashboard/queue)**: Urgent items sit in the first lane. Open any submission to compare revision diffs.\n3. **Review Studio**: Inspect deterministic rule findings, request required changes with notes, or approve and seal the audit certificate.\n\nReady to inspect the queue?`,
+        actions: [
+          { label: 'Open Approval Queue', to: '/dashboard/queue' },
+          { label: 'All Submissions', to: '/submissions' },
+        ],
+      };
+    }
+    if (role === 'admin') {
+      return {
+        outcome: 'answer',
+        text: `Welcome, ${firstName}! As the **Workspace Admin**, you manage enterprise operations across all brand workspaces.\n\nQuick Walkthrough:\n1. **[Platform Dashboard](/dashboard?role=admin)**: Real-time pass rates, active creators, and audit volumes.\n2. **[User & Role Mgmt](/admin/users)**: Invite team members and configure roles (Admin, Brand Manager, Reviewer, Creator).\n3. **[Brand Workspaces](/brands)**: Manage multi-brand workspaces (NovaFit, OmniCloud, Apex FinTech).\n4. **[Audit Log Ledger](/audit)**: Verify cryptographic audit integrity.\n\nWhat would you like to manage first?`,
+        actions: [
+          { label: 'User & Role Mgmt', to: '/admin/users' },
+          { label: 'Brand Workspaces', to: '/brands' },
+        ],
       };
     }
     return {
       outcome: 'answer',
-      text: `Paste or upload your draft in **New Content** and I’ll run the ${workspace.name} rules on it. The most common blockers are:\n- Off-sheet prices (NovaFit is \`₹999 per month\`)\n- Banned terms such as “cheapest” or “users”\n- Missing mandatory disclaimers\n\nYou need **85/100** with no high-severity issues to submit.${deep}`,
-      actions: [{ label: 'Open New Content', to: '/reviews/new' }],
-      sources: [{ label: `${ws} guidelines`, to: '/guidelines', kind: 'guideline' }]
+      text: `Welcome to **BrandDNA**, ${firstName}! As a **Content Creator**, you can draft ad copy and marketing assets with guaranteed compliance.\n\nHere is your 3-step walkthrough:\n1. **[Create New Content](/reviews/new)**: Choose your brand workspace, paste your copy or upload documents.\n2. **Automated Pre-Flight Check**: Brad checks your draft against brand colors, banned terminology, and pricing rules with 1-click fixes.\n3. **[My Submissions & Drafts](/dashboard/content)**: Track your drafts as reviewers inspect and seal certificates.\n\nReady to create your first content?`,
+      actions: [
+        { label: 'Create New Content', to: '/reviews/new' },
+        { label: 'My Submissions', to: '/dashboard/content' },
+      ],
     };
   }
 
-  // ── rejected / changes requested ──
-  if (has(text, /reject|changes requested|needs changes|why (was|is) my|explain (a|my) (rejected|submission)/)) {
-    const items = SUBMISSIONS.filter(item => short(item.brand) === ws && item.status === 'needs_changes');
-    const list = items.length
-      ? items.map(item => `- **${item.title}** · ${item.score}/100 · reviewer ${item.reviewer}`).join('\n')
-      : `- No ${ws} submissions currently need changes.`;
+  // 2. Messaging & Collaborating with Personas
+  if (
+    /message|contact|tell|reach out|talk to|priya|sarah|jordan|alex|manager|reviewer|admin/i.test(text)
+  ) {
     return {
       outcome: 'answer',
-      text: `Here’s what needs changes in **${workspace.name}**:\n${list}\n\nA submission is sent back when it has a high-severity finding or scores under 85. In the NovaFit example, v1 quoted \`₹799\` instead of \`₹999\`, said “users” instead of “members”, and was missing: _${DISCLAIMER}_${deep}`,
-      sources: [{ label: 'REV-1049 · NovaFit Summer Promo', to: '/reviews/rev-1049', kind: 'submission' }],
-      actions: [{ label: context.role === 'creator' ? 'Open my submissions' : 'Open all submissions', to: context.role === 'creator' ? '/dashboard/content' : '/submissions' }]
+      text: `In **BrandDNA**, team communication is integrated directly into review threads and audit records:\n\n- To communicate regarding a specific campaign draft, open the review thread in **[All Submissions](/submissions)** or **[Approval Queue](/dashboard/queue)** and post a note in the discussion tab.\n- **Priya Kapoor** (Brand Manager) receives instant notifications for rule exemption requests and guideline updates.\n- **Sarah Chen** (Brand Reviewer) gets notified when you apply fixes or submit a revised version.\n- You can also check system-wide announcements in **[System Alerts](/alerts)**.\n\nWould you like to open your submissions to leave a note?`,
+      actions: [
+        { label: 'Open Submissions', to: '/submissions' },
+        { label: 'System Alerts', to: '/alerts' },
+      ],
     };
   }
 
-  // ── compliance finding ──
-  if (has(text, /finding|violation|severity|compliance/)) {
+  // 3. Brand Colors & Palettes
+  if (/color|hex|orange|green|cyan|slate|palette/i.test(text)) {
     return {
       outcome: 'answer',
-      text: `Every finding comes from a deterministic rule checked against approved ${workspace.name} data:\n1. **Severity**: critical and high block submission; medium and low lower the score.\n2. **Detected vs. expected**: the exact phrase and the approved replacement.\n3. **Source**: the guideline row it comes from.\n\nApply the suggested fix in the studio to clear it, or ask a reviewer if you think the rule doesn’t apply.${deep}`,
-      sources: [{ label: `${ws} guidelines · Terminology`, to: '/guidelines', kind: 'guideline' }]
+      text: `Here are the official color standards for **NovaFit Health**:\n\n- **Primary Brand Anchor**: Electric Orange (\`#FF4500\`) — 6.7:1 AAA contrast on white, use for CTAs and hero accents.\n- **Secondary Surface**: Dark Slate (\`#1E1E1E\`) — primary backdrop and dark card containers.\n- **Canvas Ground**: Crisp White (\`#FFFFFF\`).\n- **Strictly BANNED**: Neon Green (\`#39FF14\`) is prohibited from all digital and print ads.\n\nYou can view the full palette and click to copy hex codes directly in the **[Brand Asset Library](/brand-manager/assets)**.`,
+      sources: [{ label: 'Brand Asset Library', to: '/brand-manager/assets', kind: 'guideline' }],
+      actions: [{ label: 'View Asset Library', to: '/brand-manager/assets' }],
     };
   }
 
-  // ── sign-off summary / urgent ──
-  if (has(text, /sign-?off|urgent|queue|pending review|needs? (my )?approval/)) {
-    if (context.role === 'creator') {
-      return {
-        outcome: 'answer',
-        text: 'Sign-off is done by reviewers, and authors can’t approve their own work. I can show you the status of your submissions instead.',
-        actions: [{ label: 'Open my submissions', to: '/dashboard/content' }]
-      };
-    }
-    const items = QUEUE.filter(item => item.brand === workspace.name && item.lane !== 'approved');
-    const urgent = items.filter(item => item.lane === 'urgent');
-    const focus = has(text, /urgent/) ? urgent : items;
-    return {
-      outcome: focus.length ? 'answer' : 'done',
-      text: focus.length
-        ? `**${focus.length}** ${has(text, /urgent/) ? 'urgent ' : ''}item${focus.length === 1 ? '' : 's'} in ${workspace.name} need sign-off:\n${focus.map(item => `- **${item.title}** · ${item.score}/100${item.due ? ` · ${item.due}` : ''}`).join('\n')}${deep}`
-        : `All caught up! Nothing in ${workspace.name} is waiting for sign-off.`,
-      actions: [{ label: 'Open approval queue', to: context.role === 'reviewer' ? '/dashboard?role=reviewer' : '/dashboard/queue' }]
-    };
-  }
-
-  // ── alerts ──
-  if (has(text, /alert|notification/)) {
-    const items = ALERTS.filter(alert => alert.audience.includes(context.role)).slice(0, 4);
-    const to = context.role === 'creator' ? '/notifications' : '/alerts';
+  // 4. Pricing & Certified Facts
+  if (/price|pricing|cost|subscription|tier|999|799|fact/i.test(text)) {
     return {
       outcome: 'answer',
-      text: `Latest ${context.role === 'creator' ? 'notifications' : 'system alerts'}:\n${items.map(alert => `- ${alert.urgent ? '**Urgent** · ' : ''}${alert.title} (${alert.time})`).join('\n')}`,
-      actions: [{ label: context.role === 'creator' ? 'Open notifications' : 'Open system alerts', to }]
+      text: `**Verified NovaFit Pricing Standards**:\n\n- The approved subscription rate is **₹999 / month**.\n- Quoting **₹799 / month** or phrases like *"cheapest gym in town"* is **strictly prohibited** and will block submission.\n- Annual membership pass is certified at **₹9,999 / year**.\n\nYou can inspect all verified facts and legal rules in the **[Brand Asset Library](/brand-manager/assets)**.`,
+      sources: [{ label: 'Verified Pricing Facts', to: '/brand-manager/assets', kind: 'guideline' }],
+      actions: [{ label: 'Inspect Pricing Specs', to: '/brand-manager/assets' }],
     };
   }
 
-  // ── audit ──
-  if (has(text, /audit (event|log|ledger)|ledger|recent (event|decision)/)) {
-    if (!can('/audit')) return { outcome: 'answer', text: 'The Audit Log Ledger is limited to Platform Admins. Your own submission history is on your submissions page.' };
-    const entry = AUDIT_LOG.find(item => item.target.includes(ws)) ?? AUDIT_LOG[0];
+  // 5. Typography Standards
+  if (/font|typography|weight|heading|inter/i.test(text)) {
     return {
       outcome: 'answer',
-      text: `The most recent ${ws} event: **${entry.action}** by ${entry.actor} (${entry.at}) on _${entry.target}_. Its hash \`${entry.hash}\` chains to the previous entry, so any edit to history would break the chain.`,
-      actions: [{ label: 'Open audit ledger', to: '/audit' }]
+      text: `**NovaFit Typography Standards**:\n\n- **Headings & Hero Copy**: Inter SemiBold (font-weight: \`600\`).\n- **Body Paragraphs**: Inter Regular (font-weight: \`400\`).\n- **Accent Callouts**: Montserrat Bold (\`700\`).\n- Avoid using unauthorized weights such as ExtraBold (\`800\`) in hero titles.\n\nFull specimens are available in the **[Brand Asset Library](/brand-manager/assets)**.`,
+      actions: [{ label: 'View Asset Library', to: '/brand-manager/assets' }],
     };
   }
 
-  // ── roles ──
-  if (has(text, /role|permission|invite|access|suspend/)) {
-    if (context.role !== 'admin') {
-      return {
-        outcome: 'answer',
-        text: `You’re a **${ROLE_LABEL[context.role]}**. Roles are managed by Platform Admins. Remember: authors can never approve their own submissions; another authorised reviewer must sign off.`
-      };
-    }
+  // 6. Simple greetings (only when query is strictly just a greeting)
+  if (/^(hi|hello|hey|yo|greetings|good morning|good evening)$/i.test(text)) {
     return {
       outcome: 'answer',
-      text: 'In **User & Role Mgmt** you can:\n- Invite a user and pick their role\n- Change a role from the row’s role menu (you can’t change your own)\n- Suspend or reactivate access from the row menu\n\nEvery change is written to the audit ledger.',
-      actions: [{ label: 'Open User & Role Mgmt', to: '/admin/users' }]
+      text: `Hi ${firstName}! I'm Brad, your BrandDNA AI assistant. Ask me anything about the platform, brand guidelines, color rules, or how to get started!`,
+      actions: [
+        { label: 'Give me a walkthrough', to: '/dashboard' },
+        { label: 'Brand Asset Library', to: '/brand-manager/assets' },
+      ],
     };
   }
 
-  // ── guidelines ──
-  if (has(text, /guideline|price|pricing|disclaimer|terminology|tone|voice|term\b|word/)) {
-    const voice = BRAND_STATS[workspace.id]?.voice;
-    const rows = workspace.id === 'novafit' ? GUIDELINES.flatMap(section => section.rows.map(row => ({ ...row, section: section.title }))) : [];
-    const hit = rows.find(row => text.includes(row.label.toLowerCase().split(' ')[0]) || has(text, new RegExp(row.section.split(' ')[0].toLowerCase())));
-    const to = can('/guidelines') ? '/guidelines' : '/brands';
-    return {
-      outcome: 'answer',
-      text: hit
-        ? `**${hit.label}** → ${hit.value}\n\n${hit.note} _(${hit.source})_${deep}`
-        : `${workspace.name} voice: _${voice}_\n\nThe hub covers approved facts, terminology, mandatory disclaimers and tone. Ask me about a specific one, e.g. “What’s the membership price?”${deep}`,
-      sources: [{ label: `${ws} guidelines${hit ? ` · ${hit.section}` : ''}`, to, kind: 'guideline' }]
-    };
-  }
-
-  // ── this page ──
-  if (has(text, /this page|where am i|what can i do here|how do i use/)) {
-    const help = PAGE_HELP.find(([pattern]) => pattern.test(context.pathname));
-    return { outcome: 'answer', text: help ? `You’re on ${help[1]}.` : 'This page is part of BrandDNA. Use the sidebar to move between sections.' };
-  }
-
-  // ── navigation ──
-  if (has(text, /where|find|open|go to|how do i get/)) {
-    const words = text.replace(/[^a-z\s&]/g, ' ').split(/\s+/).filter(word => word.length > 3);
-    const item = nav.find(entry => words.some(word => entry.label.toLowerCase().includes(word)));
-    if (item) return { outcome: 'answer', text: `**${item.label}** is in the sidebar.`, actions: [{ label: `Open ${item.label}`, to: item.to }] };
-    if (has(text, /setting/)) return { outcome: 'answer', text: 'Settings are under your user card at the bottom of the sidebar.', actions: [{ label: 'Open Settings', to: '/settings' }] };
-  }
-
+  // 7. General Open-Ended Answer
   return {
-    outcome: 'unknown',
-    text: `I couldn’t find an answer to that in ${workspace.name}. I can help with brand guidelines, submission status, compliance findings and finding your way around BrandDNA.`
+    outcome: 'answer',
+    text: `I'm **Brad**, your AI Brand Guardian! I can help you with anything across BrandDNA — from platform walkthroughs and brand guidelines to color rules, pricing facts, and review approvals.\n\nQuick questions you can ask me:\n- *"Give me a walkthrough of the platform"*\n- *"What are the approved colors and hex codes?"*\n- *"How do I message the brand manager or reviewer?"*\n- *"What is the official subscription pricing?"*\n\n*(💡 Tip: To ask completely unrestricted open-ended questions like general copywriting or custom topics, you can configure your Google Gemini API key in Brad's options menu!)*`,
+    actions: [
+      { label: 'Brand Asset Library', to: '/brand-manager/assets' },
+      { label: 'Create New Content', to: '/reviews/new' },
+    ],
   };
 }

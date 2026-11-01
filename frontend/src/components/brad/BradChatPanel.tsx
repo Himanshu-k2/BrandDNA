@@ -11,6 +11,7 @@ import {
   Copy,
   EllipsisVertical,
   FileText,
+  Key,
   Link2,
   MessageSquareText,
   Mic,
@@ -18,6 +19,7 @@ import {
   RotateCcw,
   Search,
   Smile,
+  Sparkles,
   Square,
   ThumbsDown,
   ThumbsUp,
@@ -38,6 +40,7 @@ import { BradFace } from './face/BradFace';
 import { countWords, Markdown } from './Markdown';
 import { BradIconButton, ListeningBars, ModeSwitch, TypingDots } from './parts';
 import { useActiveWorkspace } from './workspace';
+import { getStoredGeminiKey, setStoredGeminiKey, isGeminiDirectActive } from './gemini';
 
 /*
  * Radii: panel 24 − 16 padding → bubbles 8 (radius-chip), sender corner 4 (radius-min).
@@ -89,6 +92,9 @@ export function BradChatPanel({
   const [menu, setMenu] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [layer, setLayer] = useState(false);
+  const [keyModal, setKeyModal] = useState(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState(getStoredGeminiKey());
+  const [geminiActive, setGeminiActive] = useState(isGeminiDirectActive());
   const menuRef = useRef<HTMLDivElement>(null);
   useDismiss(menuRef, menu, useCallback(() => setMenu(false), []));
 
@@ -120,11 +126,27 @@ export function BradChatPanel({
           </span>
           <div className="flex min-w-0 flex-1 flex-col">
             <h2 className="font-display text-subheading leading-tight-ui font-semibold text-ink">Brad</h2>
-            <p className="flex items-center gap-2 text-caption text-mid">
-              <span className="size-2 rounded-full bg-success" aria-hidden />
-              <span className="sr-only">Online ·</span>
-              BrandDNA assistant
-            </p>
+            <div className="flex items-center gap-2 text-caption">
+              <span className={cn('size-2 rounded-full', geminiActive ? 'bg-brand-orange' : 'bg-success')} aria-hidden />
+              {geminiActive ? (
+                <button
+                  type="button"
+                  onClick={() => setKeyModal(true)}
+                  className="flex items-center gap-1 font-medium text-ink hover:underline cursor-pointer"
+                >
+                  <Sparkles className="size-3 text-brand-orange" />
+                  Gemini AI Active
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setKeyModal(true)}
+                  className="text-mid hover:text-ink text-left cursor-pointer"
+                >
+                  BrandDNA assistant · <span className="underline text-graphite">Connect Gemini</span>
+                </button>
+              )}
+            </div>
           </div>
           <div ref={menuRef} className="relative" onPointerDown={event => event.stopPropagation()}>
             <BradIconButton label="More options" side="bottom" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu(value => !value)}>
@@ -140,6 +162,14 @@ export function BradChatPanel({
                   transition={{ duration: DURATION.fast, ease: EASE }}
                   className="absolute top-full right-0 z-30 mt-2 flex min-w-56 origin-top-right flex-col rounded-item border border-silver bg-paper p-2 shadow-lift"
                 >
+                  <MenuRow
+                    onClick={() => {
+                      setMenu(false);
+                      setKeyModal(true);
+                    }}
+                  >
+                    <Key className="size-4" {...ICON} /> {geminiActive ? 'Manage Gemini AI Key' : 'Connect Gemini AI Key'}
+                  </MenuRow>
                   <MenuRow
                     onClick={() => {
                       setMenu(false);
@@ -165,6 +195,80 @@ export function BradChatPanel({
           </BradIconButton>
         </div>
         <AnimatePresence initial={false}>
+          {keyModal && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0, transition: { duration: DURATION.fast, ease: EASE } }}
+              transition={{ duration: DURATION.fast, ease: EASE }}
+              className="overflow-hidden border-t border-silver bg-silver/15 p-4"
+            >
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-ui font-semibold text-ink">
+                    <Sparkles className="size-4 text-brand-orange" />
+                    Connect Google Gemini AI
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setKeyModal(false)}
+                    className="cursor-pointer text-graphite hover:text-ink"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+                <p className="text-caption text-graphite leading-relaxed">
+                  Connect your Google Gemini API key to enable live generative AI. Brad will answer any question, draft copy, or explain anything across BrandDNA!
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={geminiKeyInput}
+                    onChange={e => setGeminiKeyInput(e.target.value)}
+                    placeholder="Paste Gemini API Key (AIzaSy...)"
+                    className="flex-1 rounded-chip border border-silver bg-paper px-3 py-1.5 text-caption font-mono text-ink placeholder:text-mid focus:border-ink focus:outline-none"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setStoredGeminiKey(geminiKeyInput);
+                      setGeminiActive(Boolean(geminiKeyInput.trim()));
+                      setKeyModal(false);
+                    }}
+                  >
+                    Save
+                  </Button>
+                  {geminiActive && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setStoredGeminiKey('');
+                        setGeminiKeyInput('');
+                        setGeminiActive(false);
+                        setKeyModal(false);
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-caption text-graphite pt-0.5">
+                  <span className="text-caption">
+                    {geminiActive ? '✅ Gemini 2.5 Flash active' : 'Using built-in knowledge'}
+                  </span>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-brand-orange hover:underline inline-flex items-center gap-1"
+                  >
+                    Get free Gemini key ↗
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
           {confirm && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
