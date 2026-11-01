@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { RevealText } from '@/components/mono/RevealText';
 import { Select, type SelectOption } from '@/components/mono/Select';
-import { Button, focusRing, ICON, Modal } from '@/components/mono/ui';
+import { Button, focusRing, ICON, Modal, NotificationBell } from '@/components/mono/ui';
 import { ProgressBar } from '@/components/mono/accent';
 import { BRANDS, REVIEW } from '@/data/demo';
 import { cn } from '@/lib/cn';
@@ -318,6 +318,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
             >
               Try NovaFit example
             </button>
+            <NotificationBell />
           </div>
         </div>
 

@@ -16,6 +16,9 @@ import { cn } from '@/lib/cn';
 import { DURATION, EASE, rise, riseReduced } from '@/lib/motion';
 import { RevealText } from './RevealText';
 import { TONE_SUBTLE } from './tone';
+import { NotificationBell } from './NotificationBell';
+
+export { NotificationBell };
 
 /** 2px Almost Black focus outline with 2px offset — every interactive element. */
 export const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
@@ -206,7 +209,8 @@ export function PageHeader({
   actions,
   eyebrow,
   onBack,
-  backAriaLabel = 'Go back'
+  backAriaLabel = 'Go back',
+  showNotification = true
 }: {
   title: string;
   subtitle?: ReactNode;
@@ -214,6 +218,7 @@ export function PageHeader({
   eyebrow?: ReactNode;
   onBack?: () => void;
   backAriaLabel?: string;
+  showNotification?: boolean;
 }) {
   return (
     <header className="flex flex-wrap items-start justify-between gap-4">
@@ -238,7 +243,10 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {actions}
+        {showNotification && <NotificationBell />}
+      </div>
     </header>
   );
 }

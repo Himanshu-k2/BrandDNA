@@ -9,6 +9,7 @@ import { BradDock } from '@/components/brad/BradDock';
 import { Logo } from './Logo';
 import { CommandPalette } from './CommandPalette';
 import { Sidebar } from './Sidebar';
+import { NotificationBell } from './NotificationBell';
 import { TONE_ICON, TONE_SUBTLE, type Tone } from './tone';
 import { focusRing, ICON } from './ui';
 
@@ -131,14 +132,17 @@ export function AppFrame() {
           <main className="min-w-0 flex-1 px-4 pt-4 pb-32 md:px-8 md:pt-8">
             <div className="mb-6 flex h-12 items-center justify-between md:hidden">
               <Logo variant="horizontal" size="md" />
-              <button
-                type="button"
-                aria-label="Open menu"
-                onClick={() => setDrawer(true)}
-                className={`press flex size-10 cursor-pointer items-center justify-center rounded-full border border-silver text-ink ${focusRing}`}
-              >
-                <Menu className="size-5" {...ICON} />
-              </button>
+              <div className="flex items-center gap-2">
+                <NotificationBell className="size-10" />
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  onClick={() => setDrawer(true)}
+                  className={`press flex size-10 cursor-pointer items-center justify-center rounded-full border border-silver text-ink ${focusRing}`}
+                >
+                  <Menu className="size-5" {...ICON} />
+                </button>
+              </div>
             </div>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div

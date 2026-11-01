@@ -5,12 +5,10 @@ import {
   AlertTriangle,
   ArrowRight,
   ArrowUpRight,
-  Building2,
   ChevronDown,
   Crown,
   ExternalLink,
   FileText,
-  FileUp,
   Layers,
   Palette,
   ShieldAlert,
@@ -22,6 +20,7 @@ import { RevealText } from '@/components/mono/RevealText';
 import { Card, Pill, SectionHeader, SeeAll, Stagger, ICON } from '@/components/mono/ui';
 import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
+import { NotificationBell } from '@/components/mono/NotificationBell';
 import { BRANDS } from '@/data/demo';
 import { brandsAPI } from '@/api/brands';
 import { OverviewCard } from './dashboard/OverviewCard';
@@ -219,22 +218,7 @@ export function BrandManagerDashboard() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => navigate('/brand-manager/uploads')}
-            className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-silver bg-paper px-5 text-ui font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
-          >
-            <FileUp className="size-5" strokeWidth={1.5} />
-            Ingest Guidelines
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/brand-manager/assets')}
-            className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-ink px-6 text-ui font-medium text-paper transition-[background-color,transform] duration-200 ease-(--ease-refined) hover:scale-[1.02] hover:bg-graphite focus-visible:outline-2 focus-visible:outline-ink"
-          >
-            <Building2 className="size-5" strokeWidth={1.5} />
-            Asset Library
-          </button>
+          <NotificationBell />
         </div>
       </header>
 

@@ -9,6 +9,7 @@ import { cn } from '@/lib/cn';
 import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
 import { notificationsAPI } from '@/api/notifications';
+import { getReadAlertIds, markAlertsAsRead } from '@/components/mono/NotificationBell';
 
 const KIND: Record<AlertKind, { icon: LucideIcon; label: string }> = {
   sla: { icon: AlarmClock, label: 'Deadline' },
@@ -26,7 +27,7 @@ export function AlertsPage() {
   const navigate = useNavigate();
   const { persona } = useSession();
   const [filter, setFilter] = useState<Filter>('all');
-  const [read, setRead] = useState<Set<string>>(new Set());
+  const [read, setRead] = useState<Set<string>>(getReadAlertIds);
   const [liveAlerts, setLiveAlerts] = useState<any[]>([]);
   const notifications = pathname === '/notifications';
 
@@ -60,7 +61,9 @@ export function AlertsPage() {
   const unread = mine.filter(alert => !read.has(alert.id)).length;
 
   const markAll = () => {
-    setRead(new Set(mine.map(alert => alert.id)));
+    const allIds = mine.map(alert => alert.id);
+    markAlertsAsRead(allIds);
+    setRead(new Set(allIds));
     notificationsAPI.markAllAsRead().catch(() => {});
   };
 

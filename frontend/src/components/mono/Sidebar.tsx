@@ -334,7 +334,7 @@ function NavRow({ item, compact, active, onClick, tipHandlers }: { item: NavItem
           <span className="ml-auto shrink-0 rounded-full bg-silver px-2 py-1 text-caption font-semibold tracking-[0.04em] whitespace-nowrap text-ink uppercase">{badgeText}</span>
         )}
         {!compact && item.badge && level === 2 && (
-          <span className="ml-auto size-2 shrink-0 rounded-full bg-ink" title={item.badge.full}>
+          <span className="ml-auto size-2 shrink-0 rounded-full bg-brand-orange" title={item.badge.full}>
             <span className="sr-only">{item.badge.full}</span>
           </span>
         )}
@@ -342,7 +342,7 @@ function NavRow({ item, compact, active, onClick, tipHandlers }: { item: NavItem
           <span
             className={cn(
               'ml-auto flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-2 text-caption font-medium tabular-nums',
-              item.count.urgent ? 'bg-graphite text-paper' : 'bg-silver text-ink'
+              item.count.urgent ? 'bg-brand-orange text-white font-semibold' : 'bg-silver text-ink'
             )}
             aria-label={`${item.count.value} ${item.count.urgent ? 'including urgent' : 'unread'}`}
           >
@@ -351,7 +351,7 @@ function NavRow({ item, compact, active, onClick, tipHandlers }: { item: NavItem
         )}
       </span>
       {compact && (item.badge || item.count) && (
-        <span aria-hidden className={cn('absolute top-2 right-2 size-2 rounded-full', item.count && !item.count.urgent ? 'bg-mid' : 'bg-ink')} />
+        <span aria-hidden className={cn('absolute top-2 right-2 size-2 rounded-full', item.count && !item.count.urgent ? 'bg-mid' : 'bg-brand-orange')} />
       )}
     </button>
   );

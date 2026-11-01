@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowUpRight, CirclePlus, Crown, Globe, X } from 'lucide-react';
+import { ArrowUpRight, Crown, X } from 'lucide-react';
 import { RevealText } from '@/components/mono/RevealText';
 import { Stagger } from '@/components/mono/ui';
 import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
+import { NotificationBell } from '@/components/mono/NotificationBell';
 import { AuditCard } from './dashboard/AuditCard';
 import type { View } from './dashboard/data';
 import { OverviewCard } from './dashboard/OverviewCard';
@@ -14,31 +14,14 @@ import { ActivityCard, AdvisorCard, ReviewsCard } from './dashboard/SideCards';
 /** Dashboard for Creator, Reviewer, Admin, or Brand Manager — rendered inside the shared AppFrame. */
 export function HomeDashboard({ view }: { view: View }) {
   const { persona } = useSession();
-  const navigate = useNavigate();
   const [banner, setBanner] = useState<'offer' | 'sent' | 'hidden'>('offer');
   const firstName = persona.name.split(' ')[0];
-
-  const getAction = () => {
-    if (view === 'creator') return { label: 'New Content', icon: CirclePlus, to: '/reviews/new' };
-    if (view === 'brand_manager') return { label: 'Asset Library', icon: Globe, to: '/brand-manager/assets' };
-    return { label: 'Open Queue', icon: Globe, to: '/dashboard/queue' };
-  };
-
-  const action = getAction();
-  const ActionIcon = action.icon;
 
   return (
     <>
       <header className="flex items-center justify-between gap-4">
         <RevealText text={`Hello, ${firstName}!`} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.2} />
-        <button
-          type="button"
-          onClick={() => navigate(action.to)}
-          className="press flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-ink px-6 text-ui font-medium text-paper transition-[background-color,transform] duration-200 ease-(--ease-refined) hover:scale-[1.02] hover:bg-graphite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-        >
-          <ActionIcon className="size-5" strokeWidth={1.5} />
-          {action.label}
-        </button>
+        <NotificationBell />
       </header>
 
       {/* Upgrade banner: radius 24, padding 8 → 16 inner (32px controls read as pills). */}
