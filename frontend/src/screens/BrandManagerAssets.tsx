@@ -125,27 +125,29 @@ export function BrandManagerAssets() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* ── Page Header ── */}
+      {/* ── Page Header (Avatars & Bell ALWAYS Top-Right) ── */}
       <PageHeader
         title={`Brand Asset Library: ${brand.name}`}
         subtitle="Official color palettes, typography standards, logo clear space rules, and verified pricing facts."
         onBack={() => navigate('/dashboard?role=brand_manager')}
         backAriaLabel="Back to dashboard"
-        actions={
-          <div className="relative">
-            <select
-              value={selectedBrand}
-              onChange={e => setSelectedBrand(e.target.value)}
-              className="press flex h-11 cursor-pointer appearance-none items-center gap-2 rounded-full border border-silver bg-paper pr-10 pl-4 text-ui font-medium text-ink shadow-sm transition-colors hover:border-mid focus-visible:outline-ink"
-            >
-              <option value="novafit">Brand: NovaFit Health</option>
-              <option value="omnicloud">Brand: OmniCloud</option>
-              <option value="apex">Brand: Apex FinTech</option>
-            </select>
-            <ChevronDown className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-graphite" />
-          </div>
-        }
       />
+
+      {/* ── Brand Selection Filter Bar ── */}
+      <div className="-mt-4 flex items-center justify-between">
+        <div className="relative">
+          <select
+            value={selectedBrand}
+            onChange={e => setSelectedBrand(e.target.value)}
+            className="press flex h-11 cursor-pointer appearance-none items-center gap-2 rounded-full border border-silver bg-paper pr-10 pl-4 text-ui font-medium text-ink shadow-sm transition-colors hover:border-mid focus-visible:outline-ink"
+          >
+            <option value="novafit">Brand: NovaFit Health</option>
+            <option value="omnicloud">Brand: OmniCloud</option>
+            <option value="apex">Brand: Apex FinTech</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-graphite" />
+        </div>
+      </div>
 
       {/* ── Section 1: Color Palette System ── */}
       <Card className="flex flex-col gap-6 p-6">

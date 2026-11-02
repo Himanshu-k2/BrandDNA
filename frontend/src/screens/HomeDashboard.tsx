@@ -17,7 +17,7 @@ export function HomeDashboard({ view }: { view: View }) {
     <>
       <header className="flex items-center justify-between gap-4">
         <RevealText text={`Hello, ${firstName}!`} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.2} />
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 shrink-0">
           <OnlineTeamPresence />
           <NotificationBell />
         </div>

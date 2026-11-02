@@ -42,7 +42,7 @@ export function BrandManagerDashboard() {
           delay={0.2}
         />
 
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 shrink-0">
           <OnlineTeamPresence />
           <NotificationBell />
         </div>

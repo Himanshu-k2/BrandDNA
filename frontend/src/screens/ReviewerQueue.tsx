@@ -76,13 +76,16 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
           <span className="font-medium text-ink">{item.author}</span>
           {selfAuthored && <Pill variant="outline">You</Pill>}
           <span>· {item.submitted}</span>
-          {item.due && (
-            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-silver bg-silver/20 px-2.5 py-0.5 text-caption font-medium text-graphite">
+        </div>
+
+        {item.due && (
+          <div className="flex items-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-silver/80 bg-silver/20 px-2.5 py-0.5 text-caption font-medium text-graphite">
               <AlarmClock className="size-3.5 text-ink shrink-0" strokeWidth={1.5} />
               {item.due}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {item.lane !== 'approved' && (
           <SeverityPills counts={item.counts} />

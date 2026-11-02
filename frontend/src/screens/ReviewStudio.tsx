@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronRight, CircleCheck, FileSearch, GitCompare, Lock, MessagesSquare, PenLine, Send, Sparkles, Trash2, WandSparkles, Zap } from 'lucide-react';
 import { RevealText } from '@/components/mono/RevealText';
-import { Button, Card, EmptyState, ICON, NotificationBell, Pill, ScoreRing, Tabs, TextLink, Tooltip } from '@/components/mono/ui';
+import { Button, Card, EmptyState, ICON, NotificationBell, OnlineTeamPresence, Pill, ScoreRing, Tabs, TextLink, Tooltip } from '@/components/mono/ui';
 import { SeverityBadge, StatusBadge, type Tone } from '@/components/mono/status';
 import { COMMENTS, REVIEW, type Comment } from '@/data/demo';
 import { DURATION, EASE } from '@/lib/motion';
@@ -234,7 +234,10 @@ export function ReviewStudio() {
             <RevealText key={isNew ? 'new' : 'existing'} text={isNew ? intake?.title || 'New content' : REVIEW.title} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.08} />
             {!isNew && <span className="text-caption text-mid tabular-nums">#{REVIEW.code}</span>}
           </div>
-          <NotificationBell />
+          <div className="ml-auto flex items-center gap-3 shrink-0">
+            <OnlineTeamPresence />
+            <NotificationBell />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge tone={statusMeta[status].tone} caps={false}>

@@ -90,7 +90,7 @@ export function BrandWorkspaces() {
                     <ShieldCheck className="size-4 text-ink" {...ICON} /> {stats.updated}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="secondary" size="sm" onClick={() => navigate('/guidelines')}>
+                    <Button variant="secondary" size="sm" onClick={() => navigate(`/guidelines?brand=${brand.id}`)}>
                       <BookOpen className="size-4" {...ICON} /> Guidelines
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => navigate('/submissions')}>
