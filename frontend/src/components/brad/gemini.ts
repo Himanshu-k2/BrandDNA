@@ -22,8 +22,8 @@ export function setStoredGeminiKey(key: string): void {
 }
 
 export function getStoredGeminiModel(): string {
-  if (typeof window === 'undefined') return 'gemini-2.5-pro';
-  return localStorage.getItem(GEMINI_MODEL_KEY) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-pro';
+  if (typeof window === 'undefined') return 'gemini-3.8-flash';
+  return localStorage.getItem(GEMINI_MODEL_KEY) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.8-flash';
 }
 
 export function setStoredGeminiModel(model: string): void {
@@ -106,7 +106,7 @@ export async function askGeminiDirect(
 
   const preferredModel = getStoredGeminiModel();
   const models = Array.from(
-    new Set([preferredModel, 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'])
+    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'])
   );
   let lastError: any = null;
 
