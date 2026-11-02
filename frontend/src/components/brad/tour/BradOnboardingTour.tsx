@@ -14,135 +14,139 @@ export interface TourStep {
   expression: ExpressionId;
 }
 
-const ROLE_STEPS: Record<Role, TourStep[]> = {
-  creator: [
-    {
-      targetId: 'creator-dashboard',
-      title: 'Creator Dashboard',
-      description: 'This is your mission control. Monitor your brand compliance score, turnaround times, and latest submission approval statuses at a glance.',
-      expression: 'happy',
-    },
-    {
-      targetId: 'new-content',
-      title: 'Create New Content',
-      description: 'Drafting a campaign, ad copy, or social post? Start here! Upload assets or paste text, and I’ll run instant pre-flight checks against approved brand colors, fonts, and certified claims.',
-      expression: 'attentive',
-    },
-    {
-      targetId: 'my-submissions-drafts',
-      title: 'My Submissions & Drafts',
-      description: 'Track all your active drafts and reviewer feedback in real-time. Review change requests with side-by-side diffs and apply 1-click guideline fixes.',
-      expression: 'excited',
-    },
-    {
-      targetId: 'brand-guidelines',
-      title: 'Brand Guidelines Hub',
-      description: 'Explore verified brand rules, certified pricing, and official hex swatches (like NovaFit Electric Orange) so your creative assets always pass audit.',
-      expression: 'curious',
-    },
-    {
-      targetId: 'ask-brad-capsule',
-      title: 'All caught up!',
-      description: 'Whenever you have questions, need copywriting inspiration, or want to check a guideline rule, just click my capsule down here anytime to chat with me!',
-      expression: 'proud',
-    },
-  ],
-  reviewer: [
-    {
-      targetId: 'reviewer-dashboard',
-      title: 'Reviewer Dashboard',
-      description: 'Your reviewer cockpit: inspect open approvals, average turnaround speed, and compliance pass rates across teams.',
-      expression: 'happy',
-    },
-    {
-      targetId: 'approval-queue',
-      title: 'Approval Queue',
-      description: 'High-priority drafts arrive here first. Inspect diffs, verify brand claims, request revisions with required notes, or approve and seal certificates.',
-      expression: 'attentive',
-    },
-    {
-      targetId: 'all-submissions',
-      title: 'All Submissions',
-      description: 'Browse the full archive of historical submissions, active reviews, and signed certificates across all brands.',
-      expression: 'curious',
-    },
-    {
-      targetId: 'brand-workspaces',
-      title: 'Brand Workspaces',
-      description: 'Switch between enterprise brands like NovaFit, OmniCloud, and Apex FinTech. Each workspace keeps strict guideline isolation.',
-      expression: 'excited',
-    },
-    {
-      targetId: 'ask-brad-capsule',
-      title: 'All caught up!',
-      description: 'I’m always here to check guidelines, verify terminology, or help review drafts. Tap my capsule anytime to chat!',
-      expression: 'proud',
-    },
-  ],
-  brand_manager: [
-    {
-      targetId: 'brand-dashboard',
-      title: 'Brand Manager Dashboard',
-      description: 'Govern the brand identity across all workspaces. Track overall brand integrity, high-priority violations, and asset compliance.',
-      expression: 'happy',
-    },
-    {
-      targetId: 'brand-asset-library',
-      title: 'Brand Asset Library',
-      description: 'Inspect official verified hex colors, typography scales, contrast ratings, and clear-space logo requirements.',
-      expression: 'curious',
-    },
-    {
-      targetId: 'guideline-ingestion',
-      title: 'Guideline Ingestion Studio',
-      description: 'Ingest PDF brand guidelines. Brad extracts colors, fonts, and pricing rules into live automated enforcement rules.',
-      expression: 'excited',
-    },
-    {
-      targetId: 'audit-log-ledger',
-      title: 'Audit Log Ledger',
-      description: 'Review tamper-proof, cryptographic audit certificates tracking every approved creative asset.',
-      expression: 'attentive',
-    },
-    {
-      targetId: 'ask-brad-capsule',
-      title: 'All caught up!',
-      description: 'I’m your dedicated Brand Guardian. Click my capsule anytime to inspect guidelines or run compliance checks!',
-      expression: 'proud',
-    },
-  ],
-  admin: [
-    {
-      targetId: 'platform-dashboard',
-      title: 'Platform Dashboard',
-      description: 'Enterprise overview: active creators, global review pass rates, and system-wide audit activity.',
-      expression: 'happy',
-    },
-    {
-      targetId: 'user-role-mgmt',
-      title: 'User & Role Management',
-      description: 'Manage platform access, configure user roles, and assign team members to brand workspaces.',
-      expression: 'attentive',
-    },
-    {
-      targetId: 'brand-workspaces',
-      title: 'Brand Workspaces',
-      description: 'Create and govern multi-tenant workspaces with isolated guideline sheets and assigned reviewers.',
-      expression: 'excited',
-    },
-    {
-      targetId: 'audit-log-ledger',
-      title: 'Audit Log Ledger',
-      description: 'Cryptographic ledger maintaining permanent proof of compliance for all published creative work.',
-      expression: 'curious',
-    },
-    {
-      targetId: 'ask-brad-capsule',
-      title: 'All caught up!',
-      description: 'Need assistance managing the platform? I’m ready in the bottom capsule whenever you need me!',
-      expression: 'proud',
-    },
-  ],
+const getRoleSteps = (role: Role, firstName: string): TourStep[] => {
+  const stepsByRole: Record<Role, TourStep[]> = {
+    creator: [
+      {
+        targetId: 'creator-dashboard',
+        title: 'Your Mission Control',
+        description: `Hey ${firstName}! Think of this as your creative home base. Here you can check your live compliance score, see what’s in flight, and keep an eye on review turnaround times so you never miss a launch.`,
+        expression: 'happy',
+      },
+      {
+        targetId: 'new-content',
+        title: 'Where New Ideas Take Flight',
+        description: `Got a fresh social drop, email, or ad campaign? Jump in here! Paste your draft or upload assets, and I'll pre-flight check your copy against approved brand colors, fonts, and pricing claims before you hit submit.`,
+        expression: 'attentive',
+      },
+      {
+        targetId: 'my-submissions-drafts',
+        title: 'Your Creative Workshop',
+        description: `Everything you've created lives right here. Track reviews in real-time, see helpful feedback notes from Priya and Sarah side-by-side, and apply 1-click guideline fixes without breaking a sweat.`,
+        expression: 'excited',
+      },
+      {
+        targetId: 'brand-guidelines',
+        title: 'Your Brand Cheat Sheet',
+        description: `No more guessing if that orange is on-brand! Browse official hex codes, certified pricing figures, and tone rules for every brand so your drafts sail through approval on the first try.`,
+        expression: 'curious',
+      },
+      {
+        targetId: 'ask-brad-capsule',
+        title: "I've Always Got Your Back!",
+        description: `You're all set to create! If you ever get stuck, need copywriting ideas, or want me to double-check a guideline rule, just tap my capsule down here anytime. Let’s make something amazing!`,
+        expression: 'proud',
+      },
+    ],
+    reviewer: [
+      {
+        targetId: 'reviewer-dashboard',
+        title: 'Your Review Headquarters',
+        description: `Hey ${firstName}! Here’s your daily snapshot: pending sign-offs, team pass rates, and review turnaround times all in one clean view.`,
+        expression: 'happy',
+      },
+      {
+        targetId: 'approval-queue',
+        title: 'The Review Studio',
+        description: `The most important stop for your day! Compare version diffs side-by-side, verify pricing and terminology against official rules, and seal certified sign-offs with one click.`,
+        expression: 'attentive',
+      },
+      {
+        targetId: 'all-submissions',
+        title: 'The Complete Content Ledger',
+        description: `Search through the entire archive of approved campaigns and historical revisions. Every asset is cryptographically sealed for permanent audit proof.`,
+        expression: 'curious',
+      },
+      {
+        targetId: 'brand-workspaces',
+        title: 'Multi-Brand Switcher',
+        description: `Easily jump between isolated brand spaces—NovaFit, OmniCloud, and Apex FinTech—with zero guideline leaks between brands.`,
+        expression: 'excited',
+      },
+      {
+        targetId: 'ask-brad-capsule',
+        title: 'Your Pair-Reviewing Partner',
+        description: `All caught up! Whenever you need me to verify a claim, check color contrast, or explain a rule violation, just tap my capsule down here!`,
+        expression: 'proud',
+      },
+    ],
+    brand_manager: [
+      {
+        targetId: 'brand-dashboard',
+        title: 'Brand Health HQ',
+        description: `Welcome, ${firstName}! Keep a close eye on your brand's vital signs: track compliance pass rates, catch rule violations early, and protect brand integrity across all channels.`,
+        expression: 'happy',
+      },
+      {
+        targetId: 'brand-asset-library',
+        title: 'The Source of Truth',
+        description: `Your official brand repository. Inspect verified hex palettes, typography hierarchies, and clear-space logo rules that keep your brand looking pristine.`,
+        expression: 'curious',
+      },
+      {
+        targetId: 'guideline-ingestion',
+        title: 'AI Guideline Ingestion',
+        description: `Drop in your raw brand PDF manuals! I automatically parse them, extracting official colors, font weights, and pricing rules into live enforcement engines.`,
+        expression: 'excited',
+      },
+      {
+        targetId: 'audit-log-ledger',
+        title: 'Cryptographic Audit Ledger',
+        description: `Tamper-proof accountability. Review cryptographic audit records verifying every single creative asset published by your teams.`,
+        expression: 'attentive',
+      },
+      {
+        targetId: 'ask-brad-capsule',
+        title: 'At Your Service!',
+        description: `You’re all set! Whenever you want to tweak guidelines, run rule simulations, or chat brand strategy, tap my capsule down here!`,
+        expression: 'proud',
+      },
+    ],
+    admin: [
+      {
+        targetId: 'platform-dashboard',
+        title: 'Your High-Altitude Cockpit',
+        description: `Welcome, ${firstName}! This is your 30,000-foot view. Monitor real-time platform compliance, track creator activity, and watch live audit velocities across all organizations at a glance.`,
+        expression: 'happy',
+      },
+      {
+        targetId: 'user-role-mgmt',
+        title: 'Team & Access Control',
+        description: `Easily invite collaborators, set permissions, and assign team members to specific roles—Admin, Brand Manager, Reviewer, or Creator—with enterprise security.`,
+        expression: 'attentive',
+      },
+      {
+        targetId: 'brand-workspaces',
+        title: 'Isolated Brand Universes',
+        description: `Govern multi-brand organizations (like NovaFit, OmniCloud, and Apex FinTech). Every workspace gets strictly isolated guideline sheets, approved facts, and dedicated reviewers.`,
+        expression: 'excited',
+      },
+      {
+        targetId: 'approval-queue',
+        title: 'Review & Sign-Off Hub',
+        description: `Keep work flowing smoothly. Track drafts requiring urgent sign-offs, inspect tamper-proof cryptographic certificates, and oversee turnaround times.`,
+        expression: 'curious',
+      },
+      {
+        targetId: 'ask-brad-capsule',
+        title: 'Ready When You Are!',
+        description: `You’re all caught up! Whenever you need platform help, audit checks, or system configurations, just tap my capsule down here to chat. Have a great day!`,
+        expression: 'proud',
+      },
+    ],
+  };
+
+  return stepsByRole[role] || stepsByRole.creator;
 };
 
 type TourPhase = 'idle' | 'emerging' | 'greeting' | 'declined' | 'tour' | 'returning' | 'finished';
@@ -158,6 +162,7 @@ interface TargetRect {
 
 export function BradOnboardingTour() {
   const { persona } = useSession();
+  const firstName = persona.name.split(' ')[0];
   const [phase, setPhase] = useState<TourPhase>('idle');
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
@@ -166,7 +171,7 @@ export function BradOnboardingTour() {
   const [bradPos, setBradPos] = useState({ x: 0, y: 0 });
   const [capsulePos, setCapsulePos] = useState({ x: 0, y: 0 });
 
-  const steps = ROLE_STEPS[persona.role] || ROLE_STEPS.creator;
+  const steps = getRoleSteps(persona.role, firstName);
   const currentStep = steps[stepIndex] || steps[0];
 
   // Storage key per persona to identify new users
@@ -177,11 +182,12 @@ export function BradOnboardingTour() {
     const capsuleEl = document.querySelector('[data-tour-target="ask-brad-capsule"]');
     if (capsuleEl) {
       const rect = capsuleEl.getBoundingClientRect();
-      setCapsulePos({
+      const pos = {
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-      });
-      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      };
+      setCapsulePos(pos);
+      return pos;
     }
     const fallback = { x: window.innerWidth - 88, y: window.innerHeight - 48 };
     setCapsulePos(fallback);
@@ -202,7 +208,6 @@ export function BradOnboardingTour() {
         right: cap.x + 70,
         bottom: cap.y + 24,
       });
-      setBradPos({ x: cap.x - 56, y: cap.y - 68 });
       return;
     }
 
@@ -217,17 +222,35 @@ export function BradOnboardingTour() {
         right: rect.right,
         bottom: rect.bottom,
       });
-      // Position Brad next to the sidebar element
-      setBradPos({
-        x: rect.right + 36,
-        y: rect.top + rect.height / 2,
-      });
     } else {
-      // Fallback center left
-      setBradPos({ x: 300, y: 220 + stepIndex * 48 });
       setTargetRect(null);
     }
-  }, [phase, currentStep, stepIndex, updateCapsulePos]);
+  }, [phase, currentStep, updateCapsulePos]);
+
+  // Highlight the targeted DOM element cleanly with elevated contrast & orange glow
+  useEffect(() => {
+    if (phase !== 'tour') {
+      document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
+        el.removeAttribute('data-tour-highlight');
+      });
+      return;
+    }
+
+    const targetEl = document.querySelector(`[data-tour-target="${currentStep.targetId}"]`);
+    document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
+      if (el !== targetEl) el.removeAttribute('data-tour-highlight');
+    });
+
+    if (targetEl) {
+      targetEl.setAttribute('data-tour-highlight', 'true');
+    }
+
+    return () => {
+      document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
+        el.removeAttribute('data-tour-highlight');
+      });
+    };
+  }, [phase, currentStep]);
 
   // Recalculate on window resize
   useEffect(() => {
@@ -239,14 +262,14 @@ export function BradOnboardingTour() {
     return () => window.removeEventListener('resize', handleResize);
   }, [updateCapsulePos, updateTargetPos]);
 
-  // Start the onboarding sequence after 10-second delay for new accounts
+  // Start the onboarding sequence after 6-second delay for new accounts
   useEffect(() => {
     const hasSeenTour = localStorage.getItem(storageKey);
     if (hasSeenTour) return;
 
     const timer = window.setTimeout(() => {
       startOnboarding();
-    }, 10_000); // 10-second onboarding delay as requested
+    }, 6_000); // 6-second delay as requested
 
     return () => window.clearTimeout(timer);
   }, [storageKey]);
@@ -269,7 +292,7 @@ export function BradOnboardingTour() {
 
     // Float from capsule to top-center of dashboard
     const topCenterX = window.innerWidth / 2;
-    const topCenterY = Math.max(120, window.innerHeight * 0.18);
+    const topCenterY = Math.max(105, window.innerHeight * 0.16);
 
     window.setTimeout(() => {
       setBradPos({ x: topCenterX, y: topCenterY });
@@ -277,7 +300,7 @@ export function BradOnboardingTour() {
 
     window.setTimeout(() => {
       setPhase('greeting');
-    }, 950);
+    }, 900);
   };
 
   const handleAcceptTour = () => {
@@ -294,7 +317,7 @@ export function BradOnboardingTour() {
   const handleDeclineTour = () => {
     setPhase('declined');
     setDeclinedMessage(
-      `No problem at all, ${persona.name.split(' ')[0]}! If you ever run into any questions or need a hand, just tap my capsule down here anytime.`
+      `No problem at all, ${firstName}! If you ever run into any questions or need a hand with compliance, just tap my capsule down here anytime.`
     );
 
     // After message display, return Brad back into the capsule
@@ -331,12 +354,12 @@ export function BradOnboardingTour() {
     window.setTimeout(() => {
       setSplashActive(true);
       window.dispatchEvent(new CustomEvent('branddna:capsule_splash'));
-    }, 750);
+    }, 700);
 
     window.setTimeout(() => {
       setPhase('finished');
       localStorage.setItem(storageKey, 'true');
-    }, 1600);
+    }, 1500);
   };
 
   if (phase === 'idle' || phase === 'finished') {
@@ -347,10 +370,46 @@ export function BradOnboardingTour() {
     );
   }
 
-  const firstName = persona.name.split(' ')[0];
+  // Calculate Tour Card Position (always positioning beside the highlighted element)
+  const isFinalStep = currentStep.targetId === 'ask-brad-capsule';
+  const cardWidth = 360;
+
+  let cardPos = {
+    left: Math.max(20, (window.innerWidth - cardWidth) / 2),
+    top: Math.max(100, window.innerHeight * 0.25),
+  };
+
+  if (phase === 'tour') {
+    if (isFinalStep) {
+      // Anchored near the bottom-right capsule for the finish step
+      cardPos = {
+        left: Math.max(20, window.innerWidth - cardWidth - 48),
+        top: Math.max(40, window.innerHeight - 340),
+      };
+    } else if (targetRect) {
+      // Positioned to the right of the highlighted sidebar element
+      cardPos = {
+        left: Math.min(window.innerWidth - cardWidth - 24, targetRect.right + 28),
+        top: Math.max(20, Math.min(window.innerHeight - 280, targetRect.top - 16)),
+      };
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden pointer-events-auto">
+      {/* Dynamic CSS injecting elevated glow styling for the highlighted menu section */}
+      <style>{`
+        [data-tour-highlight="true"] {
+          position: relative !important;
+          z-index: 55 !important;
+          background-color: #ffffff !important;
+          color: #070d0d !important;
+          box-shadow: 0 0 0 3px #ff6700, 0 0 28px rgba(255, 103, 0, 0.45) !important;
+          border-radius: 18px !important;
+          transition: all 0.25s ease-out !important;
+        }
+      `}</style>
+
       {/* Liquid Splash Portal over capsule */}
       <div
         style={{
@@ -365,190 +424,186 @@ export function BradOnboardingTour() {
         <LiquidSplash active={splashActive} onComplete={() => setSplashActive(false)} />
       </div>
 
-      {/* Dimmed backdrop scrim with spotlight cutout during tour */}
+      {/* Dimmed backdrop scrim during tour */}
       <AnimatePresence>
         {(phase === 'greeting' || phase === 'declined' || phase === 'tour') && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            className="absolute inset-0 bg-ink/35 backdrop-blur-[1.5px]"
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 bg-ink/40 backdrop-blur-[2px] z-40"
             onClick={phase === 'greeting' ? handleDeclineTour : finishTour}
           />
         )}
       </AnimatePresence>
 
-      {/* Spotlight pulse ring on targeted sidebar element */}
-      {phase === 'tour' && targetRect && (
+      {/* Free-floating Brad Avatar for Emerging and Returning animations */}
+      {(phase === 'emerging' || phase === 'returning') && (
         <motion.div
-          key={`spotlight-${stepIndex}`}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          animate={{
+            x: bradPos.x,
+            y: bradPos.y,
+            scale: phase === 'returning' ? [1, 1.15, 0.2] : 1,
+            opacity: phase === 'returning' ? [1, 1, 0] : 1,
+          }}
+          transition={{
+            type: 'spring',
+            damping: 24,
+            stiffness: 180,
+            mass: 0.85,
+          }}
           style={{
             position: 'fixed',
-            top: targetRect.top - 4,
-            left: targetRect.left - 4,
-            width: targetRect.width + 8,
-            height: targetRect.height + 8,
+            left: 0,
+            top: 0,
+            transform: 'translate(-50%, -50%)',
           }}
-          className="pointer-events-none z-50 rounded-xl ring-2 ring-brand-orange ring-offset-2 ring-offset-paper shadow-[0_0_24px_rgba(255,69,0,0.35)]"
-        />
-      )}
-
-      {/* Floating Brad Avatar */}
-      <motion.div
-        animate={{
-          x: bradPos.x,
-          y: bradPos.y,
-          scale: phase === 'returning' ? [1, 1.15, 0.2] : 1,
-          opacity: phase === 'returning' ? [1, 1, 0] : 1,
-        }}
-        transition={{
-          type: 'spring',
-          damping: 24,
-          stiffness: 180,
-          mass: 0.85,
-        }}
-        style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          transform: 'translate(-50%, -50%)',
-        }}
-        className="pointer-events-none z-50 flex items-center justify-center"
-      >
-        <div className="relative flex items-center justify-center">
-          {/* Subtle magical aura around Brad */}
-          <motion.div
-            animate={{
-              scale: [1, 1.25, 1],
-              opacity: [0.35, 0.65, 0.35],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 3,
-              ease: 'easeInOut',
-            }}
-            className="absolute -inset-3 rounded-full bg-gradient-to-r from-brand-orange/30 via-white/50 to-brand-orange/20 blur-md"
-          />
-
-          {/* Brad's actual interactive face */}
-          <div className="relative size-14 rounded-full bg-ink p-1 ring-2 ring-white/90 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
-            <BradFace
-              size="lg"
-              expression={
-                phase === 'greeting'
-                  ? 'excited'
-                  : phase === 'declined'
-                  ? 'attentive'
-                  : phase === 'returning'
-                  ? 'proud'
-                  : currentStep.expression
-              }
-              follow={true}
-              still={false}
+          className="pointer-events-none z-50 flex items-center justify-center"
+        >
+          <div className="relative flex items-center justify-center">
+            <motion.div
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.35, 0.7, 0.35],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2.5,
+                ease: 'easeInOut',
+              }}
+              className="absolute -inset-3 rounded-full bg-gradient-to-r from-brand-orange/40 via-white/60 to-brand-orange/30 blur-md"
             />
+            <div className="relative size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
+              <BradFace
+                size="lg"
+                expression={phase === 'returning' ? 'proud' : 'excited'}
+                follow={true}
+                still={false}
+              />
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Greeting Speech Bubble at Top-Center (Sketch 2) */}
       <AnimatePresence>
         {phase === 'greeting' && (
-          <motion.div
-            key="greeting-bubble"
-            initial={{ opacity: 0, y: 16, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.94 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          <div
             style={{
               position: 'fixed',
               left: '50%',
-              top: Math.max(190, window.innerHeight * 0.26),
+              top: Math.max(100, window.innerHeight * 0.16),
               transform: 'translateX(-50%)',
             }}
-            className="z-50 w-[min(92vw,480px)] rounded-2xl border border-silver/80 bg-paper p-6 shadow-float"
+            className="z-50 flex flex-col items-center"
           >
-            {/* Triangular pointer pointing up towards Brad */}
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 size-4 rotate-45 border-t border-l border-silver/80 bg-paper" />
-
-            <div className="relative flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">
-                  <Sparkles className="size-4" />
-                </span>
-                <h3 className="font-display text-subheading font-bold text-ink tracking-tight">
-                  Hello, {firstName}!
-                </h3>
+            {/* Top-Center Brad Avatar */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35 }}
+              className="relative -mb-3 z-20 flex items-center justify-center"
+            >
+              <div className="size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
+                <BradFace size="lg" expression="excited" follow={true} still={false} />
               </div>
+            </motion.div>
 
-              <p className="text-ui text-graphite leading-relaxed">
-                I'm <strong className="text-ink font-semibold">Brad</strong>, your AI Brand Guardian.
-                Welcome to <span className="text-ink font-semibold">BrandDNA</span>!
-                Would you like a quick walkthrough of your workspace to see how everything works?
-              </p>
+            {/* Greeting Card */}
+            <motion.div
+              key="greeting-bubble"
+              initial={{ opacity: 0, y: 16, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="w-[min(92vw,480px)] rounded-3xl border border-silver/80 bg-paper p-6 shadow-float"
+            >
+              <div className="relative flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">
+                    <Sparkles className="size-4" />
+                  </span>
+                  <h3 className="font-display text-subheading font-bold text-ink tracking-tight">
+                    Hey there, {firstName}! 👋
+                  </h3>
+                </div>
 
-              <div className="mt-2 flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleDeclineTour}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-ui font-medium text-graphite hover:text-ink hover:bg-silver/40 transition-colors cursor-pointer',
-                    focusRing
-                  )}
-                >
-                  No thanks
-                </button>
+                <p className="text-ui text-graphite leading-relaxed">
+                  I'm <strong className="text-ink font-semibold">Brad</strong>, your AI Brand Guardian.
+                  Welcome to <span className="text-ink font-semibold">BrandDNA</span>!
+                  Would you like a quick, friendly walkthrough of your workspace to see how everything fits together?
+                </p>
 
-                <button
-                  type="button"
-                  onClick={handleAcceptTour}
-                  className={cn(
-                    'flex items-center gap-2 rounded-full bg-ink hover:bg-graphite px-5 py-2.5 text-ui font-semibold text-white shadow-lift transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer',
-                    focusRing
-                  )}
-                >
-                  <span>Let's go</span>
-                  <ArrowRight className="size-4" />
-                </button>
+                <div className="mt-2 flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleDeclineTour}
+                    className={cn(
+                      'rounded-full px-4 py-2 text-ui font-medium text-graphite hover:text-ink hover:bg-silver/40 transition-colors cursor-pointer',
+                      focusRing
+                    )}
+                  >
+                    No thanks
+                  </button>
+
+                  {/* Let's go button with crisp, high-contrast white text */}
+                  <button
+                    type="button"
+                    onClick={handleAcceptTour}
+                    style={{ color: '#ffffff' }}
+                    className={cn(
+                      'flex items-center gap-2 rounded-full bg-ink hover:bg-graphite px-5 py-2.5 text-ui font-semibold shadow-lift transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer',
+                      focusRing
+                    )}
+                  >
+                    <span style={{ color: '#ffffff' }} className="font-semibold">
+                      Let's go
+                    </span>
+                    <ArrowRight className="size-4" style={{ color: '#ffffff' }} />
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
       {/* Declined Reassurance Bubble */}
       <AnimatePresence>
         {phase === 'declined' && (
-          <motion.div
-            key="declined-bubble"
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
+          <div
             style={{
               position: 'fixed',
               left: '50%',
-              top: Math.max(190, window.innerHeight * 0.26),
+              top: Math.max(110, window.innerHeight * 0.18),
               transform: 'translateX(-50%)',
             }}
-            className="z-50 w-[min(90vw,440px)] rounded-2xl border border-silver/80 bg-paper p-5 shadow-float text-center"
+            className="z-50 flex flex-col items-center"
           >
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 size-4 rotate-45 border-t border-l border-silver/80 bg-paper" />
-            <p className="text-ui text-ink leading-relaxed font-medium">
-              {declinedMessage}
-            </p>
-            <p className="mt-2 text-caption text-mid">
-              Diving back into my capsule...
-            </p>
-          </motion.div>
+            <div className="size-14 -mb-3 z-20 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
+              <BradFace size="lg" expression="attentive" follow={true} still={false} />
+            </div>
+            <motion.div
+              key="declined-bubble"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="w-[min(90vw,440px)] rounded-3xl border border-silver/80 bg-paper p-6 shadow-float text-center"
+            >
+              <p className="text-ui text-ink leading-relaxed font-medium">
+                {declinedMessage}
+              </p>
+              <p className="mt-2 text-caption text-mid">
+                Diving back into my capsule...
+              </p>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Guided Tour Callout Card (Sketch 1) */}
+      {/* Guided Tour Callout Card (Sketches 1 & 3: Bot perched on top-left corner) */}
       <AnimatePresence>
         {phase === 'tour' && (
           <motion.div
@@ -559,28 +614,55 @@ export function BradOnboardingTour() {
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: 'fixed',
-              left: Math.min(
-                window.innerWidth - 380,
-                Math.max(20, bradPos.x + 36)
-              ),
-              top: Math.min(
-                window.innerHeight - 260,
-                Math.max(60, bradPos.y - 70)
-              ),
+              left: cardPos.left,
+              top: cardPos.top,
+              width: cardWidth,
             }}
-            className="z-50 w-[340px] rounded-2xl border border-silver/90 bg-paper p-5 shadow-float"
+            className="z-50 relative rounded-3xl border border-silver/90 bg-paper p-6 shadow-float"
           >
-            {/* Close button */}
+            {/* Bot face perched prominently on the LEFT TOP CORNER of the message box on ALL steps */}
+            <div className="absolute -top-7 -left-5 z-20 flex items-center justify-center">
+              <motion.div
+                animate={{
+                  y: [0, -3, 0],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.8,
+                  ease: 'easeInOut',
+                }}
+                className="relative flex items-center justify-center"
+              >
+                {/* Glow ring */}
+                <div className="absolute -inset-1.5 rounded-full bg-brand-orange/30 blur-sm" />
+                {/* Bot Face Circle */}
+                <div className="relative size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-lift">
+                  <BradFace
+                    size="md"
+                    expression={currentStep.expression}
+                    follow={true}
+                    still={false}
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Speech bubble pointer arrow pointing back to the highlighted sidebar element */}
+            {!isFinalStep && (
+              <div className="absolute top-6 -left-2 size-4 rotate-45 border-b border-l border-silver/80 bg-paper" />
+            )}
+
+            {/* Close / Skip button */}
             <button
               type="button"
               aria-label="Skip tour"
               onClick={finishTour}
-              className="absolute top-3 right-3 flex size-7 items-center justify-center rounded-full text-graphite hover:bg-silver/40 hover:text-ink transition-colors cursor-pointer"
+              className="absolute top-4 right-4 flex size-7 items-center justify-center rounded-full text-graphite hover:bg-silver/40 hover:text-ink transition-colors cursor-pointer"
             >
               <X className="size-4" />
             </button>
 
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2.5 pt-1 pl-6">
               {/* Step indicator badge */}
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-caption font-bold text-brand-orange">
@@ -639,19 +721,21 @@ export function BradOnboardingTour() {
                   <button
                     type="button"
                     onClick={finishTour}
-                    className="flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-brand-orange/90 px-4 py-1.5 text-caption font-semibold text-white shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                    style={{ color: '#ffffff' }}
+                    className="flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-brand-orange/90 px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    <Check className="size-3.5" />
-                    <span>Finish Tour</span>
+                    <Check className="size-3.5" style={{ color: '#ffffff' }} />
+                    <span style={{ color: '#ffffff' }}>Finish Tour</span>
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleNextStep}
-                    className="flex items-center gap-1 rounded-full bg-ink hover:bg-graphite px-3.5 py-1.5 text-caption font-semibold text-white shadow-sm transition-all hover:scale-105 cursor-pointer"
+                    style={{ color: '#ffffff' }}
+                    className="flex items-center gap-1 rounded-full bg-ink hover:bg-graphite px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 cursor-pointer"
                   >
-                    <span>Next</span>
-                    <ArrowRight className="size-3" />
+                    <span style={{ color: '#ffffff' }}>Next</span>
+                    <ArrowRight className="size-3" style={{ color: '#ffffff' }} />
                   </button>
                 )}
               </div>
