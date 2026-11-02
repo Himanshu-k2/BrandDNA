@@ -51,6 +51,10 @@ const COUNTER_FROM = 1800;
 /** Grayscale text symbols only (no colour emoji). */
 const SYMBOLS = ['✓', '✗', '→', '←', '↑', '↓', '•', '…', '—', '★', '☆', '§', '¶', '°', '±', '×', '÷', '≈', '≠', '≤', '≥', '∞', '#', '@'];
 
+const isSafeAppPath = (path?: string): boolean => {
+  return Boolean(path && typeof path === 'string' && path.startsWith('/') && !path.startsWith('//') && !path.includes(':'));
+};
+
 const time = (date: Date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
 type Variant = 'desktop' | 'tablet' | 'mobile';
@@ -510,7 +514,7 @@ function BradRow({ message, live, revealing, showChips, onNavigate }: { message:
 
         {!revealing && (message.sources?.length || message.actions?.length || message.retry) ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: DURATION.fast, ease: EASE }} className="flex flex-wrap items-center gap-2 pt-1">
-            {message.sources?.map(source => (
+            {message.sources?.filter(s => isSafeAppPath(s.to)).map(source => (
               <Link
                 key={source.to + source.label}
                 to={source.to}
@@ -522,13 +526,13 @@ function BradRow({ message, live, revealing, showChips, onNavigate }: { message:
                 <span className="truncate">{source.label}</span>
               </Link>
             ))}
-            {message.actions?.map(action => (
+            {message.actions?.filter(a => isSafeAppPath(a.to)).map(action => (
               <Button
                 key={action.to}
                 variant="secondary"
                 size="sm"
                 onClick={() => {
-                  if (action.to !== pathname) navigate(action.to);
+                  if (isSafeAppPath(action.to) && action.to !== pathname) navigate(action.to);
                   onNavigate?.();
                 }}
               >

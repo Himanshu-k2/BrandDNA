@@ -27,13 +27,13 @@ export const register = async (req, res, next) => {
     if (totalUsers === 0) {
       // First user bootstrap pattern: initial user is granted admin
       assignedRole = 'admin';
-    } else if (role && (role === 'admin' || role === 'reviewer' || role === 'brand_manager')) {
+    } else if (role && (role === 'admin' || role === 'brand_manager')) {
       const configuredSecret = process.env.ADMIN_INVITE_SECRET;
       if (!configuredSecret || adminSecretKey !== configuredSecret) {
         return res.status(403).json({
           success: false,
           message:
-            'Privilege escalation rejected: Assigning admin or reviewer role requires a valid admin secret key',
+            'Privilege escalation rejected: Assigning admin or brand manager role requires a valid admin secret key',
         });
       }
       assignedRole = role;

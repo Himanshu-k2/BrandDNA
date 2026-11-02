@@ -14,7 +14,7 @@ const router = Router();
 router
   .route('/:id')
   .get(protect, getFactById)
-  .patch(protect, authorize('admin'), validateBody(updateFactSchema), updateFact)
-  .delete(protect, authorize('admin'), deleteFact);
+  .patch(protect, authorize('admin', 'brand_manager'), validateBody(updateFactSchema), updateFact)
+  .delete(protect, authorize('admin', 'brand_manager'), deleteFact);
 
 export default router;

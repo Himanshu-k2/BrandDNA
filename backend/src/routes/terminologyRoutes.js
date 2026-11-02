@@ -14,7 +14,7 @@ const router = Router();
 router
   .route('/:id')
   .get(protect, getTerminologyById)
-  .patch(protect, authorize('admin'), validateBody(updateTerminologySchema), updateTerminology)
-  .delete(protect, authorize('admin'), deleteTerminology);
+  .patch(protect, authorize('admin', 'brand_manager'), validateBody(updateTerminologySchema), updateTerminology)
+  .delete(protect, authorize('admin', 'brand_manager'), deleteTerminology);
 
 export default router;

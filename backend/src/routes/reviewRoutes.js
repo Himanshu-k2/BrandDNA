@@ -74,13 +74,14 @@ router
 
 // ==========================================
 // Workflow Submissions & Human Decisions
+// (Only Brand Manager and Admin can review and sign off)
 // ==========================================
 router.post('/:id/submit', protect, submitReview);
 
 router.post(
   '/:id/approve',
   protect,
-  authorize('brand_manager', 'admin', 'reviewer'),
+  authorize('brand_manager', 'admin'),
   validateBody(approveReviewSchema),
   approveReview
 );
@@ -88,7 +89,7 @@ router.post(
 router.post(
   '/:id/reject',
   protect,
-  authorize('brand_manager', 'admin', 'reviewer'),
+  authorize('brand_manager', 'admin'),
   validateBody(rejectReviewSchema),
   rejectReview
 );
@@ -96,7 +97,7 @@ router.post(
 router.post(
   '/:id/request-changes',
   protect,
-  authorize('brand_manager', 'admin', 'reviewer'),
+  authorize('brand_manager', 'admin'),
   validateBody(requestChangesSchema),
   requestChanges
 );

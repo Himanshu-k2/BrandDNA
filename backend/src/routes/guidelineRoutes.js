@@ -14,7 +14,7 @@ const router = Router();
 router
   .route('/:id')
   .get(protect, getGuidelineById)
-  .patch(protect, authorize('admin'), validateBody(updateGuidelineSchema), updateGuideline)
-  .delete(protect, authorize('admin'), deleteGuideline);
+  .patch(protect, authorize('admin', 'brand_manager'), validateBody(updateGuidelineSchema), updateGuideline)
+  .delete(protect, authorize('admin', 'brand_manager'), deleteGuideline);
 
 export default router;

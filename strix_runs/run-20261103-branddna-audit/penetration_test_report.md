@@ -122,3 +122,4 @@ A comprehensive white-box and live application security assessment was executed 
 * **Vulnerability Analysis:** Unauthenticated `/api/health` exposed internal MongoDB server host and database instance names.
 * **Remediation:** Stripped `host` and `name` from public health responses; returns only health state indicators.
 * **Verification:** `/api/health` returns `{ state: 'connected', isConnected: true }`.
+

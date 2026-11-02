@@ -327,9 +327,13 @@ You MUST respond ONLY with valid JSON adhering to this exact structure:
   ]
 }`;
 
+    const sanitizedContent = String(content || '')
+      .replace(/<\/submitted_content>/gi, '[submitted_content_tag_removed]')
+      .slice(0, 50000);
+
     const promptContent = `Please review this submitted marketing copy:
 <submitted_content>
-${content}
+${sanitizedContent}
 </submitted_content>`;
 
     const response = await callWithRetry(
@@ -475,9 +479,14 @@ Return JSON in this format:
     const formattedPages = pages
       .filter((p) => p.hasExtractableText)
       .map((p) => `--- PAGE ${p.pageNumber} ---\n${p.text}`)
-      .join('\n\n');
+      .join('\n\n')
+      .replace(/<\/submitted_document>/gi, '[submitted_document_tag_removed]')
+      .slice(0, 50000);
 
-    const prompt = `Review this document:\n\n${formattedPages}`;
+    const prompt = `Review this document:
+<submitted_document>
+${formattedPages}
+</submitted_document>`;
 
     const response = await callWithRetry(
       async (modelToUse) => {

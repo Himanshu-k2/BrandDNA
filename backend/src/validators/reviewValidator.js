@@ -1,5 +1,18 @@
 import { z } from 'zod';
 
+export const fileItemSchema = z
+  .object({
+    filename: z.string().trim().max(255).optional(),
+    fileType: z
+      .string()
+      .trim()
+      .regex(/^(image\/(png|jpeg|jpg|webp)|application\/pdf)$/i, 'Allowed file types are PNG, JPEG, WebP, and PDF')
+      .optional(),
+    fileData: z.string().max(15 * 1024 * 1024, 'Base64 file payload cannot exceed 15MB').optional(),
+    fileSize: z.number().max(10 * 1024 * 1024, 'File size cannot exceed 10MB').optional(),
+  })
+  .passthrough();
+
 export const createReviewSchema = z
   .object({
     brandId: z
@@ -15,9 +28,9 @@ export const createReviewSchema = z
       .string()
       .optional()
       .default('text'),
-    title: z.string().trim().optional(),
-    submissionNote: z.string().trim().optional(),
-    files: z.array(z.any()).optional().default([]),
+    title: z.string().trim().max(200).optional(),
+    submissionNote: z.string().trim().max(1000).optional(),
+    files: z.array(fileItemSchema).max(5, 'Maximum 5 files allowed per submission').optional().default([]),
   })
   .passthrough()
   .refine(

@@ -1,3 +1,4 @@
+import { validateFileSignature } from '../utils/fileSignature.js';
 import { executeContentReview } from '../services/reviewService.js';
 import ContentReview from '../models/ContentReview.js';
 
@@ -30,11 +31,18 @@ export const createReview = async (req, res, next) => {
         buffer = Buffer.from(first.fileData, 'base64');
       }
       if (buffer) {
+        if (buffer.length > 10 * 1024 * 1024) {
+          return res.status(400).json({
+            success: false,
+            message: 'File size exceeds maximum allowed limit of 10MB',
+          });
+        }
+        validateFileSignature(buffer, first.filename || 'uploaded_creative_asset');
         file = {
           buffer,
           originalname: first.filename || 'uploaded_creative_asset',
           mimetype: mimeType,
-          size: first.fileSize || buffer.length,
+          size: buffer.length,
         };
       }
     }

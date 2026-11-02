@@ -5,6 +5,6 @@ import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
-router.route('/:id').delete(protect, authorize('admin'), deleteVisualAsset);
+router.route('/:id').delete(protect, authorize('admin', 'brand_manager'), deleteVisualAsset);
 
 export default router;

@@ -16,7 +16,7 @@ export const registerSchema = z.object({
     .min(8, 'Password must be at least 8 characters long')
     .regex(/[A-Za-z]/, 'Password must contain at least one letter')
     .regex(/[0-9]/, 'Password must contain at least one number'),
-  role: z.enum(['admin', 'creator', 'reviewer']).optional(),
+  role: z.enum(['admin', 'creator', 'brand_manager']).optional(),
   adminSecretKey: z.string().optional(),
   organizationId: z
     .string()
