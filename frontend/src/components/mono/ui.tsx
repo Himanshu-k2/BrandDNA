@@ -181,8 +181,28 @@ export function Kbd({ children }: { children: ReactNode }) {
 /* ── Surfaces ────────────────────────────────────────────────────── */
 
 /** Clean White card · 1px Pale Silver border · 24px radius · soft shadow. */
-export function Card({ className, children, as: Tag = 'div' }: { className?: string; children: ReactNode; as?: 'div' | 'section' | 'article' | 'aside' }) {
-  return <Tag className={cn('rounded-panel border border-silver bg-paper shadow-soft', className)}>{children}</Tag>;
+export function Card({
+  className,
+  children,
+  as: Tag = 'div',
+  onClick,
+  role
+}: {
+  className?: string;
+  children: ReactNode;
+  as?: 'div' | 'section' | 'article' | 'aside';
+  onClick?: () => void;
+  role?: string;
+}) {
+  return (
+    <Tag
+      onClick={onClick}
+      role={role}
+      className={cn('rounded-panel border border-silver bg-paper shadow-soft', className)}
+    >
+      {children}
+    </Tag>
+  );
 }
 
 export function SectionHeader({ title, action, as: Tag = 'h2' }: { title: string; action?: ReactNode; as?: 'h2' | 'h3' }) {

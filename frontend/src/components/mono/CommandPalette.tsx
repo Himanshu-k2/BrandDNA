@@ -79,7 +79,7 @@ const BRAND_SEARCH_ACTIONS: Action[] = Object.entries(BRAND_GUIDELINES).flatMap(
       list.push({
         label,
         hint,
-        to: `/guidelines?brand=${brandId}`,
+        to: `/guidelines?brand=${brandId}&category=${section.id}`,
         icon,
         category: `${cfg.brandName} Rules`
       });

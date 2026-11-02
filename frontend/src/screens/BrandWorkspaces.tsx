@@ -49,7 +49,11 @@ export function BrandWorkspaces() {
           const stats = BRAND_STATS[brand.id as keyof typeof BRAND_STATS] || BRAND_STATS['novafit'];
           return (
             <Stagger key={brand.id} index={index + 1}>
-              <Card as="article" className="flex h-full flex-col gap-2 p-2">
+              <Card
+                as="article"
+                onClick={() => navigate(`/guidelines?brand=${brand.id}`)}
+                className="group flex h-full flex-col gap-2 p-2 cursor-pointer transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+              >
                 <div className="flex flex-col gap-4 rounded-item p-4">
                   <div className="flex items-center gap-3">
                     <span className="flex size-12 shrink-0 items-center justify-center rounded-min bg-ink text-ui font-semibold text-paper">{brand.initials}</span>
@@ -93,7 +97,14 @@ export function BrandWorkspaces() {
                     <Button variant="secondary" size="sm" onClick={() => navigate(`/guidelines?brand=${brand.id}`)}>
                       <BookOpen className="size-4" {...ICON} /> Guidelines
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/submissions')}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/submissions');
+                      }}
+                    >
                       View submissions
                     </Button>
                   </div>

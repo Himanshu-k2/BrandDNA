@@ -1,7 +1,9 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   BookMarked,
   Check,
   ChevronsUpDown,
@@ -15,7 +17,8 @@ import {
   Volume2
 } from 'lucide-react';
 import { useFrame } from '@/components/mono/AppFrame';
-import { Card, EmptyState, ICON, IconButton, PageHeader, Pill, SectionHeader, Stagger, Tabs, focusRing } from '@/components/mono/ui';
+import { Card, EmptyState, ICON, PageHeader, Pill, SectionHeader, Stagger, Tabs, focusRing } from '@/components/mono/ui';
+import { RollingNumber } from '@/components/mono/accent';
 import { BRAND_GUIDELINES, type GuidelineSection } from '@/data/platform';
 import { BRANDS } from '@/data/demo';
 import { useSession } from '@/state/session';
@@ -24,24 +27,64 @@ import { cn } from '@/lib/cn';
 
 type Filter = 'all' | GuidelineSection['id'];
 
+const CATEGORY_TITLES: Record<string, string> = {
+  facts: 'Approved facts',
+  terms: 'Terminology',
+  disclaimers: 'Mandatory disclaimers',
+  tone: 'Tone of voice'
+};
+
 export function GuidelinesHub() {
   const { persona } = useSession();
   const { notify } = useFrame();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filter, setFilter] = useState<Filter>('all');
+
+  // Active brand & category from URL query parameter (e.g. /guidelines?brand=apex&category=facts)
+  const brandKey = searchParams.get('brand') || 'novafit';
+  const brandConfig = BRAND_GUIDELINES[brandKey] || BRAND_GUIDELINES.novafit;
+
+  const categoryParam = searchParams.get('category') as Filter | null;
+  const initialFilter: Filter =
+    categoryParam && ['facts', 'terms', 'disclaimers', 'tone'].includes(categoryParam)
+      ? categoryParam
+      : 'all';
+
+  const [filter, setFilter] = useState<Filter>(initialFilter);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
   const brandDropdownRef = useRef<HTMLDivElement>(null);
   useDismiss(brandDropdownRef, brandDropdownOpen, () => setBrandDropdownOpen(false));
 
-  // Active brand from URL search query (e.g. /guidelines?brand=omnicloud)
-  const brandKey = searchParams.get('brand') || 'novafit';
-  const brandConfig = BRAND_GUIDELINES[brandKey] || BRAND_GUIDELINES.novafit;
+  // Sync state if category param in URL changes
+  useEffect(() => {
+    if (categoryParam && ['facts', 'terms', 'disclaimers', 'tone'].includes(categoryParam)) {
+      setFilter(categoryParam);
+    } else if (!categoryParam) {
+      setFilter('all');
+    }
+  }, [categoryParam]);
 
   const handleSelectBrand = (id: string) => {
-    setSearchParams({ brand: id });
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('brand', id);
+      return next;
+    });
+  };
+
+  const handleSelectCategory = (cat: Filter) => {
+    setFilter(cat);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (cat === 'all') {
+        next.delete('category');
+      } else {
+        next.set('category', cat);
+      }
+      return next;
+    });
   };
 
   const copy = async (key: string, text: string) => {
@@ -55,7 +98,14 @@ export function GuidelinesHub() {
     }
   };
 
-  // Filter sections by tab and query
+  // Pre-calculate counts for the 4 overview cards
+  const factsCount = brandConfig.sections.find(s => s.id === 'facts')?.rows.length || 0;
+  const termsCount = brandConfig.sections.find(s => s.id === 'terms')?.rows.length || 0;
+  const disclaimersCount = brandConfig.sections.find(s => s.id === 'disclaimers')?.rows.length || 0;
+  const toneCount = brandConfig.sections.find(s => s.id === 'tone')?.rows.length || 0;
+  const totalRules = brandConfig.sections.reduce((acc, s) => acc + s.rows.length, 0);
+
+  // Filter sections by tab and query. When filter !== 'all', it shows ONLY that card's guidelines!
   const filteredSections = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return brandConfig.sections
@@ -74,8 +124,6 @@ export function GuidelinesHub() {
       .filter(section => section.rows.length > 0);
   }, [brandConfig, filter, searchQuery]);
 
-  const totalRules = brandConfig.sections.reduce((acc, s) => acc + s.rows.length, 0);
-
   return (
     <div className="flex flex-col gap-8">
       {/* ── Page Header (Avatars & Bell ALWAYS Top-Right) ── */}
@@ -93,7 +141,7 @@ export function GuidelinesHub() {
         }
       />
 
-      {/* ── Active Brand Workspace Dropdown (Matching Image 4) ── */}
+      {/* ── Active Brand Workspace Dropdown (Compact Pill Selector) ── */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
@@ -181,12 +229,178 @@ export function GuidelinesHub() {
         </div>
       </div>
 
+      {/* ── 4 Guideline Category Cards (Image 5 Bento Grid Layout) ── */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
+            Guideline Categories · Select a card to inspect rules
+          </span>
+          {filter !== 'all' && (
+            <button
+              type="button"
+              onClick={() => handleSelectCategory('all')}
+              className="press flex items-center gap-1.5 text-caption font-semibold text-brand-orange hover:underline cursor-pointer"
+            >
+              <ArrowLeft className="size-3.5" {...ICON} /> View all categories
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Card 1: Approved Facts (Hero Orange) */}
+          <button
+            type="button"
+            onClick={() => handleSelectCategory(filter === 'facts' ? 'all' : 'facts')}
+            className={cn(
+              'group/card relative flex min-h-36 flex-col justify-between rounded-panel p-6 text-left transition-all duration-200 cursor-pointer',
+              focusRing,
+              'bg-brand-orange text-ink hover:scale-[1.01] hover:shadow-soft',
+              filter === 'facts' ? 'ring-4 ring-ink/30 shadow-lift' : 'opacity-95 hover:opacity-100'
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-ui font-medium text-ink">Approved facts</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-ink text-brand-orange transition-transform duration-200 group-hover/card:scale-110">
+                <ArrowUpRight className="size-6 shrink-0" {...ICON} />
+              </span>
+            </div>
+            <div className="my-1 flex items-baseline gap-2">
+              <span className="font-display text-display font-semibold tracking-tight text-ink tabular-nums">
+                <RollingNumber value={factsCount} />
+              </span>
+              <span className="text-ui font-medium text-ink/80">rules active</span>
+            </div>
+            <p className="text-caption text-ink/90 font-medium">
+              Audit-enforced pricing, APY yields, and certified metrics
+            </p>
+          </button>
+
+          {/* Card 2: Terminology (Hero Black) */}
+          <button
+            type="button"
+            onClick={() => handleSelectCategory(filter === 'terms' ? 'all' : 'terms')}
+            className={cn(
+              'group/card relative flex min-h-36 flex-col justify-between rounded-panel p-6 text-left transition-all duration-200 cursor-pointer',
+              focusRing,
+              'bg-ink text-paper hover:scale-[1.01] hover:shadow-soft',
+              filter === 'terms' ? 'ring-4 ring-brand-orange/40 shadow-lift' : 'opacity-95 hover:opacity-100'
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-ui font-medium text-paper">Terminology</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-ink transition-transform duration-200 group-hover/card:scale-110">
+                <ArrowUpRight className="size-6 shrink-0" {...ICON} />
+              </span>
+            </div>
+            <div className="my-1 flex items-baseline gap-2">
+              <span className="font-display text-display font-semibold tracking-tight text-brand-orange tabular-nums">
+                <RollingNumber value={termsCount} />
+              </span>
+              <span className="text-ui font-medium text-silver/80">rules active</span>
+            </div>
+            <p className="text-caption text-silver">
+              Approved phrasing, prohibited buzzwords & standard lexicon
+            </p>
+          </button>
+
+          {/* Card 3: Mandatory Disclaimers (White / Paper) */}
+          <button
+            type="button"
+            onClick={() => handleSelectCategory(filter === 'disclaimers' ? 'all' : 'disclaimers')}
+            className={cn(
+              'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
+              focusRing,
+              filter === 'disclaimers' ? 'ring-4 ring-brand-orange/30 border-brand-orange shadow-lift' : ''
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-ui font-medium text-graphite">Mandatory disclaimers</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110">
+                <ArrowUpRight className="size-6 shrink-0" {...ICON} />
+              </span>
+            </div>
+            <div className="my-1 flex items-center justify-between gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-display font-semibold tracking-tight text-ink tabular-nums">
+                  <RollingNumber value={disclaimersCount} />
+                </span>
+                <span className="text-ui font-medium text-graphite">rules active</span>
+              </div>
+              <span className="rounded-chip bg-brand-orange/10 px-2.5 py-1 text-caption font-bold text-brand-orange">
+                Mandatory
+              </span>
+            </div>
+            <p className="text-caption text-graphite">
+              Statutory regulatory disclosures & verbatim legal notices
+            </p>
+          </button>
+
+          {/* Card 4: Tone of Voice (White / Paper) */}
+          <button
+            type="button"
+            onClick={() => handleSelectCategory(filter === 'tone' ? 'all' : 'tone')}
+            className={cn(
+              'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
+              focusRing,
+              filter === 'tone' ? 'ring-4 ring-brand-orange/30 border-brand-orange shadow-lift' : ''
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-ui font-medium text-graphite">Tone of voice</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110">
+                <ArrowUpRight className="size-6 shrink-0" {...ICON} />
+              </span>
+            </div>
+            <div className="my-1 flex items-center justify-between gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-display font-semibold tracking-tight text-ink tabular-nums">
+                  <RollingNumber value={toneCount} />
+                </span>
+                <span className="text-ui font-medium text-graphite">rules active</span>
+              </div>
+              <span className="rounded-chip bg-silver/40 px-2.5 py-1 text-caption font-bold text-ink">
+                Brand Persona
+              </span>
+            </div>
+            <p className="text-caption text-graphite">
+              Institutional persona, voice posture & directives
+            </p>
+          </button>
+        </div>
+      </section>
+
+      {/* ── Single Card Active Banner (When one card is open) ── */}
+      {filter !== 'all' && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-silver/90 bg-silver/10 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleSelectCategory('all')}
+              className="press flex items-center gap-1.5 rounded-full border border-silver bg-paper px-3 py-1.5 text-caption font-semibold text-ink shadow-xs transition-colors hover:border-mid hover:bg-silver/20 cursor-pointer"
+            >
+              <ArrowLeft className="size-4" {...ICON} /> All Categories
+            </button>
+            <span className="text-caption text-graphite">
+              Showing only <span className="font-semibold text-ink">{CATEGORY_TITLES[filter]}</span> for {brandConfig.brandName}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleSelectCategory('all')}
+            className="text-caption font-medium text-brand-orange hover:underline cursor-pointer"
+          >
+            Close single-card view
+          </button>
+        </div>
+      )}
+
       {/* ── Toolbar: Category Filter Tabs + Real-Time Search ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
           label="Guideline categories"
           value={filter}
-          onChange={setFilter}
+          onChange={handleSelectCategory}
           items={[
             { id: 'all' as Filter, label: 'All Rules' },
             ...brandConfig.sections.map(section => ({
@@ -204,7 +418,11 @@ export function GuidelinesHub() {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder={`Search ${brandConfig.brandName} rules...`}
+            placeholder={
+              filter === 'all'
+                ? `Search ${brandConfig.brandName} rules...`
+                : `Search ${brandConfig.brandName} ${CATEGORY_TITLES[filter] || 'rules'}...`
+            }
             className={cn(
               'h-10 w-full rounded-full border border-silver bg-paper pr-4 pl-10 text-caption text-ink placeholder:text-mid shadow-xs transition-colors hover:border-mid focus:border-ink focus:outline-none',
               focusRing
@@ -222,7 +440,7 @@ export function GuidelinesHub() {
         </div>
       </div>
 
-      {/* ── Guideline Sections Display ── */}
+      {/* ── Guideline Sections Display (Shows ONLY that card's guidelines when a card is selected) ── */}
       {filteredSections.length === 0 ? (
         <Card className="p-8">
           <EmptyState icon={Search} title="No matching guideline rules found">
@@ -248,7 +466,7 @@ export function GuidelinesHub() {
                 </span>
               </div>
 
-              {/* ── Category 1: Approved Facts (Tactile Bento Grid) ── */}
+              {/* ── Category 1: Approved Facts (Matching Image 1: 2-Column Grid) ── */}
               {section.id === 'facts' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {section.rows.map(row => {
@@ -262,11 +480,11 @@ export function GuidelinesHub() {
                       >
                         <div className="flex flex-col gap-2.5">
                           <div className="flex items-start justify-between gap-3">
-                            <span className="text-caption font-semibold text-graphite uppercase tracking-wider">
+                            <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider">
                               {row.label}
                             </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
-                              <ShieldCheck className="size-3" strokeWidth={2.5} /> Certified Fact
+                            <span className="inline-flex items-center gap-1 rounded-full text-[11px] font-bold text-ink">
+                              <ShieldCheck className="size-3.5 text-ink" strokeWidth={2.5} /> Certified Fact
                             </span>
                           </div>
 
@@ -313,7 +531,7 @@ export function GuidelinesHub() {
                 </div>
               )}
 
-              {/* ── Category 2: Terminology / Lexicon (Before / After Comparison) ── */}
+              {/* ── Category 2: Terminology / Lexicon (Matching Image 2: Strikethrough -> Approved) ── */}
               {section.id === 'terms' && (
                 <div className="grid grid-cols-1 gap-4">
                   {section.rows.map(row => {
@@ -360,16 +578,17 @@ export function GuidelinesHub() {
                             <span className="font-semibold text-ink">Rationale:</span> {row.note}
                           </p>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Pill variant="outline" icon={BookMarked} caps={false}>
-                              {row.source}
-                            </Pill>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="inline-flex items-center gap-1.5 text-caption text-mid">
+                              <BookMarked className="size-3.5 text-graphite" {...ICON} />
+                              <span>{row.source}</span>
+                            </span>
 
                             <button
                               type="button"
                               onClick={() => copy(rowKey, row.value)}
                               className={cn(
-                                'press flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-caption font-medium transition-colors',
+                                'press flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-caption font-medium transition-all duration-150',
                                 focusRing,
                                 isCopied
                                   ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
@@ -394,24 +613,24 @@ export function GuidelinesHub() {
                 </div>
               )}
 
-              {/* ── Category 3: Mandatory Disclaimers (Legal Vault Containers) ── */}
+              {/* ── Category 3: Mandatory Disclaimers (Matching Image 3: Orange Accent & Quote Box) ── */}
               {section.id === 'disclaimers' && (
                 <div className="grid grid-cols-1 gap-4">
                   {section.rows.map(row => {
-                    const rowKey = `disc-${row.label}`;
+                    const rowKey = `disclaimer-${row.label}`;
                     const isCopied = copiedKey === rowKey;
 
                     return (
                       <Card
                         key={row.label}
-                        className="group flex flex-col gap-4 border-l-4 border-l-brand-orange p-5 transition-all duration-200 hover:shadow-soft"
+                        className="group flex flex-col gap-3.5 border-l-4 border-l-brand-orange p-5 transition-all duration-200 hover:border-graphite/40"
                       >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <span className="text-ui font-semibold text-ink">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col gap-1 min-w-0 flex-1">
+                            <h3 className="font-display text-subheading font-bold text-ink">
                               {row.label}
-                            </span>
-                            <p className="text-caption text-graphite mt-0.5">
+                            </h3>
+                            <p className="text-caption text-graphite">
                               {row.note}
                             </p>
                           </div>
@@ -428,7 +647,7 @@ export function GuidelinesHub() {
 
                         <div className="flex items-center justify-between border-t border-silver/60 pt-3">
                           <span className="inline-flex items-center gap-1.5 text-caption text-graphite">
-                            <BookMarked className="size-3.5 text-ink shrink-0" {...ICON} />
+                            <FileText className="size-3.5 text-ink shrink-0" {...ICON} />
                             {row.source}
                           </span>
 
@@ -460,7 +679,7 @@ export function GuidelinesHub() {
                 </div>
               )}
 
-              {/* ── Category 4: Tone of Voice Directives ── */}
+              {/* ── Category 4: Tone of Voice Directives (Matching Image 4: 2-Column Persona Cards) ── */}
               {section.id === 'tone' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {section.rows.map(row => {
@@ -477,12 +696,12 @@ export function GuidelinesHub() {
                             <span className="text-caption font-semibold uppercase tracking-wider text-graphite">
                               {row.label}
                             </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-caption font-semibold text-ink">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-0.5 text-caption font-semibold text-ink">
                               <Sparkles className="size-3 text-brand-orange" {...ICON} /> Brand Persona
                             </span>
                           </div>
 
-                          <p className="text-ui font-semibold text-ink">
+                          <p className="font-display text-subheading font-bold text-ink">
                             {row.value}
                           </p>
 
@@ -496,17 +715,27 @@ export function GuidelinesHub() {
                             {row.source}
                           </span>
 
-                          <IconButton
-                            label={`Copy "${row.value}"`}
-                            size="sm"
+                          <button
+                            type="button"
                             onClick={() => copy(rowKey, row.value)}
+                            className={cn(
+                              'press flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-caption font-medium transition-all duration-150',
+                              focusRing,
+                              isCopied
+                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                : 'border-silver bg-paper text-ink hover:border-mid hover:bg-silver/20'
+                            )}
                           >
                             {isCopied ? (
-                              <Check className="size-4 text-emerald-600" {...ICON} />
+                              <>
+                                <Check className="size-3.5 text-emerald-600" {...ICON} /> Copied
+                              </>
                             ) : (
-                              <Copy className="size-4 text-graphite" {...ICON} />
+                              <>
+                                <Copy className="size-3.5 text-graphite" {...ICON} /> Copy Directive
+                              </>
                             )}
-                          </IconButton>
+                          </button>
                         </div>
                       </Card>
                     );
