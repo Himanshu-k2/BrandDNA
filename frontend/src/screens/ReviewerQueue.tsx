@@ -112,23 +112,23 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
         ) : (
           <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
             <Button size="sm" onClick={() => navigate('/reviews/rev-1049?tab=compare')}>
-              Review & Diff <ArrowRight className="size-4" {...ICON} />
+              Review & diff <ArrowRight className="size-4" {...ICON} />
             </Button>
             {item.lane === 'urgent' &&
               (approveBlocked ? (
                 <Tooltip content={selfAuthored ? SELF_APPROVAL : 'Only brand managers and admins can approve submissions.'}>
                   <Button variant="secondary" size="sm" disabled>
-                    <ShieldCheck className="size-4" {...ICON} /> Quick Approve
+                    <ShieldCheck className="size-4" {...ICON} /> Approve
                   </Button>
                 </Tooltip>
               ) : (
                 <Button variant="secondary" size="sm" onClick={onApprove}>
-                  <ShieldCheck className="size-4" {...ICON} /> Quick Approve
+                  <ShieldCheck className="size-4" {...ICON} /> Approve
                 </Button>
               ))}
             {item.lane === 'urgent' && (
               <Button variant="ghost" size="sm" onClick={onRequest} disabled={!canApprove(persona.role)}>
-                Request Revisions
+                Request changes
               </Button>
             )}
           </div>
@@ -168,7 +168,7 @@ export function ReviewerQueue() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title={title}
-        subtitle="Deterministic checks are already cleared. Verify the diff, then sign off."
+        subtitle="Automated checks cleared. Review the diff to sign off."
         actions={
           <Tabs
             label="Queue lanes"

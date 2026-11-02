@@ -17,9 +17,9 @@ export function AdvisorCard({ view }: { view?: View } = {}) {
   const targetUrl = isBrandManager ? '/brand-manager/uploads' : '/reviews/rev-1049';
   const title = isBrandManager ? 'NovaFit guideline staging' : 'NovaFit pricing rule updated';
   const desc = isBrandManager
-    ? '6 extracted rules from NovaFit_Brand_Guidelines_2026.pdf staged and verified with 98% confidence. Ready for activation.'
-    : '₹999/mo is now the only approved membership price across every channel. Older drafts will be flagged.';
-  const btnLabel = isBrandManager ? 'Review Staging' : 'Learn More';
+    ? '6 staged rules verified at 98% confidence. Ready to activate.'
+    : '₹999/mo is the verified rate. Drafts quoting old prices are flagged.';
+  const btnLabel = isBrandManager ? 'Review rules' : 'View update';
 
   return (
     <section className="flex flex-col gap-4">
@@ -48,7 +48,7 @@ export function AdvisorCard({ view }: { view?: View } = {}) {
 export function ReviewsCard({ view }: { view: View }) {
   return (
     <section className="flex flex-col gap-4">
-      <SectionHeader title="Reviews" action={<SeeAll to={listPath(view)} />} />
+      <SectionHeader title="Review queue" action={<SeeAll to={listPath(view)} />} />
       <ul className="flex flex-col rounded-panel border border-silver bg-paper shadow-soft p-2">
         {reviewCounts(view).map(row => (
           <li key={row.label}>
@@ -69,7 +69,7 @@ export function ReviewsCard({ view }: { view: View }) {
 export function ActivityCard() {
   return (
     <section className="flex flex-col gap-4">
-      <SectionHeader title="Recent Activities" action={<SeeAll to="/reviews/rev-1049?tab=compare" />} />
+      <SectionHeader title="Recent activity" action={<SeeAll to="/reviews/rev-1049?tab=compare" />} />
       <ul className="flex flex-col rounded-panel border border-silver bg-paper shadow-soft p-2">
         {ACTIVITIES.map((item, index) => (
           <li key={item.name}>

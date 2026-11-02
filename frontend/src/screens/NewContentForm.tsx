@@ -308,7 +308,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
               disabled={submitting}
               className="press flex h-10 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper px-4 text-ui font-medium text-ink shadow-sm transition-[background-color,transform] duration-200 hover:bg-silver/24 active:scale-95 focus-visible:outline-2 focus-visible:outline-ink disabled:opacity-40"
             >
-              Try Instagram example
+              Sample: Instagram
             </button>
             <button
               type="button"
@@ -316,7 +316,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
               disabled={submitting}
               className="press flex h-10 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper px-4 text-ui font-medium text-ink shadow-sm transition-[background-color,transform] duration-200 hover:bg-silver/24 active:scale-95 focus-visible:outline-2 focus-visible:outline-ink disabled:opacity-40"
             >
-              Try NovaFit example
+              Sample: NovaFit
             </button>
             <div className="flex items-center gap-3 shrink-0 ml-auto">
               <OnlineTeamPresence />
@@ -326,7 +326,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
         </div>
 
         <p className="max-w-2xl text-body text-graphite pl-[52px]">
-          Upload your copy, documents, or images. We'll check them against your brand guidelines before they go to review.
+          Add copy, documents, or images. We'll audit them against brand guidelines before review.
         </p>
       </header>
 
@@ -520,12 +520,12 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
             {submitting ? (
               <>
                 <Loader2 className="size-5 animate-spin" {...ICON} />
-                Checking...
+                Auditing…
               </>
             ) : (
               <>
                 <ShieldCheck className="size-5" {...ICON} />
-                Check against brand guidelines
+                Audit content
               </>
             )}
           </button>
@@ -547,7 +547,7 @@ export function NewContentForm({ onSubmit }: { onSubmit: (data: NewContentSubmis
         }
       >
         <p className="text-body text-graphite">
-          Your brand, content type, title, files, and text will be cleared, and you'll return to the dashboard.
+          Your unsaved draft will be lost and you'll return to the dashboard.
         </p>
       </Modal>
     </div>

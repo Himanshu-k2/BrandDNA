@@ -73,7 +73,7 @@ export function AuditLedger() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Audit Log Ledger"
-        subtitle="Append-only, hash-chained record of every audit, decision and configuration change."
+        subtitle="Tamper-proof record of every audit, decision, and configuration change."
         actions={
           <Button variant="secondary" size="lg" onClick={() => exportCsv(rows)}>
             <Download className="size-5" {...ICON} /> Export CSV
@@ -95,7 +95,7 @@ export function AuditLedger() {
             <span className="flex items-center gap-2 text-ui font-semibold text-ink">
               <ShieldCheck className="size-5" {...ICON} /> Chain verified
             </span>
-            <span className="text-caption text-graphite">Every entry’s hash links to the previous one. No gaps detected.</span>
+            <span className="text-caption text-graphite">Cryptographic hash chain intact. Zero gaps detected.</span>
           </div>
         </Card>
       </Stagger>

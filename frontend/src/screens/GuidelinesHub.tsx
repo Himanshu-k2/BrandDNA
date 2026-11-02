@@ -130,14 +130,14 @@ export function GuidelinesHub() {
       {/* ── Page Header (Avatars & Bell ALWAYS Top-Right) ── */}
       <PageHeader
         title="Brand Guidelines Hub"
-        subtitle={`${brandConfig.brandName} · official approved facts, lexicon terminology, mandatory disclaimers, and voice rules enforced by the audit engine.`}
+        subtitle={`${brandConfig.brandName} · Verified facts, terminology rules, disclaimers, and voice directives.`}
         onBack={() => navigate(-1)}
         backAriaLabel="Back to previous page"
         eyebrow={
           <Pill variant="outline" icon={Lock} caps={false}>
             {persona.role === 'admin'
-              ? 'Managed by you · Platform Admin'
-              : 'Verified Brand Guidelines · Audit Enforced'}
+              ? 'Platform admin access'
+              : 'Audit-enforced rules'}
           </Pill>
         }
       />
@@ -146,10 +146,10 @@ export function GuidelinesHub() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
-            Active Brand Workspace
+            Active workspace
           </span>
           <span className="text-caption text-mid">
-            {totalRules} live enforcement rules active
+            {totalRules} active rules
           </span>
         </div>
 
@@ -234,7 +234,7 @@ export function GuidelinesHub() {
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
-            Guideline Categories · Select a card to inspect rules
+            Rule categories · Select a card to inspect
           </span>
           {isCardOpen && (
             <button
@@ -275,7 +275,7 @@ export function GuidelinesHub() {
               <span className="text-ui font-medium text-ink/80">rules active</span>
             </div>
             <p className="text-caption text-ink/90 font-medium">
-              Audit-enforced pricing, APY yields, and certified metrics
+              Verified pricing, rates, and certified metrics
             </p>
           </button>
 
@@ -303,7 +303,7 @@ export function GuidelinesHub() {
               <span className="text-ui font-medium text-silver/80">rules active</span>
             </div>
             <p className="text-caption text-silver">
-              Approved phrasing, prohibited buzzwords & standard lexicon
+              Approved terms and prohibited phrasing
             </p>
           </button>
 
@@ -335,7 +335,7 @@ export function GuidelinesHub() {
               </span>
             </div>
             <p className="text-caption text-graphite">
-              Statutory regulatory disclosures & verbatim legal notices
+              Required legal notices and disclaimers
             </p>
           </button>
 
@@ -367,7 +367,7 @@ export function GuidelinesHub() {
               </span>
             </div>
             <p className="text-caption text-graphite">
-              Institutional persona, voice posture & directives
+              Brand voice and persona directives
             </p>
           </button>
         </div>
@@ -458,8 +458,8 @@ export function GuidelinesHub() {
           {/* Guideline Sections Display (Shows ONLY the selected card's guidelines, clean without clutter below) */}
           {filteredSections.length === 0 ? (
             <Card className="p-8">
-              <EmptyState icon={Search} title="No matching guideline rules found">
-                No rules in {brandConfig.brandName} match &ldquo;{searchQuery}&rdquo;. Try clearing your search or switching categories.
+              <EmptyState icon={Search} title="No matching rules">
+                No rules match &ldquo;{searchQuery}&rdquo;. Try another search or switch categories.
               </EmptyState>
             </Card>
           ) : (

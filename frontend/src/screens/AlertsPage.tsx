@@ -71,10 +71,10 @@ export function AlertsPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title={notifications ? 'Notifications' : 'System Alerts'}
-        subtitle={notifications ? 'Review decisions, guideline changes and deadlines for your content.' : 'Deadlines, rule changes and engine health across every brand workspace.'}
+        subtitle={notifications ? 'Review updates, rule changes, and submission deadlines.' : 'Deadlines, rule updates, and workspace health.'}
         actions={
           <Button variant="secondary" size="lg" disabled={unread === 0} onClick={markAll}>
-            <CheckCheck className="size-5" {...ICON} /> Mark all as read
+            <CheckCheck className="size-5" {...ICON} /> Mark all read
           </Button>
         }
       />
@@ -93,8 +93,8 @@ export function AlertsPage() {
       <Stagger index={1}>
         <Card className="p-2">
           {rows.length === 0 ? (
-            <EmptyState icon={BellOff} title="Nothing here">
-              You’re all caught up on {filter === 'all' ? 'alerts' : `${filter} alerts`}.
+            <EmptyState icon={BellOff} title="All caught up">
+              No new notifications right now.
             </EmptyState>
           ) : (
             <ul className="flex flex-col">

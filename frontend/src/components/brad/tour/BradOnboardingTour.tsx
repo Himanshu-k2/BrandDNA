@@ -19,96 +19,96 @@ const getRoleSteps = (role: Role, firstName: string): TourStep[] => {
     creator: [
       {
         targetId: 'creator-dashboard',
-        title: 'Your Mission Control',
-        description: `Hey ${firstName}! Think of this as your creative home base. Here you can check your live compliance score, see what’s in flight, and keep an eye on review turnaround times so you never miss a launch.`,
+        title: 'Mission control',
+        description: `Welcome, ${firstName}! Track your live compliance score, drafts in progress, and review turnaround times.`,
         expression: 'happy',
       },
       {
         targetId: 'new-content',
-        title: 'Where New Ideas Take Flight',
-        description: `Got a fresh social drop, email, or ad campaign? Jump in here! Paste your draft or upload assets, and I'll pre-flight check your copy against approved brand colors, fonts, and pricing claims before you hit submit.`,
+        title: 'Draft pre-flight',
+        description: `Paste copy or upload assets. I'll pre-flight check colors, fonts, and pricing claims before you submit.`,
         expression: 'attentive',
       },
       {
         targetId: 'my-submissions-drafts',
-        title: 'Your Creative Workshop',
-        description: `Everything you've created lives right here. Track reviews in real-time, see helpful feedback notes from Priya and Sarah side-by-side, and apply 1-click guideline fixes without breaking a sweat.`,
+        title: 'Submissions & drafts',
+        description: `Track reviews in real time, view reviewer feedback side-by-side, and apply one-click guideline fixes.`,
         expression: 'excited',
       },
       {
         targetId: 'brand-guidelines',
-        title: 'Your Brand Cheat Sheet',
-        description: `No more guessing if that orange is on-brand! Browse official hex codes, certified pricing figures, and tone rules for every brand so your drafts sail through approval on the first try.`,
+        title: 'Brand guidelines',
+        description: `Browse official hex codes, approved facts, and tone rules for every brand workspace.`,
         expression: 'curious',
       },
       {
         targetId: 'ask-brad-capsule',
-        title: "I've Always Got Your Back!",
-        description: `You're all set to create! If you ever get stuck, need copywriting ideas, or want me to double-check a guideline rule, just tap my capsule down here anytime. Let’s make something amazing!`,
+        title: 'Ask Brad anytime',
+        description: `Need copywriting ideas, guideline checks, or quick answers? Tap my capsule down here anytime.`,
         expression: 'proud',
       },
     ],
     brand_manager: [
       {
         targetId: 'brand-dashboard',
-        title: 'Brand Health HQ',
-        description: `Welcome, ${firstName}! Keep a close eye on your brand's vital signs: track compliance pass rates, catch rule violations early, and protect brand integrity across all channels.`,
+        title: 'Brand health',
+        description: `Welcome, ${firstName}! Monitor compliance pass rates, catch rule risks early, and protect brand integrity.`,
         expression: 'happy',
       },
       {
         targetId: 'brand-asset-library',
-        title: 'The Source of Truth',
-        description: `Your official brand repository. Inspect verified hex palettes, typography hierarchies, and clear-space logo rules that keep your brand looking pristine.`,
+        title: 'Asset library',
+        description: `Your source of truth. Inspect verified hex palettes, typography hierarchy, and logo clear-space rules.`,
         expression: 'curious',
       },
       {
         targetId: 'guideline-ingestion',
-        title: 'AI Guideline Ingestion',
-        description: `Drop in your raw brand PDF manuals! I automatically parse them, extracting official colors, font weights, and pricing rules into live enforcement engines.`,
+        title: 'Guideline ingestion',
+        description: `Upload brand PDF manuals. I automatically parse them into live compliance enforcement rules.`,
         expression: 'excited',
       },
       {
         targetId: 'audit-log-ledger',
-        title: 'Cryptographic Audit Ledger',
-        description: `Tamper-proof accountability. Review cryptographic audit records verifying every single creative asset published by your teams.`,
+        title: 'Audit ledger',
+        description: `Tamper-proof records. Review cryptographic audit entries verifying every published creative asset.`,
         expression: 'attentive',
       },
       {
         targetId: 'ask-brad-capsule',
-        title: 'At Your Service!',
-        description: `You’re all set! Whenever you want to tweak guidelines, run rule simulations, or chat brand strategy, tap my capsule down here!`,
+        title: 'Ask Brad anytime',
+        description: `Tap my capsule anytime to adjust rules, run simulations, or chat brand strategy.`,
         expression: 'proud',
       },
     ],
     admin: [
       {
         targetId: 'platform-dashboard',
-        title: 'Your High-Altitude Cockpit',
-        description: `Welcome, ${firstName}! This is your 30,000-foot view. Monitor real-time platform compliance, track creator activity, and watch live audit velocities across all organizations at a glance.`,
+        title: 'Platform overview',
+        description: `Welcome, ${firstName}! Monitor platform compliance, creator activity, and audit volume across brands.`,
         expression: 'happy',
       },
       {
         targetId: 'user-role-mgmt',
-        title: 'Team & Access Control',
-        description: `Easily invite collaborators, set permissions, and assign team members to specific roles—Admin, Brand Manager, Reviewer, or Creator—with enterprise security.`,
+        title: 'Team & access',
+        description: `Invite team members, assign workspace roles, and manage permissions with enterprise security.`,
         expression: 'attentive',
       },
       {
         targetId: 'brand-workspaces',
-        title: 'Isolated Brand Universes',
-        description: `Govern multi-brand organizations (like NovaFit, OmniCloud, and Apex FinTech). Every workspace gets strictly isolated guideline sheets, approved facts, and dedicated reviewers.`,
+        title: 'Brand workspaces',
+        description: `Manage multi-brand workspaces with isolated guideline sheets, approved facts, and dedicated reviewers.`,
         expression: 'excited',
       },
       {
         targetId: 'approval-queue',
-        title: 'Review & Sign-Off Hub',
-        description: `Keep work flowing smoothly. Track drafts requiring urgent sign-offs, inspect tamper-proof cryptographic certificates, and oversee turnaround times.`,
+        title: 'Approval queue',
+        description: `Track drafts awaiting sign-off, verify cryptographic audit certificates, and oversee turnaround times.`,
         expression: 'curious',
       },
       {
         targetId: 'ask-brad-capsule',
-        title: 'Ready When You Are!',
-        description: `You’re all caught up! Whenever you need platform help, audit checks, or system configurations, just tap my capsule down here to chat. Have a great day!`,
+        title: 'Ask Brad anytime',
+        description: `Tap my capsule whenever you need system checks, config help, or live guidance.`,
         expression: 'proud',
       },
     ],
@@ -297,7 +297,7 @@ export function BradOnboardingTour() {
   const handleDeclineTour = () => {
     setPhase('declined');
     setDeclinedMessage(
-      `No problem at all, ${firstName}! If you ever run into any questions or need a hand with compliance, just tap my capsule down here anytime.`
+      `No problem, ${firstName}! Tap my capsule anytime if you need a hand.`
     );
 
     window.setTimeout(() => {
@@ -562,7 +562,7 @@ export function BradOnboardingTour() {
                 <p className="text-ui text-graphite leading-relaxed">
                   I'm <strong className="text-ink font-semibold">Brad</strong>, your AI Brand Guardian.
                   Welcome to <span className="text-ink font-semibold">BrandDNA</span>!
-                  Would you like a quick, friendly walkthrough of your workspace to see how everything fits together?
+                  Want a quick 1-minute walkthrough of your workspace?
                 </p>
 
                 <div className="mt-2 flex items-center justify-end gap-3 pt-2">

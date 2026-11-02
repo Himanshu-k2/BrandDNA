@@ -127,8 +127,8 @@ export function BrandManagerAssets() {
     <div className="flex flex-col gap-8">
       {/* ── Page Header (Avatars & Bell ALWAYS Top-Right) ── */}
       <PageHeader
-        title={`Brand Asset Library: ${brand.name}`}
-        subtitle="Official color palettes, typography standards, logo clear space rules, and verified pricing facts."
+        title={`Asset Library: ${brand.name}`}
+        subtitle="Approved colors, typography, logo clear space, and pricing facts."
         onBack={() => navigate('/dashboard?role=brand_manager')}
         backAriaLabel="Back to dashboard"
       />

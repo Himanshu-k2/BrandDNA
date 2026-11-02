@@ -34,6 +34,8 @@ export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [remember, setRemember] = useState(true);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [status, setStatus] = useState<Status>('idle');
@@ -115,7 +117,12 @@ export function LoginScreen() {
       <section className="relative hidden flex-1 flex-col justify-between overflow-hidden rounded-shell bg-silver/40 p-12 lg:flex">
         <span />
         <div className="flex justify-center pr-16">
-          <Characters />
+          <Characters
+            isPasswordFocused={isPasswordFocused}
+            isEmailFocused={isEmailFocused}
+            isError={status === 'error'}
+            isSuccess={busy}
+          />
         </div>
         <Logo variant="horizontal" size="md" />
       </section>
@@ -129,7 +136,7 @@ export function LoginScreen() {
 
           <RevealText text="Welcome back!" className="mt-8 text-center font-display text-display font-semibold tracking-tight text-ink" delay={0.12} />
           <motion.p className="mt-2 text-center text-body text-graphite" variants={fieldVariants} custom={2} initial="hidden" animate="show">
-            Please enter your details
+            Sign in to your brand workspace.
           </motion.p>
 
           <form className="mt-8 flex flex-col" onSubmit={submit} noValidate>
@@ -140,6 +147,8 @@ export function LoginScreen() {
                 autoComplete="email"
                 value={email}
                 error={errors.email}
+                onFocus={() => setIsEmailFocused(true)}
+                onBlur={() => setIsEmailFocused(false)}
                 onChange={event => {
                   setEmail(event.target.value);
                   setDemo(null);
@@ -154,6 +163,8 @@ export function LoginScreen() {
                 autoComplete="current-password"
                 value={password}
                 error={errors.password}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
                 onChange={event => {
                   setPassword(event.target.value);
                   resetFeedback();
@@ -178,7 +189,7 @@ export function LoginScreen() {
               <button
                 type="button"
                 className="cursor-pointer text-caption text-graphite underline-offset-4 transition-colors hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-ink"
-                onClick={() => setNotice(EMAIL_PATTERN.test(email.trim()) ? `Reset link sent to ${email.trim()}.` : 'Enter your email first, then request a reset link.')}
+                onClick={() => setNotice(EMAIL_PATTERN.test(email.trim()) ? `Reset link sent to ${email.trim()}.` : 'Enter your email above to receive a reset link.')}
               >
                 Forgot password?
               </button>
@@ -196,14 +207,14 @@ export function LoginScreen() {
               <button type="submit" disabled={busy} className={cn(primaryButton, 'bg-ink text-paper hover:bg-graphite')}>
                 {status === 'loading' ? (
                   <>
-                    <LoaderCircle className="size-5 animate-spin" strokeWidth={1.5} /> Logging in…
+                    <LoaderCircle className="size-5 animate-spin" strokeWidth={1.5} /> Signing in…
                   </>
                 ) : status === 'error' ? (
                   <>
-                    <CircleAlert className="size-5" strokeWidth={1.5} /> Check your details and try again
+                    <CircleAlert className="size-5" strokeWidth={1.5} /> Invalid email or password. Try again.
                   </>
                 ) : (
-                  'Log in'
+                  'Sign in'
                 )}
               </button>
               <button
@@ -216,13 +227,13 @@ export function LoginScreen() {
                 className={cn(primaryButton, 'border border-silver bg-paper text-ink hover:bg-silver/40')}
               >
                 {status === 'google' ? <LoaderCircle className="size-5 animate-spin" strokeWidth={1.5} /> : <GoogleMark />}
-                Log in with Google
+                Sign in with Google
               </button>
             </motion.div>
           </form>
 
           <motion.div className="mt-8 flex flex-wrap items-center justify-center gap-2" variants={fieldVariants} custom={7} initial="hidden" animate="show">
-            <span className="text-caption text-graphite">Demo accounts</span>
+            <span className="text-caption text-graphite">Quick sign-in</span>
             {ORDER.map(role => (
               <button
                 key={role}
@@ -245,9 +256,9 @@ export function LoginScreen() {
           <button
             type="button"
             className="cursor-pointer font-semibold text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ink"
-            onClick={() => setNotice('Accounts are provisioned by your workspace admin. Ask them for an invite.')}
+            onClick={() => setNotice('Your workspace admin manages invites. Contact them for access.')}
           >
-            Sign Up
+            Request invite
           </button>
         </p>
       </section>

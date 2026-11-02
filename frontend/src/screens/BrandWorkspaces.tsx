@@ -36,10 +36,10 @@ export function BrandWorkspaces() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Brand Workspaces"
-        subtitle="Each brand keeps an isolated set of approved facts, lexicon rules, disclaimers and governance rules. Nothing leaks between workspaces."
+        subtitle="Isolated facts, terminology rules, disclaimers, and audits for each brand."
         actions={
           <Button size="lg" onClick={() => navigate('/dashboard/queue')}>
-            <Inbox className="size-5" {...ICON} /> Open approvals
+            <Inbox className="size-5" {...ICON} /> Review queue
           </Button>
         }
       />
@@ -95,7 +95,7 @@ export function BrandWorkspaces() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Button variant="secondary" size="sm" onClick={() => navigate(`/guidelines?brand=${brand.id}`)}>
-                      <BookOpen className="size-4" {...ICON} /> Guidelines
+                      <BookOpen className="size-4" {...ICON} /> View rules
                     </Button>
                     <Button
                       variant="ghost"
@@ -105,7 +105,7 @@ export function BrandWorkspaces() {
                         navigate('/submissions');
                       }}
                     >
-                      View submissions
+                      Submissions
                     </Button>
                   </div>
                 </div>

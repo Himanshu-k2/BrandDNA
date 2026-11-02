@@ -103,20 +103,20 @@ export function BrandManagerUploads() {
     <div className="flex flex-col gap-8">
       {/* ── Page Header ── */}
       <PageHeader
-        title="Guideline Ingestion & Document Intelligence"
-        subtitle="Upload PDF brand manuals to automatically extract official color palettes, font weights, logo clearance, and pricing rules."
+        title="Guideline Ingestion & Intelligence"
+        subtitle="Upload PDF manuals to extract colors, fonts, logo clearance, and pricing rules."
         onBack={() => navigate('/dashboard?role=brand_manager')}
         backAriaLabel="Back to dashboard"
         actions={
           <div className="flex flex-wrap items-center gap-3">
             <Button size="md" variant="secondary" onClick={() => loadSamplePdf('novafit')}>
-              Load NovaFit PDF
+              Sample: NovaFit
             </Button>
             <Button size="md" variant="secondary" onClick={() => loadSamplePdf('voltauto')}>
-              Load VoltAuto PDF
+              Sample: VoltAuto
             </Button>
             <Button size="md" onClick={() => navigate('/brand-manager/assets')}>
-              View Asset Library
+              Asset library
             </Button>
           </div>
         }
@@ -130,12 +130,12 @@ export function BrandManagerUploads() {
               <FileUp className="size-5" {...ICON} />
             </span>
             <div>
-              <h2 className="font-display text-subheading font-semibold text-ink">Ingest Brand Manual PDF</h2>
-              <p className="text-caption text-graphite">Supports official PDF guideline documents up to 25 MB</p>
+              <h2 className="font-display text-subheading font-semibold text-ink">Upload brand manual</h2>
+              <p className="text-caption text-graphite">PDFs up to 25 MB supported</p>
             </div>
           </div>
           <Pill variant="silver" caps={false}>
-            Document Staging Ready
+            Ready to upload
           </Pill>
         </div>
 

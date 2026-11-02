@@ -81,9 +81,9 @@ export function ReviewStudio() {
   const editable = persona.role === 'creator' && ['draft', 'needs_changes', 'changes_requested'].includes(status);
   const lockedReason =
     persona.role !== 'creator'
-      ? 'Brand Managers and Admins inspect and sign off; only the content author can revise this draft.'
+      ? 'Brand Managers and Admins sign off; only the author can edit this draft.'
       : !editable
-        ? 'This revision is locked while it is in review.'
+        ? 'Locked during review.'
         : undefined;
 
   const runAudit = (text: string = draft) => {
@@ -190,7 +190,7 @@ export function ReviewStudio() {
           </div>
         }
       >
-        Or load the NovaFit test case: real copy with pricing, terminology, and disclaimer violations.
+        Or load the NovaFit test case with sample pricing and disclaimer rules.
       </EmptyState>
     </div>
   );
@@ -301,7 +301,7 @@ export function ReviewStudio() {
                 {status === 'in_review' && (
                   <div className="flex flex-wrap items-center gap-2 rounded-min bg-silver/40 p-2 pl-4 text-ui text-ink">
                     <CircleCheck className="size-5" {...ICON} />
-                    <span className="flex-1">Submitted for sign-off. Editing is locked while Brand Manager reviews v2.</span>
+                    <span className="flex-1">Submitted for sign-off. Locked during review.</span>
                     <Button variant="secondary" size="sm" onClick={() => setTab('compare')}>
                       View diff
                     </Button>
@@ -312,7 +312,7 @@ export function ReviewStudio() {
                   {!audited ? (
                     <>
                       <Button size="lg" onClick={() => runAudit()} disabled={!draft.trim() || scanStep !== null}>
-                        <Zap className="size-5" {...ICON} /> Run brand & fact audit
+                        <Zap className="size-5" {...ICON} /> Audit copy
                       </Button>
                       {draft.trim() && (
                         <Button variant="ghost" onClick={() => setDraft('')}>
@@ -327,21 +327,21 @@ export function ReviewStudio() {
                     </>
                   ) : (
                     <>
-                      <Tooltip content={lockedReason ?? 'Applies every deterministic fix in one pass.'}>
+                      <Tooltip content={lockedReason ?? 'Apply all suggested fixes.'}>
                         <Button variant="secondary" onClick={applyAll} disabled={!editable || audit.open.length === 0}>
                           <WandSparkles className="size-4" {...ICON} /> Apply all fixes
                         </Button>
                       </Tooltip>
                       <Button variant="ghost" onClick={() => setEditing(value => !value)} disabled={!editable}>
-                        <PenLine className="size-4" {...ICON} /> {editing ? 'Done editing' : 'Edit & revise (v2)'}
+                        <PenLine className="size-4" {...ICON} /> {editing ? 'Done' : 'Edit draft'}
                       </Button>
                       <div className="ml-auto">
                         {canApprove(persona.role) ? (
                           <Button onClick={() => setTab('compare')}>
-                            Go to compare & sign-off <ChevronRight className="size-4" {...ICON} />
+                            Compare & sign off <ChevronRight className="size-4" {...ICON} />
                           </Button>
                         ) : (
-                          <Tooltip content={audit.canSubmit ? 'Sends v2 to Brand Manager / Admin for formal sign-off.' : `Resolve high-severity issues and reach ${SUBMIT_THRESHOLD}+ to unlock submission.`}>
+                          <Tooltip content={audit.canSubmit ? 'Send v2 for formal sign-off.' : `Fix high risks and reach ${SUBMIT_THRESHOLD}% to submit.`}>
                             <Button size="lg" onClick={submit} disabled={!audit.canSubmit || !editable}>
                               <Send className="size-5" {...ICON} /> Submit for sign-off
                             </Button>
@@ -360,7 +360,7 @@ export function ReviewStudio() {
                 ) : !audited ? (
                   <Card>
                     <EmptyState icon={Zap} title="Diagnostics appear here">
-                      Deterministic pricing, lexicon, and disclaimer checks run first, each with a cited source.
+                      Pricing, terminology, and disclaimer checks will appear here.
                     </EmptyState>
                   </Card>
                 ) : (
@@ -372,13 +372,13 @@ export function ReviewStudio() {
                         <div className="flex min-w-0 flex-col gap-1">
                           <p className="text-caption font-medium text-mid">Compliance score</p>
                           <p className="font-display text-subheading font-semibold text-ink">
-                            {audit.open.length === 0 ? 'Zero violations detected' : audit.canSubmit ? 'Ready for sign-off' : 'High-risk discrepancies'}
+                            {audit.open.length === 0 ? 'Zero violations' : audit.canSubmit ? 'Ready for sign-off' : 'High risks flagged'}
                           </p>
-                          <p className="text-caption text-graphite">Must reach {SUBMIT_THRESHOLD} with no high-severity issues to submit.</p>
+                          <p className="text-caption text-graphite">Requires {SUBMIT_THRESHOLD}% and zero high risks to submit.</p>
                         </div>
                       </div>
                       <p className="flex items-center gap-2 rounded-min bg-silver/40 px-3 py-2 text-caption font-medium text-ink">
-                        <Zap className="size-4" {...ICON} /> Deterministic rules active · verified against approved brand data
+                        <Zap className="size-4" {...ICON} /> Active rules · Verified against brand data
                       </p>
                       <div className="flex flex-wrap gap-2">
                         <SeverityBadge severity="high" count={severityCount('high')} />
@@ -390,7 +390,7 @@ export function ReviewStudio() {
                     {audit.open.length === 0 ? (
                       <Card className="flex gap-3 bg-silver/24 p-4">
                         <CircleCheck className="size-5 shrink-0 text-ink" {...ICON} />
-                        <p className="text-body text-ink">Zero violations detected. Copy fully adheres to NovaFit guidelines, pricing rules, and tone standards.</p>
+                        <p className="text-body text-ink">All clear. Copy complies with all brand rules and pricing.</p>
                       </Card>
                     ) : (
                       <div className="flex flex-col gap-4">

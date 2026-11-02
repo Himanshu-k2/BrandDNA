@@ -23,7 +23,7 @@ export function RestrictedState({ title }: { title: string }) {
   return (
     <Card>
       <EmptyState icon={Lock} title={`${title} is restricted`}>
-        Only Platform Admins can open this page. Switch persona from the user card in the sidebar to explore it.
+        Only Platform Admins can access this page.
       </EmptyState>
     </Card>
   );
@@ -93,7 +93,7 @@ export function UsersPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="User & Role Mgmt"
-        subtitle="Role-based access: creators draft and submit, brand managers and admins review and sign off."
+        subtitle="Manage team roles and brand workspace permissions."
         actions={
           <Button size="lg" onClick={() => setInviting(true)}>
             <UserPlus className="size-5" {...ICON} /> Invite user

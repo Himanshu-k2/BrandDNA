@@ -7,7 +7,7 @@ import { diffStats, diffWords, toLines, type DiffOp } from '@/lib/diff';
 import { auditDraft, NOVAFIT_RULES } from '@/lib/rules';
 
 export const SELF_APPROVAL_COPY =
-  'To prevent compliance leakage, content authors cannot approve their own submissions. An authorized brand manager or admin must sign off.';
+  'Authors cannot approve their own submissions. A brand manager or admin must sign off.';
 
 export interface Decision {
   kind: 'approved' | 'changes' | 'rejected';
@@ -246,8 +246,8 @@ export function CompareVersions({
                 setNeedsNote(false);
               }}
               disabled={!canDecide}
-              error={needsNote ? 'Add specific feedback so the author knows exactly what to change.' : undefined}
-              hint={needsNote ? undefined : 'Required for Request Changes and Reject.'}
+              error={needsNote ? 'Add specific feedback so the author knows what to change.' : undefined}
+              hint={needsNote ? undefined : 'Required for changes or rejection.'}
             />
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="secondary" size="lg" disabled={!canDecide} onClick={() => decide('changes')}>

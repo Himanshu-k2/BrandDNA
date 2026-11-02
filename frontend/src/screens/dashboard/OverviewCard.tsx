@@ -52,12 +52,12 @@ export function OverviewCard({ view }: { view: View }) {
         : '/dashboard/queue';
   return (
     <section className="flex flex-col gap-4">
-      <SectionHeader title="Overview performance" action={<PeriodToggle value={period} onChange={setPeriod} />} />
+      <SectionHeader title="Performance" action={<PeriodToggle value={period} onChange={setPeriod} />} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {stats.map((stat, index) => {
           const { value, previous } = scaleStat(stat, period);
           const delta = value - previous;
-          const from = `From ${previous.toLocaleString('en-US')}${stat.percent ? '%' : ''} (${window})`;
+          const from = `vs ${previous.toLocaleString('en-US')}${stat.percent ? '%' : ''} (${window})`;
           if (stat.accent)
             return (
               <HeroStatCard

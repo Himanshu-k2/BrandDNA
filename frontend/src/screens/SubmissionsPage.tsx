@@ -90,17 +90,17 @@ export function SubmissionsPage({ scope }: { scope: 'mine' | 'all' }) {
         title={mine ? 'My Submissions & Drafts' : 'All Submissions'}
         subtitle={
           mine
-            ? `${counts.needs_changes} assets need changes and ${counts.pending} are waiting on sign-off.`
-            : 'Every asset sent through brand governance, across all isolated brand workspaces.'
+            ? `${counts.needs_changes} drafts need changes; ${counts.pending} await sign-off.`
+            : 'All submissions and audit records across brand workspaces.'
         }
         actions={
           mine ? (
             <Button size="lg" onClick={() => navigate('/reviews/new')}>
-              <CirclePlus className="size-5" {...ICON} /> New Content
+              <CirclePlus className="size-5" {...ICON} /> New submission
             </Button>
           ) : (
             <Button size="lg" onClick={() => navigate('/dashboard/queue')}>
-              <Inbox className="size-5" {...ICON} /> Open Approvals
+              <Inbox className="size-5" {...ICON} /> Review queue
             </Button>
           )
         }
