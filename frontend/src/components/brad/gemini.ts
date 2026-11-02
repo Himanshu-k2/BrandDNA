@@ -106,7 +106,7 @@ export async function askGeminiDirect(
 
   const preferredModel = getStoredGeminiModel();
   const models = Array.from(
-    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'])
+    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3-flash-preview'])
   );
   let lastError: any = null;
 
@@ -127,11 +127,15 @@ ${message}`;
   ];
 
   for (const model of models) {
+    const ac = new AbortController();
+    const timeoutId = setTimeout(() => ac.abort(), 8000);
+
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: ac.signal,
         body: JSON.stringify({
           system_instruction: {
             parts: [{ text: SYSTEM_INSTRUCTION }]
@@ -143,6 +147,7 @@ ${message}`;
           }
         })
       });
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -172,6 +177,8 @@ ${message}`;
     } catch (err: any) {
       lastError = err;
       console.warn(`Gemini model ${model} notice:`, err.message);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 

@@ -50,5 +50,5 @@ export const getGeminiFallbackModelName = () => {
   if (process.env.GEMINI_FALLBACK_MODEL && process.env.GEMINI_FALLBACK_MODEL.trim() !== '') {
     return process.env.GEMINI_FALLBACK_MODEL.trim();
   }
-  return 'gemini-3.8-flash';
+  return 'gemini-3.6-flash';
 };
