@@ -106,7 +106,7 @@ export async function askGeminiDirect(
 
   const preferredModel = getStoredGeminiModel();
   const models = Array.from(
-    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'])
+    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'])
   );
   let lastError: any = null;
 
