@@ -33,7 +33,7 @@ export const isGeminiConfigured = () => {
 
 /**
  * Resolves the configured Gemini model name.
- * Supports Google AI Studio's 'gemini-3.8-flash', 'gemini-2.5-pro', etc.
+ * Defaults to Google AI Studio's 'gemini-3.8-flash'.
  */
 export const getGeminiModelName = () => {
   const envModel = process.env.GEMINI_MODEL;
@@ -50,6 +50,5 @@ export const getGeminiFallbackModelName = () => {
   if (process.env.GEMINI_FALLBACK_MODEL && process.env.GEMINI_FALLBACK_MODEL.trim() !== '') {
     return process.env.GEMINI_FALLBACK_MODEL.trim();
   }
-  const primary = getGeminiModelName();
-  return primary === 'gemini-3.8-flash' ? 'gemini-2.5-flash' : 'gemini-3.8-flash';
+  return 'gemini-3.8-flash';
 };
