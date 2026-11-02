@@ -173,19 +173,28 @@ export function extractRulesFromText(text, brandName = 'Brand') {
 export const getBrandDocuments = async (req, res, next) => {
   try {
     let brandId = null;
+    const organizationId = req.user.organizationId;
     if (req.params.id && mongoose.Types.ObjectId.isValid(req.params.id)) {
       const brand = await Brand.findById(req.params.id);
-      if (brand) brandId = brand._id;
+      if (brand) {
+        if (brand.organizationId.toString() !== organizationId.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: 'Forbidden: You cannot access documents from another organization',
+          });
+        }
+        brandId = brand._id;
+      }
     }
     if (!brandId) {
-      const activeBrand = await Brand.findOne({ status: 'active' });
+      const activeBrand = await Brand.findOne({ organizationId, status: 'active' });
       if (activeBrand) brandId = activeBrand._id;
     }
     if (!brandId) {
       return res.status(200).json({ success: true, data: { documents: [] }, documents: [] });
     }
 
-    const documents = await GuidelineDocument.find({ brandId })
+    const documents = await GuidelineDocument.find({ brandId, organizationId })
       .select('-rawText')
       .sort({ createdAt: -1 });
 
@@ -209,6 +218,12 @@ export const getBrandDocumentById = async (req, res, next) => {
     const doc = await GuidelineDocument.findById(req.params.docId);
     if (!doc) {
       return res.status(404).json({ success: false, message: 'Guideline document not found' });
+    }
+    if (doc.organizationId && doc.organizationId.toString() !== req.user.organizationId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You cannot access documents from another organization',
+      });
     }
 
     res.status(200).json({

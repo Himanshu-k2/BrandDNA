@@ -1,0 +1,37 @@
+name: Strix AppSec & Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-audit:
+    name: Strix Automated Security Testing & Code Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+
+      - name: Run Backend Security & Authorization Test Suite
+        run: |
+          cd backend
+          npm test
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Run Frontend Build & Static Analysis
+        run: npm --prefix frontend run build

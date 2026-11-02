@@ -23,14 +23,11 @@ export const register = async (req, res, next) => {
     // Role assignment & privilege escalation prevention
     const totalUsers = await User.countDocuments();
     let assignedRole = 'creator';
-    if (email.toLowerCase().includes('brandmanager') || email.toLowerCase().includes('admin')) {
-      assignedRole = 'admin';
-    }
 
     if (totalUsers === 0) {
       // First user bootstrap pattern: initial user is granted admin
       assignedRole = 'admin';
-    } else if (role && (role === 'admin' || role === 'reviewer')) {
+    } else if (role && (role === 'admin' || role === 'reviewer' || role === 'brand_manager')) {
       const configuredSecret = process.env.ADMIN_INVITE_SECRET;
       if (!configuredSecret || adminSecretKey !== configuredSecret) {
         return res.status(403).json({

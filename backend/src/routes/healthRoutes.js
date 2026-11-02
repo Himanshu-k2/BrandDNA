@@ -18,7 +18,10 @@ router.get('/', (req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
-    database: dbState,
+    database: {
+      state: dbState.state,
+      isConnected: dbState.isConnected,
+    },
     environment: process.env.NODE_ENV || 'development',
   };
 

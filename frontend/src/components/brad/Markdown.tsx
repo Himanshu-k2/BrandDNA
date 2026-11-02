@@ -89,12 +89,14 @@ export function Markdown({ text, reveal = false, wordMs = 35, tone = 'light' }: 
           ];
         case 'link': {
           const className = cn('rounded-min font-medium underline underline-offset-4', focusRing);
-          const link = token.href.startsWith('/') ? (
-            <Link to={token.href} className={className}>
+          const isSafeHref = /^(https?:\/\/|mailto:|\/)/i.test(token.href);
+          const safeHref = isSafeHref ? token.href : '#';
+          const link = safeHref.startsWith('/') ? (
+            <Link to={safeHref} className={className}>
               {token.value}
             </Link>
           ) : (
-            <a href={token.href} target="_blank" rel="noreferrer" className={className}>
+            <a href={safeHref} target="_blank" rel="noreferrer" className={className}>
               {token.value}
             </a>
           );

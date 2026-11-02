@@ -93,7 +93,7 @@ router
 router
   .route('/:id/documents')
   .get(protect, getBrandDocuments)
-  .post(protect, handleUpload, uploadBrandDocument);
+  .post(protect, authorize('admin', 'brand_manager'), handleUpload, uploadBrandDocument);
 
 router
   .route('/:id/documents/:docId')
@@ -101,6 +101,6 @@ router
 
 router
   .route('/:id/documents/:docId/items/:itemId')
-  .patch(protect, reviewExtractedItem);
+  .patch(protect, authorize('admin', 'brand_manager'), reviewExtractedItem);
 
 export default router;

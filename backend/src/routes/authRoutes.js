@@ -1,3 +1,4 @@
+import { authRateLimiter } from '../middleware/rateLimitMiddleware.js';
 import { Router } from 'express';
 import { register, login, getMe } from '../controllers/authController.js';
 import { validateBody } from '../middleware/validateMiddleware.js';
@@ -11,14 +12,14 @@ const router = Router();
  * @desc    Register a new user account
  * @access  Public
  */
-router.post('/register', validateBody(registerSchema), register);
+router.post('/register', authRateLimiter, validateBody(registerSchema), register);
 
 /**
  * @route   POST /api/auth/login
  * @desc    Log in user and return JWT
  * @access  Public
  */
-router.post('/login', validateBody(loginSchema), login);
+router.post('/login', authRateLimiter, validateBody(loginSchema), login);
 
 /**
  * @route   GET /api/auth/me

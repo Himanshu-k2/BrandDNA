@@ -79,17 +79,7 @@ export const getBrands = async (req, res, next) => {
       Brand.countDocuments(query),
     ]);
 
-    // Fallback: If no brands exist for user's organization, fetch any active brands
-    if (brands.length === 0) {
-      const activeBrands = await Brand.find({ status: 'active' })
-        .sort({ createdAt: -1 })
-        .limit(limitNum)
-        .populate('createdBy', 'name email');
-      if (activeBrands.length > 0) {
-        brands = activeBrands;
-        total = activeBrands.length;
-      }
-    }
+// Multi-tenant isolation: do not leak brands from other organizations
 
     // If still 0 brands in system, bootstrap default NovaFit brand workspace
     if (brands.length === 0) {
