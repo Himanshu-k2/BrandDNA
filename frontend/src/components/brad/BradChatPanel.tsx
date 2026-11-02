@@ -40,7 +40,7 @@ import { BradFace } from './face/BradFace';
 import { countWords, Markdown } from './Markdown';
 import { BradIconButton, ListeningBars, ModeSwitch, TypingDots } from './parts';
 import { useActiveWorkspace } from './workspace';
-import { getStoredGeminiKey, setStoredGeminiKey, isGeminiDirectActive } from './gemini';
+import { getStoredGeminiKey, setStoredGeminiKey, isGeminiDirectActive, getStoredGeminiModel } from './gemini';
 
 /*
  * Radii: panel 24 − 16 padding → bubbles 8 (radius-chip), sender corner 4 (radius-min).
@@ -255,7 +255,7 @@ export function BradChatPanel({
                 </div>
                 <div className="flex items-center justify-between text-caption text-graphite pt-0.5">
                   <span className="text-caption">
-                    {geminiActive ? '✅ Gemini 2.5 Flash active' : 'Using built-in knowledge'}
+                    {geminiActive ? `✅ ${getStoredGeminiModel() === 'gemini-3.8-flash' ? 'Gemini 3.8 Flash' : getStoredGeminiModel()} active` : 'Using built-in knowledge'}
                   </span>
                   <a
                     href="https://aistudio.google.com/app/apikey"
