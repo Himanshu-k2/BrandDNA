@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, ChevronRight, Sparkles, Users } from 'lucide-react';
+import { Check, Sparkles, Users } from 'lucide-react';
 import { PERSONAS, useSession, type Role } from '@/state/session';
 import { cn } from '@/lib/cn';
 import { DURATION, EASE } from '@/lib/motion';
@@ -49,7 +49,7 @@ const PRESENCE_DATA: PersonaPresenceInfo[] = [
 ];
 
 export function OnlineTeamPresence({ className, compact = false }: OnlineTeamPresenceProps) {
-  const { persona, setRole } = useSession();
+  const { persona } = useSession();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -131,28 +131,23 @@ export function OnlineTeamPresence({ className, compact = false }: OnlineTeamPre
               </span>
             </div>
 
-            {/* Persona List */}
+            {/* Persona List (Pure presence status - no switch role action) */}
             <div className="mt-2 flex flex-col gap-1.5">
               {PRESENCE_DATA.map(item => {
                 const target = PERSONAS[item.role];
                 const isCurrent = persona.role === item.role;
 
                 return (
-                  <button
+                  <div
                     key={item.role}
-                    type="button"
-                    onClick={() => {
-                      setRole(item.role);
-                      setOpen(false);
-                    }}
                     className={cn(
-                      'group/row flex items-center justify-between rounded-xl p-2 text-left transition-all duration-150 cursor-pointer',
+                      'flex items-center justify-between rounded-xl p-2.5 transition-colors',
                       isCurrent
-                        ? 'bg-silver/40 border border-silver/60'
-                        : 'hover:bg-silver/20 border border-transparent hover:border-silver/40'
+                        ? 'bg-silver/35 border border-silver/60'
+                        : 'border border-transparent hover:bg-silver/15'
                     )}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       {/* Avatar */}
                       <div className="relative shrink-0">
                         <div
@@ -182,17 +177,19 @@ export function OnlineTeamPresence({ className, compact = false }: OnlineTeamPre
                       </div>
                     </div>
 
-                    {/* Action */}
+                    {/* Status indicator (pure presence, no switch option) */}
                     <div className="shrink-0 pl-2">
                       {isCurrent ? (
-                        <Check className="size-4 text-emerald-600" {...ICON} />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                          <Check className="size-3.5" {...ICON} /> Current
+                        </span>
                       ) : (
-                        <span className="flex items-center text-caption font-semibold text-brand-orange opacity-0 transition-opacity group-hover/row:opacity-100">
-                          Switch <ChevronRight className="size-3.5" {...ICON} />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-graphite">
+                          <span className="size-1.5 rounded-full bg-emerald-500" /> Active
                         </span>
                       )}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

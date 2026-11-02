@@ -70,19 +70,50 @@ export const SEVERITY: Record<Severity, { label: string; tone: Tone; strong?: bo
   low: { label: 'Low', tone: 'neutral' }
 };
 
-/** Severity ladder: critical solid brick → high brick tint → medium ochre tint → low outline. Zero counts fall back to neutral. */
+/** Severity ladder: styled with Brand Orange & Black (no generic red/yellow). */
 export function SeverityBadge({ severity, count, className }: { severity: Severity; count?: number; className?: string }) {
   const meta = SEVERITY[severity];
   const empty = count === 0;
+
+  if (empty) {
+    return (
+      <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-full border border-silver bg-silver/20 px-2 py-0.5 text-caption font-semibold tracking-wider text-graphite uppercase tabular-nums', className)}>
+        {count === undefined ? meta.label : `${count} ${meta.label.toLowerCase()}`}
+      </span>
+    );
+  }
+
+  if (severity === 'critical') {
+    return (
+      <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/15 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-brand-orange uppercase tabular-nums', className)}>
+        <CircleAlert className="size-3.5 shrink-0 text-brand-orange" {...ICON} aria-hidden />
+        {count === undefined ? meta.label : `${count} ${meta.label.toLowerCase()}`}
+      </span>
+    );
+  }
+
+  if (severity === 'high') {
+    return (
+      <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-brand-orange uppercase tabular-nums', className)}>
+        <CircleAlert className="size-3.5 shrink-0 text-brand-orange" {...ICON} aria-hidden />
+        {count === undefined ? meta.label : `${count} ${meta.label.toLowerCase()}`}
+      </span>
+    );
+  }
+
+  if (severity === 'medium') {
+    return (
+      <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ink/20 bg-ink/5 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-ink uppercase tabular-nums', className)}>
+        <span className="size-1.5 rounded-full bg-ink" />
+        {count === undefined ? meta.label : `${count} ${meta.label.toLowerCase()}`}
+      </span>
+    );
+  }
+
   return (
-    <StatusBadge
-      tone={empty ? 'neutral' : meta.tone}
-      strong={!empty && meta.strong}
-      icon={!empty && (severity === 'critical' || severity === 'high') ? CircleAlert : null}
-      className={className}
-    >
+    <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-full border border-silver bg-silver/20 px-2 py-0.5 text-caption font-semibold tracking-wider text-graphite uppercase tabular-nums', className)}>
       {count === undefined ? meta.label : `${count} ${meta.label.toLowerCase()}`}
-    </StatusBadge>
+    </span>
   );
 }
 

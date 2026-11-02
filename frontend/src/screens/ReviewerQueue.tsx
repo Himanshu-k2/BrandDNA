@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { AlarmClock, ArrowRight, BadgeCheck, CheckCheck, Gauge, Inbox, MessageSquareWarning, ShieldCheck, Timer } from 'lucide-react';
+import { AlarmClock, ArrowRight, BadgeCheck, CheckCheck, CircleAlert, Gauge, Inbox, MessageSquareWarning, ShieldCheck, Timer } from 'lucide-react';
 import { HatchedBarChart, HeroStatCard } from '@/components/mono/accent';
 import { MonoAvatar } from '@/components/mono/Brand';
 import { FloatingTextArea } from '@/components/mono/FloatingField';
 import { Button, Card, EmptyState, ICON, Modal, PageHeader, Pill, ScoreBadge, SectionHeader, Stagger, StatValue, Tabs, Tooltip, focusRing } from '@/components/mono/ui';
-import { Banner, SeverityBadge, StatusBadge } from '@/components/mono/status';
 import { QUEUE, type QueueItem, type QueueLane } from '@/data/demo';
 import { cn } from '@/lib/cn';
 import { DURATION, EASE } from '@/lib/motion';
@@ -26,13 +25,28 @@ const SELF_APPROVAL =
 
 const PRESETS = ['Adjust tone of voice', 'Verify pricing accuracy', 'Remove unbacked claims', 'Add required disclaimer'];
 
-/** Severity counts in the muted status layer (always with text). */
+/** Severity counts styled with Brand Orange & Black with balanced typography and alignment. */
 function SeverityPills({ counts }: { counts: QueueItem['counts'] }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {counts.critical > 0 && <SeverityBadge severity="critical" count={counts.critical} />}
-      {counts.high > 0 && <SeverityBadge severity="high" count={counts.high} />}
-      {counts.medium > 0 && <SeverityBadge severity="medium" count={counts.medium} />}
+    <div className="flex flex-wrap items-center gap-2 py-0.5">
+      {counts.critical > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/15 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-brand-orange uppercase">
+          <CircleAlert className="size-3.5 shrink-0 text-brand-orange" strokeWidth={2} />
+          {counts.critical} CRITICAL
+        </span>
+      )}
+      {counts.high > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-brand-orange uppercase">
+          <CircleAlert className="size-3.5 shrink-0 text-brand-orange" strokeWidth={2} />
+          {counts.high} HIGH
+        </span>
+      )}
+      {counts.medium > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-ink/5 px-2.5 py-0.5 text-caption font-semibold tracking-wider text-ink uppercase">
+          <span className="size-1.5 rounded-full bg-ink" />
+          {counts.medium} MEDIUM
+        </span>
+      )}
     </div>
   );
 }
@@ -52,20 +66,21 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
             <p className="text-caption text-graphite">
               <span className="font-medium text-ink">{item.brand}</span> · {item.channel}
             </p>
-            <h3 className="font-display text-subheading font-semibold text-ink">{item.title}</h3>
+            <h3 className="font-display text-subheading font-semibold text-ink leading-tight">{item.title}</h3>
           </div>
           <ScoreBadge score={item.score} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-caption text-graphite">
-          <MonoAvatar initials={item.authorInitials} className="size-8" />
+        <div className="flex flex-wrap items-center gap-2.5 text-caption text-graphite">
+          <MonoAvatar initials={item.authorInitials} className="size-8 shrink-0" />
           <span className="font-medium text-ink">{item.author}</span>
           {selfAuthored && <Pill variant="outline">You</Pill>}
           <span>· {item.submitted}</span>
           {item.due && (
-            <StatusBadge tone="warning" icon={AlarmClock} caps={false} className="ml-auto">
+            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-silver bg-silver/20 px-2.5 py-0.5 text-caption font-medium text-graphite">
+              <AlarmClock className="size-3.5 text-ink shrink-0" strokeWidth={1.5} />
               {item.due}
-            </StatusBadge>
+            </span>
           )}
         </div>
 
@@ -166,18 +181,24 @@ export function ReviewerQueue() {
       />
 
       {urgentCount > 0 && (
-        <Banner
-          tone="warning"
-          className="-mt-2"
-          title={`${urgentCount} urgent campaign ${urgentCount === 1 ? 'asset requires' : 'assets require'} sign-off before Friday 5:00 PM EST launch.`}
-          action={
-            lane !== 'urgent' && (
-              <Button variant="secondary" size="sm" onClick={() => setLane('urgent')}>
-                View urgent
-              </Button>
-            )
-          }
-        />
+        <div
+          role="status"
+          className="-mt-2 flex flex-wrap items-center justify-between gap-3 rounded-panel border border-brand-orange/30 bg-brand-orange/[0.06] p-4 text-ink shadow-xs"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
+              <CircleAlert className="size-4" strokeWidth={2} />
+            </span>
+            <p className="text-ui font-medium text-ink">
+              {urgentCount} urgent campaign {urgentCount === 1 ? 'asset requires' : 'assets require'} sign-off before Friday 5:00 PM EST launch.
+            </p>
+          </div>
+          {lane !== 'urgent' && (
+            <Button variant="secondary" size="sm" onClick={() => setLane('urgent')}>
+              View urgent
+            </Button>
+          )}
+        </div>
       )}
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -238,14 +259,6 @@ export function ReviewerQueue() {
                 secondaryLabel="Changes requested"
                 highlight={WEEK.length - 1}
               />
-            </Card>
-          </Stagger>
-          <Stagger index={3}>
-            <SectionHeader title="Triage tip" />
-            <Card className="mt-4 p-6">
-              <p className="text-body text-graphite">
-                Assets scoring 90+ have passed every deterministic pricing and terminology rule. Fast-track them, then spend time on tone and claims.
-              </p>
             </Card>
           </Stagger>
         </aside>
