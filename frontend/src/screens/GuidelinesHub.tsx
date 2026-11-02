@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
   BookMarked,
@@ -25,6 +25,7 @@ type Filter = 'all' | GuidelineSection['id'];
 export function GuidelinesHub() {
   const { persona } = useSession();
   const { notify } = useFrame();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState<Filter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +77,8 @@ export function GuidelinesHub() {
       <PageHeader
         title="Brand Guidelines Hub"
         subtitle={`${brandConfig.brandName} · official approved facts, lexicon terminology, mandatory disclaimers, and voice rules enforced by the audit engine.`}
+        onBack={() => navigate(-1)}
+        backAriaLabel="Back to previous page"
         eyebrow={
           <Pill variant="outline" icon={Lock} caps={false}>
             {persona.role === 'admin'

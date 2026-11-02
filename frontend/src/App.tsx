@@ -34,8 +34,6 @@ function Dashboard() {
 }
 
 function GuidelinesRoute() {
-  const { persona } = useSession();
-  if (persona.role === 'creator') return <BrandWorkspaces />;
   return <GuidelinesHub />;
 }
 
