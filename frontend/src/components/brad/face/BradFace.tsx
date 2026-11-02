@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import { BradEngine, FOLLOW_PITCH, NO_LOOK, PITCH_MAX, R, YAW_MAX, clamp, type ExpressionId, type Look, type RenderedEye } from './engine';
@@ -54,8 +54,35 @@ export function BradFace({
   const phase = useRef(Math.random() * 120);
   const live = !still;
 
+  const [clickedMood, setClickedMood] = useState<'happy' | 'excited' | null>(null);
+  const [bouncing, setBouncing] = useState(false);
+  const [sparkles, setSparkles] = useState<Array<{ id: number; x: number; y: number }>>([]);
+
   const idle = useSyncExternalStore(autoSleep && live ? subscribeIdle : noIdle, autoSleep && live ? getIdle : () => false);
-  const shown: ExpressionId = idle ? 'sleepy' : expression;
+  const shown: ExpressionId = clickedMood || (idle ? 'sleepy' : expression);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (still) return;
+    e.stopPropagation();
+    const nextMood = clickedMood === 'excited' ? 'happy' : 'excited';
+    setClickedMood(nextMood);
+    setBouncing(true);
+
+    const newSparkles = [
+      { id: Date.now() + 1, x: -12, y: -22 },
+      { id: Date.now() + 2, x: 2, y: -26 },
+      { id: Date.now() + 3, x: 14, y: -20 },
+    ];
+    setSparkles(newSparkles);
+
+    window.dispatchEvent(new CustomEvent('branddna:brad_clicked', { detail: { mood: nextMood } }));
+
+    window.setTimeout(() => setBouncing(false), 550);
+    window.setTimeout(() => {
+      setClickedMood(null);
+      setSparkles([]);
+    }, 2400);
+  };
 
   const paint = (eyes: RenderedEye[]) => {
     for (let i = 0; i < 2; i++) {
@@ -113,7 +140,36 @@ export function BradFace({
 
   const px = BRAD_SIZE[size];
   return (
-    <span ref={wrapRef} aria-hidden className={cn('inline-flex shrink-0 will-change-transform', className)} style={{ width: px, height: px }}>
+    <span
+      ref={wrapRef}
+      role={!still ? 'button' : undefined}
+      tabIndex={!still ? 0 : undefined}
+      aria-label={!still ? 'Brad AI avatar' : undefined}
+      title={!still ? 'Click Brad to make him happy!' : undefined}
+      onClick={!still ? handleClick : undefined}
+      className={cn(
+        'relative inline-flex shrink-0 will-change-transform select-none',
+        !still && 'cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-150',
+        bouncing && 'scale-110 -translate-y-1',
+        className
+      )}
+      style={{ width: px, height: px }}
+    >
+      {/* Sparkles / Joy particles on click */}
+      {sparkles.map(s => (
+        <span
+          key={s.id}
+          className="pointer-events-none absolute text-brand-orange animate-ping z-30 font-bold"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: `translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px))`,
+            fontSize: 12,
+          }}
+        >
+          ✨
+        </span>
+      ))}
       <svg viewBox={`${-R} ${-R} ${R * 2} ${R * 2}`} width={px} height={px} focusable="false" className="block overflow-visible">
         <defs>
           <clipPath id={clipId}>

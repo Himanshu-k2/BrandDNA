@@ -166,16 +166,32 @@ export function BradOnboardingTour() {
   const [phase, setPhase] = useState<TourPhase>('idle');
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
+  const [clonedHtml, setClonedHtml] = useState<string>('');
   const [splashActive, setSplashActive] = useState(false);
   const [declinedMessage, setDeclinedMessage] = useState('');
   const [bradPos, setBradPos] = useState({ x: 0, y: 0 });
   const [capsulePos, setCapsulePos] = useState({ x: 0, y: 0 });
+  const [interactiveMood, setInteractiveMood] = useState<ExpressionId | null>(null);
 
   const steps = getRoleSteps(persona.role, firstName);
   const currentStep = steps[stepIndex] || steps[0];
+  const isFinalStep = currentStep.targetId === 'ask-brad-capsule';
 
   // Storage key per persona to identify new users
   const storageKey = `branddna_tour_seen_${persona.role}_${persona.email}`;
+
+  // Listen to interactive clicks on any Brad avatar across the app
+  useEffect(() => {
+    const onBradClick = (e: Event) => {
+      const custom = e as CustomEvent<{ mood?: ExpressionId }>;
+      const mood = custom.detail?.mood || 'excited';
+      setInteractiveMood(mood);
+      const timer = setTimeout(() => setInteractiveMood(null), 2500);
+      return () => clearTimeout(timer);
+    };
+    window.addEventListener('branddna:brad_clicked', onBradClick);
+    return () => window.removeEventListener('branddna:brad_clicked', onBradClick);
+  }, []);
 
   // Get current capsule position in bottom right
   const updateCapsulePos = useCallback(() => {
@@ -227,30 +243,26 @@ export function BradOnboardingTour() {
     }
   }, [phase, currentStep, updateCapsulePos]);
 
-  // Highlight the targeted DOM element cleanly with elevated contrast & orange glow
+  // Clone active target element's HTML to elevate it above the backdrop blur
   useEffect(() => {
-    if (phase !== 'tour') {
-      document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
-        el.removeAttribute('data-tour-highlight');
-      });
+    if (phase !== 'tour' || isFinalStep) {
+      setClonedHtml('');
       return;
     }
 
-    const targetEl = document.querySelector(`[data-tour-target="${currentStep.targetId}"]`);
-    document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
-      if (el !== targetEl) el.removeAttribute('data-tour-highlight');
-    });
-
-    if (targetEl) {
-      targetEl.setAttribute('data-tour-highlight', 'true');
-    }
-
-    return () => {
-      document.querySelectorAll('[data-tour-highlight="true"]').forEach(el => {
-        el.removeAttribute('data-tour-highlight');
-      });
+    const updateClone = () => {
+      const el = document.querySelector(`[data-tour-target="${currentStep.targetId}"]`);
+      if (el) {
+        setClonedHtml(el.outerHTML);
+      } else {
+        setClonedHtml('');
+      }
     };
-  }, [phase, currentStep]);
+
+    updateClone();
+    const timer = setTimeout(updateClone, 60);
+    return () => clearTimeout(timer);
+  }, [phase, currentStep, stepIndex, isFinalStep]);
 
   // Recalculate on window resize
   useEffect(() => {
@@ -320,7 +332,6 @@ export function BradOnboardingTour() {
       `No problem at all, ${firstName}! If you ever run into any questions or need a hand with compliance, just tap my capsule down here anytime.`
     );
 
-    // After message display, return Brad back into the capsule
     window.setTimeout(() => {
       returnToCapsule();
     }, 2800);
@@ -371,7 +382,6 @@ export function BradOnboardingTour() {
   }
 
   // Calculate Tour Card Position (always positioning beside the highlighted element)
-  const isFinalStep = currentStep.targetId === 'ask-brad-capsule';
   const cardWidth = 360;
 
   let cardPos = {
@@ -397,18 +407,76 @@ export function BradOnboardingTour() {
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden pointer-events-auto">
-      {/* Dynamic CSS injecting elevated glow styling for the highlighted menu section */}
-      <style>{`
-        [data-tour-highlight="true"] {
-          position: relative !important;
-          z-index: 55 !important;
-          background-color: #ffffff !important;
-          color: #070d0d !important;
-          box-shadow: 0 0 0 3px #ff6700, 0 0 28px rgba(255, 103, 0, 0.45) !important;
-          border-radius: 18px !important;
-          transition: all 0.25s ease-out !important;
-        }
-      `}</style>
+      {/* SVG Mask Definition for Spotlight Cutout (Hole is 100% unblurred and untinted!) */}
+      <svg
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{ position: 'fixed', inset: 0, width: '100%', height: '100%' }}
+        aria-hidden="true"
+      >
+        <defs>
+          <mask id="tour-spotlight-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+            {/* White: backdrop blur and dimming visible */}
+            <rect x="0" y="0" width="100%" height="100%" fill="#ffffff" />
+            {/* Black: completely transparent cutout hole (NO blur, NO tint!) */}
+            {phase === 'tour' && targetRect && !isFinalStep && (
+              <rect
+                x={targetRect.left - 4}
+                y={targetRect.top - 4}
+                width={targetRect.width + 8}
+                height={targetRect.height + 8}
+                rx="16"
+                ry="16"
+                fill="#000000"
+              />
+            )}
+          </mask>
+        </defs>
+      </svg>
+
+      {/* Dimmed backdrop scrim during tour with cutout mask */}
+      <AnimatePresence>
+        {(phase === 'greeting' || phase === 'declined' || phase === 'tour') && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 40,
+              backgroundColor: 'rgba(7, 13, 13, 0.45)',
+              backdropFilter: 'blur(3px)',
+              WebkitBackdropFilter: 'blur(3px)',
+              mask: phase === 'tour' && targetRect && !isFinalStep ? 'url(#tour-spotlight-mask)' : undefined,
+              WebkitMask: phase === 'tour' && targetRect && !isFinalStep ? 'url(#tour-spotlight-mask)' : undefined,
+            }}
+            onClick={phase === 'greeting' ? handleDeclineTour : finishTour}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Elevated Spotlight Target Element - Rendered at z-45 in front of the blur layer */}
+      {phase === 'tour' && targetRect && !isFinalStep && clonedHtml && (
+        <motion.div
+          key={`spotlight-clone-${stepIndex}`}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          style={{
+            position: 'fixed',
+            top: targetRect.top - 2,
+            left: targetRect.left - 2,
+            width: targetRect.width + 4,
+            height: targetRect.height + 4,
+            zIndex: 45,
+            pointerEvents: 'none',
+          }}
+          className="rounded-nav border-2 border-brand-orange bg-paper shadow-[0_0_28px_rgba(255,103,0,0.55),0_8px_20px_rgba(0,0,0,0.14)] p-0.5 overflow-hidden flex items-center [&>button]:!w-full [&>button]:!h-full [&>button]:!bg-paper [&>button]:!text-ink [&>button]:!opacity-100 [&>button]:!font-semibold [&>button]:!shadow-none"
+          dangerouslySetInnerHTML={{ __html: clonedHtml }}
+        />
+      )}
 
       {/* Liquid Splash Portal over capsule */}
       <div
@@ -423,20 +491,6 @@ export function BradOnboardingTour() {
       >
         <LiquidSplash active={splashActive} onComplete={() => setSplashActive(false)} />
       </div>
-
-      {/* Dimmed backdrop scrim during tour */}
-      <AnimatePresence>
-        {(phase === 'greeting' || phase === 'declined' || phase === 'tour') && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 bg-ink/40 backdrop-blur-[2px] z-40"
-            onClick={phase === 'greeting' ? handleDeclineTour : finishTour}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Free-floating Brad Avatar for Emerging and Returning animations */}
       {(phase === 'emerging' || phase === 'returning') && (
@@ -477,7 +531,7 @@ export function BradOnboardingTour() {
             <div className="relative size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
               <BradFace
                 size="lg"
-                expression={phase === 'returning' ? 'proud' : 'excited'}
+                expression={interactiveMood || (phase === 'returning' ? 'proud' : 'excited')}
                 follow={true}
                 still={false}
               />
@@ -498,15 +552,23 @@ export function BradOnboardingTour() {
             }}
             className="z-50 flex flex-col items-center"
           >
-            {/* Top-Center Brad Avatar */}
+            {/* Top-Center Brad Avatar (Clickable to trigger happy & excited animation!) */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.35 }}
-              className="relative -mb-3 z-20 flex items-center justify-center"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+              title="Click Brad to make him happy!"
+              className="relative -mb-3 z-20 flex items-center justify-center cursor-pointer"
             >
               <div className="size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
-                <BradFace size="lg" expression="excited" follow={true} still={false} />
+                <BradFace
+                  size="lg"
+                  expression={interactiveMood || 'excited'}
+                  follow={true}
+                  still={false}
+                />
               </div>
             </motion.div>
 
@@ -582,7 +644,12 @@ export function BradOnboardingTour() {
             className="z-50 flex flex-col items-center"
           >
             <div className="size-14 -mb-3 z-20 rounded-full bg-ink p-1 ring-4 ring-paper shadow-float">
-              <BradFace size="lg" expression="attentive" follow={true} still={false} />
+              <BradFace
+                size="lg"
+                expression={interactiveMood || 'attentive'}
+                follow={true}
+                still={false}
+              />
             </div>
             <motion.div
               key="declined-bubble"
@@ -620,9 +687,14 @@ export function BradOnboardingTour() {
             }}
             className="z-50 relative rounded-3xl border border-silver/90 bg-paper p-6 shadow-float"
           >
-            {/* Bot face perched prominently on the LEFT TOP CORNER of the message box on ALL steps */}
-            <div className="absolute -top-7 -left-5 z-20 flex items-center justify-center">
+            {/* Bot face perched prominently on the LEFT TOP CORNER of the message box on ALL steps (Clickable!) */}
+            <div
+              title="Click Brad to make him happy!"
+              className="absolute -top-7 -left-5 z-20 flex items-center justify-center cursor-pointer"
+            >
               <motion.div
+                whileHover={{ scale: 1.12 }}
+                whileTap={{ scale: 0.92 }}
                 animate={{
                   y: [0, -3, 0],
                 }}
@@ -639,7 +711,7 @@ export function BradOnboardingTour() {
                 <div className="relative size-14 rounded-full bg-ink p-1 ring-4 ring-paper shadow-lift">
                   <BradFace
                     size="md"
-                    expression={currentStep.expression}
+                    expression={interactiveMood || currentStep.expression}
                     follow={true}
                     still={false}
                   />
@@ -722,7 +794,10 @@ export function BradOnboardingTour() {
                     type="button"
                     onClick={finishTour}
                     style={{ color: '#ffffff' }}
-                    className="flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-brand-orange/90 px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-brand-orange/90 px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer',
+                      focusRing
+                    )}
                   >
                     <Check className="size-3.5" style={{ color: '#ffffff' }} />
                     <span style={{ color: '#ffffff' }}>Finish Tour</span>
@@ -732,7 +807,10 @@ export function BradOnboardingTour() {
                     type="button"
                     onClick={handleNextStep}
                     style={{ color: '#ffffff' }}
-                    className="flex items-center gap-1 rounded-full bg-ink hover:bg-graphite px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 cursor-pointer"
+                    className={cn(
+                      'flex items-center gap-1 rounded-full bg-ink hover:bg-graphite px-4 py-1.5 text-caption font-semibold shadow-sm transition-all hover:scale-105 cursor-pointer',
+                      focusRing
+                    )}
                   >
                     <span style={{ color: '#ffffff' }}>Next</span>
                     <ArrowRight className="size-3" style={{ color: '#ffffff' }} />

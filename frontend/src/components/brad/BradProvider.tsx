@@ -201,6 +201,16 @@ export function BradProvider({ children }: { children: ReactNode }) {
     flash('attentive', 1400);
   };
 
+  useEffect(() => {
+    const onBradClicked = (e: Event) => {
+      const custom = e as CustomEvent<{ mood?: ExpressionId }>;
+      const mood = custom.detail?.mood || 'excited';
+      flash(mood, 2400);
+    };
+    window.addEventListener('branddna:brad_clicked', onBradClicked);
+    return () => window.removeEventListener('branddna:brad_clicked', onBradClicked);
+  }, [flash]);
+
   const [hasUnreadPersonaMsg, setHasUnreadPersonaMsg] = useState(false);
 
   useEffect(() => {
