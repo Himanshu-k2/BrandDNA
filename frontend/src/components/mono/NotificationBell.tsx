@@ -9,7 +9,6 @@ import { getUnreadMessagesForRole } from '@/lib/personaMessages';
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 
 const READ_STORAGE_KEY = 'branddna_read_alerts';
-const CLICKED_STORAGE_KEY = 'branddna_notification_clicked';
 
 export function getReadAlertIds(): Set<string> {
   if (typeof window === 'undefined') return new Set();
@@ -37,16 +36,11 @@ export function NotificationBell({ className }: { className?: string }) {
   const { persona } = useSession();
   const [readIds, setReadIds] = useState<Set<string>>(getReadAlertIds);
   const [unreadPersonaMsgs, setUnreadPersonaMsgs] = useState(0);
-  const [isClicked, setIsClicked] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(`${CLICKED_STORAGE_KEY}_${persona.role}`) === 'true';
-  });
 
   useEffect(() => {
     const update = () => {
       setReadIds(getReadAlertIds());
       setUnreadPersonaMsgs(getUnreadMessagesForRole(persona.role).length);
-      setIsClicked(localStorage.getItem(`${CLICKED_STORAGE_KEY}_${persona.role}`) === 'true');
     };
 
     update();
@@ -71,13 +65,10 @@ export function NotificationBell({ className }: { className?: string }) {
   }, [persona.role, readIds]);
 
   const totalUnread = unreadAlertsCount + unreadPersonaMsgs;
-  const hasOrangeDot = totalUnread > 0 && !isClicked && !isActive;
-  const isTurnedBlack = isActive || isClicked;
+  const showOrangeDot = totalUnread > 0 && !isActive;
 
   const handleClick = () => {
-    setIsClicked(true);
     try {
-      localStorage.setItem(`${CLICKED_STORAGE_KEY}_${persona.role}`, 'true');
       const applicable = ALERTS.filter(alert => alert.audience.includes(persona.role));
       markAlertsAsRead(applicable.map(a => a.id));
     } catch {}
@@ -89,22 +80,22 @@ export function NotificationBell({ className }: { className?: string }) {
       type="button"
       onClick={handleClick}
       aria-label={`Notifications${totalUnread > 0 ? `, ${totalUnread} unread` : ''}`}
-      title={hasOrangeDot ? `Notifications (${totalUnread} unread)` : 'Notifications'}
+      title={showOrangeDot ? `Notifications (${totalUnread} unread)` : 'Notifications'}
       className={cn(
-        'relative press flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border shadow-sm transition-[background-color,border-color,color,transform] duration-200 active:scale-95',
+        'relative press flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border shadow-sm transition-all duration-200 active:scale-95',
         focusRing,
-        isTurnedBlack
-          ? 'border-ink bg-ink text-paper hover:bg-graphite'
-          : 'border-silver bg-paper text-ink hover:border-mid hover:bg-silver/24',
+        isActive
+          ? 'border-ink/80 bg-silver/30 text-ink ring-2 ring-ink/10'
+          : 'border-silver/80 bg-paper text-ink hover:border-graphite/40 hover:bg-silver/20',
         className
       )}
     >
       <Bell
-        className={cn('size-5 transition-colors', isTurnedBlack ? 'text-paper' : 'text-ink')}
+        className="size-5 text-ink transition-colors"
         strokeWidth={1.5}
       />
-      {/* If there are unread notifications before clicking: ORANGE DOT */}
-      {hasOrangeDot && (
+      {/* Orange dot indicator only if there are unread notifications and user is not on notifications page */}
+      {showOrangeDot && (
         <span className="absolute top-2.5 right-2.5 flex size-2.5">
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand-orange opacity-75" />
           <span className="relative inline-flex size-2.5 rounded-full bg-brand-orange ring-2 ring-paper" />

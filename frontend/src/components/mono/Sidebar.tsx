@@ -1,16 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, ChevronsLeft, ChevronsUpDown, LogOut, Search, Settings, type LucideIcon } from 'lucide-react';
-import { BRANDS } from '@/data/demo';
-import { setActiveWorkspace } from '@/components/brad/workspace';
+import { ChevronDown, ChevronsLeft, LogOut, Search, Settings, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { DURATION, EASE } from '@/lib/motion';
 import { dashboardPath, PERSONAS, ROLE_LABEL, useSession, type Role } from '@/state/session';
 import { MonoAvatar } from './Brand';
 import { Logo } from './Logo';
 import { NAV, type NavItem } from './nav';
-import { focusRing, ICON, Kbd, MenuRow, Popover } from './ui';
+import { focusRing, ICON, Kbd } from './ui';
 
 /*
  * Radii: shell 32 − sidebar padding 12 → nav rows, switcher, search, user card = 20 (radius-nav).
@@ -25,14 +23,13 @@ interface SidebarProps {
   onToggleCompact: () => void;
   onNavigate?: () => void;
   onSearch: () => void;
-  onNotice: (message: string) => void;
+  onNotice?: (message: string) => void;
 }
 
-export function Sidebar({ compact, canCollapse, onToggleCompact, onNavigate, onSearch, onNotice }: SidebarProps) {
+export function Sidebar({ compact, canCollapse, onToggleCompact, onNavigate, onSearch }: SidebarProps) {
   const { persona, setRole } = useSession();
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
-  const [brand, setBrand] = useState<(typeof BRANDS)[number]>(BRANDS[0]);
   const [userOpen, setUserOpen] = useState(false);
   const [tip, setTip] = useState<Tip>(null);
 
@@ -92,61 +89,14 @@ export function Sidebar({ compact, canCollapse, onToggleCompact, onNavigate, onS
         </IconAction>
       )}
 
-      {/* 2 · Workspace switcher */}
-      <Popover
-        align="left"
-        className="w-64"
-        trigger={({ open, toggle }) => (
-          <button
-            type="button"
-            aria-haspopup="menu"
-            aria-expanded={open}
-            aria-label={`Workspace: ${brand.name}`}
-            onClick={toggle}
-            {...tipHandlers(brand.name)}
-            className={cn(
-              'press flex h-12 w-full shrink-0 cursor-pointer items-center gap-3 rounded-nav border border-silver bg-paper px-2 text-left transition-colors hover:border-mid',
-              focusRing,
-              compact && 'justify-center px-0'
-            )}
-          >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-inset bg-ink text-caption font-semibold text-paper">{brand.initials}</span>
-            {!compact && (
-              <>
-                <span className="min-w-0 flex-1 text-ui font-medium whitespace-nowrap text-ink">{brand.name}</span>
-                <ChevronsUpDown className="size-4 shrink-0 text-graphite" {...ICON} />
-              </>
-            )}
-          </button>
-        )}
-      >
-        {close =>
-          BRANDS.map(item => (
-            <MenuRow
-              key={item.id}
-              active={item.id === brand.id}
-              onClick={() => {
-                setBrand(item);
-                setActiveWorkspace(item.id);
-                close();
-                onNotice(`Switched to ${item.name}`);
-              }}
-            >
-              <span className="flex size-6 items-center justify-center rounded-min bg-ink text-caption font-semibold text-paper">{item.initials}</span>
-              {item.name}
-            </MenuRow>
-          ))
-        }
-      </Popover>
-
-      {/* 3 · Search */}
+      {/* 2 · Search */}
       <button
         type="button"
         onClick={onSearch}
         aria-label="Search (Command K)"
         {...tipHandlers('Search  ⌘K')}
         className={cn(
-          'flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-nav border border-silver bg-paper px-3 text-ui text-mid transition-colors hover:border-mid',
+          'flex h-11 shrink-0 cursor-pointer items-center gap-2.5 rounded-nav border border-silver/80 bg-paper px-3.5 text-ui text-graphite shadow-xs transition-colors hover:border-graphite/40 hover:bg-silver/15',
           focusRing,
           compact && 'justify-center px-0'
         )}
@@ -154,20 +104,20 @@ export function Sidebar({ compact, canCollapse, onToggleCompact, onNavigate, onS
         <Search className="size-4 shrink-0 text-graphite" {...ICON} />
         {!compact && (
           <>
-            <span className="flex-1 text-left">Search</span>
+            <span className="flex-1 text-left text-mid">Search</span>
             <Kbd>⌘K</Kbd>
           </>
         )}
       </button>
 
-      {/* 4 · Role indicator */}
+      {/* 3 · Role indicator */}
       {!compact && (
-        <div className="mt-2 flex px-3">
-          <span className="rounded-full border border-silver bg-paper px-3 py-1 text-caption font-medium text-ink">{ROLE_LABEL[persona.role]}</span>
+        <div className="mt-1 flex px-3">
+          <span className="rounded-full border border-silver/80 bg-silver/20 px-3 py-1 text-caption font-semibold tracking-wide text-ink">{ROLE_LABEL[persona.role]}</span>
         </div>
       )}
 
-      {/* 5 · Menu */}
+      {/* 4 · Menu */}
       <div className={cn('flex flex-col', compact && 'mt-2 border-t border-silver pt-2')}>
         {!compact && <p className="flex h-8 items-center px-3 text-caption font-medium text-mid">Menu</p>}
         <ul className="flex flex-col gap-1">

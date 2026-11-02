@@ -223,40 +223,46 @@ export function PageHeader({
 }) {
   return (
     <header className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          {eyebrow && <div className="flex flex-wrap items-center gap-2 text-caption text-graphite">{eyebrow}</div>}
-          <div className="flex items-center gap-3">
-            {onBack && (
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label={backAriaLabel}
-                className="press flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper text-ink shadow-sm transition-[background-color,transform] duration-200 hover:bg-silver/24 active:scale-95 focus-visible:outline-2 focus-visible:outline-ink"
-              >
-                <ArrowLeft className="size-5" {...ICON} />
-              </button>
-            )}
-            <RevealText key={title} text={title} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.08} />
-          </div>
-          {subtitle && (
-            <p className={cn('max-w-2xl text-body text-graphite', onBack && 'pl-[52px]')}>
-              {subtitle}
-            </p>
+      {/* Top row: Title + onBack on left, Presence & Notification ALWAYS on top right */}
+      <div className="flex items-start justify-between gap-6">
+        <div className="flex min-w-0 flex-1 items-start gap-3.5">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label={backAriaLabel}
+              className="press mt-0.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-silver bg-paper text-ink shadow-sm transition-[background-color,transform] duration-200 hover:bg-silver/24 active:scale-95 focus-visible:outline-2 focus-visible:outline-ink"
+            >
+              <ArrowLeft className="size-5" {...ICON} />
+            </button>
           )}
+
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            {eyebrow && <div className="flex flex-wrap items-center gap-2 text-caption text-graphite">{eyebrow}</div>}
+            <RevealText key={title} text={title} className="font-display text-display font-semibold tracking-tight text-ink leading-tight" delay={0.08} />
+            {subtitle && (
+              <p className="max-w-2xl text-body text-graphite leading-relaxed">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* ALWAYS RIGHT-ALIGNED: Actions + Online Presence & Notification */}
-        <div className="ml-auto flex shrink-0 items-center justify-end gap-3 self-start pt-1">
-          {actions}
-          {showNotification && (
-            <div className="flex items-center gap-3 shrink-0">
-              <OnlineTeamPresence />
-              <NotificationBell />
-            </div>
-          )}
-        </div>
+        {/* ALWAYS RIGHT-ALIGNED on top: Online Presence & Notification Bell */}
+        {showNotification && (
+          <div className="ml-auto flex shrink-0 items-center gap-3 self-start pt-0.5">
+            <OnlineTeamPresence />
+            <NotificationBell />
+          </div>
+        )}
       </div>
+
+      {/* Actions / Subheader Toolbar */}
+      {actions && (
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
+          {actions}
+        </div>
+      )}
     </header>
   );
 }

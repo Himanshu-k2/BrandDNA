@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
   BookMarked,
   Check,
+  ChevronsUpDown,
   Copy,
   FileCheck,
   FileText,
@@ -18,6 +19,7 @@ import { Card, EmptyState, ICON, IconButton, PageHeader, Pill, SectionHeader, St
 import { BRAND_GUIDELINES, type GuidelineSection } from '@/data/platform';
 import { BRANDS } from '@/data/demo';
 import { useSession } from '@/state/session';
+import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
 
 type Filter = 'all' | GuidelineSection['id'];
@@ -30,6 +32,9 @@ export function GuidelinesHub() {
   const [filter, setFilter] = useState<Filter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
+  const brandDropdownRef = useRef<HTMLDivElement>(null);
+  useDismiss(brandDropdownRef, brandDropdownOpen, () => setBrandDropdownOpen(false));
 
   // Active brand from URL search query (e.g. /guidelines?brand=omnicloud)
   const brandKey = searchParams.get('brand') || 'novafit';
@@ -88,8 +93,8 @@ export function GuidelinesHub() {
         }
       />
 
-      {/* ── Segmented Brand Selector (Neo Kinpaku Craft) ── */}
-      <div className="flex flex-col gap-3">
+      {/* ── Active Brand Workspace Dropdown (Matching Image 4) ── */}
+      <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
             Active Brand Workspace
@@ -99,53 +104,80 @@ export function GuidelinesHub() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {BRANDS.map(b => {
-            const active = (b.id === brandKey);
+        <div ref={brandDropdownRef} className="relative inline-block w-full max-w-xs">
+          <button
+            type="button"
+            onClick={() => setBrandDropdownOpen(prev => !prev)}
+            aria-expanded={brandDropdownOpen}
+            aria-haspopup="listbox"
+            className={cn(
+              'group flex h-12 w-full items-center justify-between rounded-full border border-silver/90 bg-paper px-3 pr-4 text-left shadow-xs transition-all duration-200 hover:border-graphite/40 hover:bg-silver/10 cursor-pointer',
+              focusRing,
+              brandDropdownOpen && 'border-ink/80 ring-2 ring-ink/10'
+            )}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-caption font-bold text-paper">
+                {brandConfig.brandInitials}
+              </span>
+              <span className="truncate text-ui font-semibold text-ink">
+                {brandConfig.brandName}
+              </span>
+            </div>
+            <ChevronsUpDown className="size-4 shrink-0 text-graphite ml-2 transition-transform duration-200" {...ICON} />
+          </button>
 
-            return (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => handleSelectBrand(b.id)}
-                className={cn(
-                  'group flex items-center justify-between rounded-panel border p-4 text-left transition-all duration-200 cursor-pointer',
-                  focusRing,
-                  active
-                    ? 'border-brand-orange bg-brand-orange/[0.05] shadow-sm ring-1 ring-brand-orange/30'
-                    : 'border-silver/80 bg-paper hover:border-graphite/40 hover:bg-silver/10'
-                )}
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <span
+          {/* Dropdown Menu */}
+          {brandDropdownOpen && (
+            <div
+              role="listbox"
+              className="absolute top-full left-0 z-50 mt-2 w-full min-w-72 rounded-2xl border border-silver/80 bg-paper p-1.5 shadow-float backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+            >
+              {BRANDS.map(b => {
+                const isSelected = b.id === brandKey;
+
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      handleSelectBrand(b.id);
+                      setBrandDropdownOpen(false);
+                    }}
                     className={cn(
-                      'flex size-10 shrink-0 items-center justify-center rounded-item font-display font-bold text-caption tracking-wider transition-transform group-hover:scale-105',
-                      active ? 'bg-ink text-paper' : 'bg-silver/40 text-ink'
+                      'group/opt flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer',
+                      isSelected ? 'bg-silver/40 font-semibold text-ink' : 'text-graphite hover:bg-silver/20 hover:text-ink'
                     )}
                   >
-                    {b.initials}
-                  </span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={cn(
+                          'flex size-7 shrink-0 items-center justify-center rounded-full text-caption font-bold',
+                          isSelected ? 'bg-ink text-paper' : 'bg-silver/50 text-ink'
+                        )}
+                      >
+                        {b.initials}
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate text-ui leading-tight">{b.name}</span>
+                        <span className="truncate text-caption text-mid">{b.sector}</span>
+                      </div>
+                    </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-ui font-semibold text-ink leading-tight">
-                      {b.name}
-                    </p>
-                    <p className="truncate text-caption text-graphite mt-0.5">
-                      {b.sector}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="shrink-0 pl-2">
-                  {active ? (
-                    <span className="flex size-2 rounded-full bg-brand-orange ring-4 ring-brand-orange/20" />
-                  ) : (
-                    <span className="flex size-2 rounded-full bg-silver/60 group-hover:bg-mid" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                    <div className="shrink-0 pl-2">
+                      {isSelected ? (
+                        <Check className="size-4 text-brand-orange" {...ICON} />
+                      ) : (
+                        <span className="size-1.5 rounded-full bg-silver/80 group-hover/opt:bg-graphite" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
