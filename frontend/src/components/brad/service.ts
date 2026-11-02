@@ -91,7 +91,7 @@ export async function sendMessageToBrad(
     if (targetRole === context.role) {
       return {
         outcome: 'unknown',
-        text: `You are currently logged in as **${context.personaName} (${ROLE_LABEL[context.role]})**. You can send messages to the other personas: **Brand Manager**, **Brand Reviewer**, **Platform Admin**, or **Content Creator**.`,
+        text: `You are currently logged in as **${context.personaName} (${ROLE_LABEL[context.role]})**. You can send messages to the other personas: **Brand Manager**, **Platform Admin**, or **Content Creator**.`,
       };
     }
 
@@ -174,29 +174,20 @@ function answer(raw: string, context: BradContext): BradReply {
     if (role === 'brand_manager') {
       return {
         outcome: 'answer',
-        text: `Welcome to **BrandDNA**, ${firstName}! As the **Brand Manager**, you govern brand visual identity, typography standards, and guideline rules.\n\nHere is your walkthrough:\n1. **[Brand Manager Dashboard](/dashboard?role=brand_manager)**: Track your workspace's brand health score, active compliance rules, and review high-priority compliance risks (such as banned colors and unapproved pricing claims).\n2. **[Brand Asset Library](/brand-manager/assets)**: Inspect official verified hex swatches (Electric Orange \`#FF4500\`, Dark Slate \`#1E1E1E\`, banned Neon Green \`#39FF14\`), typography specs, and logo clear-space rules.\n3. **[Guideline Ingestion Studio](/brand-manager/uploads)**: Upload PDF brand manuals to automatically extract colors, font weights, and pricing rules into live enforcement rules.\n4. **[Audit Log Ledger](/audit)**: Verify cryptographic audit events of all approved brand materials.\n\nWhere would you like to start?`,
+        text: `Welcome to **BrandDNA**, ${firstName}! As the **Brand Manager**, you govern brand visual identity, typography standards, guideline rules, and have sign-off authority to review and approve creator content.\n\nHere is your walkthrough:\n1. **[Brand Manager Dashboard](/dashboard?role=brand_manager)**: Track your workspace's brand health score, active compliance rules, and review high-priority compliance risks.\n2. **[Approval Queue](/dashboard/queue)**: Inspect creator submissions, review revision diffs, request changes, or approve and seal certificates.\n3. **[Brand Asset Library](/brand-manager/assets)**: Inspect official verified hex swatches, typography specs, and logo clear-space rules.\n4. **[Guideline Ingestion Studio](/brand-manager/uploads)**: Upload PDF brand manuals to automatically extract colors and rules into live enforcement.\n5. **[Audit Log Ledger](/audit)**: Verify cryptographic audit events of all approved brand materials.\n\nWhere would you like to start?`,
         actions: [
           { label: 'Brand Dashboard', to: '/dashboard?role=brand_manager' },
+          { label: 'Approval Queue', to: '/dashboard/queue' },
           { label: 'Brand Asset Library', to: '/brand-manager/assets' },
-          { label: 'Guideline Ingestion', to: '/brand-manager/uploads' },
-        ],
-      };
-    }
-    if (role === 'reviewer') {
-      return {
-        outcome: 'answer',
-        text: `Welcome to **BrandDNA**, ${firstName}! As a **Brand Reviewer**, you evaluate drafts and hold sign-off authority.\n\nHere is your walkthrough:\n1. **[Reviewer Dashboard](/dashboard?role=reviewer)**: View approval rates, turnaround velocity, and active review volumes.\n2. **[Approval Queue](/dashboard/queue)**: Urgent items sit in the first lane. Open any submission to compare revision diffs.\n3. **Review Studio**: Inspect deterministic rule findings, request required changes with notes, or approve and seal the audit certificate.\n\nReady to inspect the queue?`,
-        actions: [
-          { label: 'Open Approval Queue', to: '/dashboard/queue' },
-          { label: 'All Submissions', to: '/submissions' },
         ],
       };
     }
     if (role === 'admin') {
       return {
         outcome: 'answer',
-        text: `Welcome, ${firstName}! As the **Workspace Admin**, you manage enterprise operations across all brand workspaces.\n\nQuick Walkthrough:\n1. **[Platform Dashboard](/dashboard?role=admin)**: Real-time pass rates, active creators, and audit volumes.\n2. **[User & Role Mgmt](/admin/users)**: Invite team members and configure roles (Admin, Brand Manager, Reviewer, Creator).\n3. **[Brand Workspaces](/brands)**: Manage multi-brand workspaces (NovaFit, OmniCloud, Apex FinTech).\n4. **[Audit Log Ledger](/audit)**: Verify cryptographic audit integrity.\n\nWhat would you like to manage first?`,
+        text: `Welcome, ${firstName}! As the **Workspace Admin**, you manage enterprise operations, invite team members, and hold full sign-off authority across all brand workspaces.\n\nQuick Walkthrough:\n1. **[Platform Dashboard](/dashboard?role=admin)**: Real-time pass rates, active creators, and audit volumes.\n2. **[Approval Queue](/dashboard/queue)**: Review creator submissions and seal audit certificates.\n3. **[User & Role Mgmt](/admin/users)**: Invite team members and configure roles (Admin, Brand Manager, Creator).\n4. **[Brand Workspaces](/brands)**: Manage multi-brand workspaces (NovaFit, OmniCloud, Apex FinTech).\n5. **[Audit Log Ledger](/audit)**: Verify cryptographic audit integrity.\n\nWhat would you like to manage first?`,
         actions: [
+          { label: 'Approval Queue', to: '/dashboard/queue' },
           { label: 'User & Role Mgmt', to: '/admin/users' },
           { label: 'Brand Workspaces', to: '/brands' },
         ],
@@ -204,7 +195,7 @@ function answer(raw: string, context: BradContext): BradReply {
     }
     return {
       outcome: 'answer',
-      text: `Welcome to **BrandDNA**, ${firstName}! As a **Content Creator**, you can draft ad copy and marketing assets with guaranteed compliance.\n\nHere is your 3-step walkthrough:\n1. **[Create New Content](/reviews/new)**: Choose your brand workspace, paste your copy or upload documents.\n2. **Automated Pre-Flight Check**: Brad checks your draft against brand colors, banned terminology, and pricing rules with 1-click fixes.\n3. **[My Submissions & Drafts](/dashboard/content)**: Track your drafts as reviewers inspect and seal certificates.\n\nReady to create your first content?`,
+      text: `Welcome to **BrandDNA**, ${firstName}! As a **Content Creator**, you can draft ad copy and marketing assets with guaranteed compliance.\n\nHere is your 3-step walkthrough:\n1. **[Create New Content](/reviews/new)**: Choose your brand workspace, paste your copy or upload documents.\n2. **Automated Pre-Flight Check**: Brad checks your draft against brand colors, banned terminology, and pricing rules with 1-click fixes.\n3. **[My Submissions & Drafts](/dashboard/content)**: Track your drafts as Brand Managers and Admins inspect and seal certificates.\n\nReady to create your first content?`,
       actions: [
         { label: 'Create New Content', to: '/reviews/new' },
         { label: 'My Submissions', to: '/dashboard/content' },
@@ -214,12 +205,13 @@ function answer(raw: string, context: BradContext): BradReply {
 
   // 2. Messaging & Collaborating with Personas
   if (
-    /message|contact|tell|reach out|talk to|priya|sarah|jordan|alex|manager|reviewer|admin/i.test(text)
+    /message|contact|tell|reach out|talk to|priya|jordan|alex|manager|admin|creator/i.test(text)
   ) {
     return {
       outcome: 'answer',
-      text: `In **BrandDNA**, team communication is integrated directly into review threads and audit records:\n\n- To communicate regarding a specific campaign draft, open the review thread in **[All Submissions](/submissions)** or **[Approval Queue](/dashboard/queue)** and post a note in the discussion tab.\n- **Priya Kapoor** (Brand Manager) receives instant notifications for rule exemption requests and guideline updates.\n- **Sarah Chen** (Brand Reviewer) gets notified when you apply fixes or submit a revised version.\n- You can also check system-wide announcements in **[System Alerts](/alerts)**.\n\nWould you like to open your submissions to leave a note?`,
+      text: `In **BrandDNA**, team communication is integrated directly into review threads and audit records:\n\n- To communicate regarding a specific campaign draft, open the review thread in **[All Submissions](/submissions)** or **[Approval Queue](/dashboard/queue)** and post a note in the discussion tab.\n- **Priya Kapoor** (Brand Manager) evaluates submissions, approves content, and manages brand rules.\n- **Jordan Blake** (Platform Admin) oversees platform compliance and approvals.\n- **Alex Rivera** (Content Creator) authors campaigns and addresses revision requests.\n- You can also check system-wide announcements in **[System Alerts](/alerts)**.\n\nWould you like to open your submissions to leave a note?`,
       actions: [
+        { label: 'Approval Queue', to: '/dashboard/queue' },
         { label: 'Open Submissions', to: '/submissions' },
         { label: 'System Alerts', to: '/alerts' },
       ],

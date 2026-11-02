@@ -20,6 +20,7 @@ import { Card, Pill, SectionHeader, SeeAll, Stagger, ICON } from '@/components/m
 import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
 import { NotificationBell } from '@/components/mono/NotificationBell';
+import { OnlineTeamPresence } from '@/components/mono/OnlineTeamPresence';
 import { BRANDS } from '@/data/demo';
 import { brandsAPI } from '@/api/brands';
 import { OverviewCard } from './dashboard/OverviewCard';
@@ -199,7 +200,8 @@ export function BrandManagerDashboard() {
           delay={0.2}
         />
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <OnlineTeamPresence />
           <NotificationBell />
         </div>
       </header>

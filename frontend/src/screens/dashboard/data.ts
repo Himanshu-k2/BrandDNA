@@ -1,7 +1,7 @@
 import { QUEUE, SUBMISSIONS } from '@/data/demo';
 
 export type Period = 'day' | 'week' | 'month' | 'year';
-export type View = 'creator' | 'reviewer' | 'brand_manager' | 'admin';
+export type View = 'brand_manager' | 'creator' | 'admin';
 
 export const PERIODS: Array<{ id: Period; label: string; window: string; factor: number }> = [
   { id: 'day', label: 'Day', window: 'last 24 hours', factor: 1 / 7 },
@@ -26,12 +26,6 @@ export const STATS: Record<View, Stat[]> = {
     { label: 'Submitted', value: 42, previous: 36 },
     { label: 'Approved', value: 31, previous: 27, accent: 'dark' },
     { label: 'First-pass rate', value: 78, previous: 81, percent: true, accent: 'orange' }
-  ],
-  reviewer: [
-    { label: 'Reviews completed', value: 96, previous: 88 },
-    { label: 'Approved & sealed', value: 74, previous: 65, accent: 'dark' },
-    { label: 'Changes requested', value: 18, previous: 21 },
-    { label: 'Approval rate', value: 77, previous: 74, percent: true, accent: 'orange' }
   ],
   brand_manager: [
     { label: 'Verified brand assets', value: 384, previous: 360 },

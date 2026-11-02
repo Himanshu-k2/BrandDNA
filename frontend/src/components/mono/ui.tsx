@@ -17,8 +17,9 @@ import { DURATION, EASE, rise, riseReduced } from '@/lib/motion';
 import { RevealText } from './RevealText';
 import { TONE_SUBTLE } from './tone';
 import { NotificationBell } from './NotificationBell';
+import { OnlineTeamPresence } from './OnlineTeamPresence';
 
-export { NotificationBell };
+export { NotificationBell, OnlineTeamPresence };
 
 /** 2px Almost Black focus outline with 2px offset — every interactive element. */
 export const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
@@ -245,7 +246,12 @@ export function PageHeader({
       </div>
       <div className="flex flex-wrap items-center gap-2.5">
         {actions}
-        {showNotification && <NotificationBell />}
+        {showNotification && (
+          <div className="flex items-center gap-2.5">
+            <OnlineTeamPresence />
+            <NotificationBell />
+          </div>
+        )}
       </div>
     </header>
   );

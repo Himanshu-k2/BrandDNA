@@ -98,7 +98,7 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
             </Button>
             {item.lane === 'urgent' &&
               (approveBlocked ? (
-                <Tooltip content={selfAuthored ? SELF_APPROVAL : 'Only reviewers and admins can approve submissions.'}>
+                <Tooltip content={selfAuthored ? SELF_APPROVAL : 'Only brand managers and admins can approve submissions.'}>
                   <Button variant="secondary" size="sm" disabled>
                     <ShieldCheck className="size-4" {...ICON} /> Quick Approve
                   </Button>
@@ -121,7 +121,6 @@ function QueueCard({ item, onApprove, onRequest }: { item: QueueItem; onApprove:
 }
 
 export function ReviewerQueue() {
-  const { persona } = useSession();
   const [items, setItems] = useState(QUEUE);
   const [lane, setLane] = useState<QueueLane>('urgent');
   const [requesting, setRequesting] = useState<QueueItem | null>(null);
@@ -145,7 +144,7 @@ export function ReviewerQueue() {
   };
 
   const laneItems = inLane(lane);
-  const title = persona.role === 'reviewer' ? 'Approvals' : 'Approval Queue';
+  const title = 'Approval Queue';
 
   return (
     <div className="flex flex-col gap-8">

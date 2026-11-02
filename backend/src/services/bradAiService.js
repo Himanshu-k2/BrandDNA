@@ -8,10 +8,9 @@ You are NOT restricted to BrandDNA or NovaFit. You act as the user's ultimate pe
 
 Core Platform Knowledge:
 1. Personas & Roles:
-- Creator (Alex Rivera, Horizon Media Agency): Drafts content, runs real-time automated pre-flight checks, fixes compliance warnings, submits content for reviewer sign-off.
-- Brand Manager (Priya Kapoor, Brand Asset Operations): Governs Brand Asset Library (/brand-manager/assets), ingests PDF brand manuals into live rules (/brand-manager/uploads), reviews top compliance risks and rule violations.
-- Brand Reviewer (Sarah Chen, Account & Brand Manager): Evaluates submission diffs, inspects compliance scores, requests revisions with required notes, issues sealed audit certificates.
-- Admin (Jordan Blake, Enterprise Brand Director): Full platform management, team roles (/admin/users), brand workspaces (/brands), audit log ledger (/audit), and system alerts (/alerts).
+- Creator (Alex Rivera, Horizon Media Agency): Drafts content, runs real-time automated pre-flight checks, fixes compliance warnings, submits content for brand manager / admin sign-off.
+- Brand Manager (Priya Kapoor, Brand Asset Operations): Governs Brand Asset Library (/brand-manager/assets), ingests PDF brand manuals into live rules (/brand-manager/uploads), reviews and signs off on creator submissions in Approval Queue (/dashboard/queue).
+- Admin (Jordan Blake, Enterprise Brand Director): Full platform management, team roles (/admin/users), brand workspaces (/brands), audit log ledger (/audit), approvals (/dashboard/queue), and system alerts (/alerts).
 
 2. Brand Workspaces & Verified Rules:
 - NovaFit Health:
@@ -33,7 +32,6 @@ Core Platform Knowledge:
 
 3. Key Routes:
 - Creator Dashboard: /dashboard?role=creator
-- Reviewer Dashboard: /dashboard?role=reviewer
 - Brand Manager Dashboard: /dashboard?role=brand_manager
 - Platform Admin Dashboard: /dashboard?role=admin
 - Create New Content: /reviews/new
@@ -100,31 +98,24 @@ function getFallbackReply(message, context = {}) {
         outcome: 'answer',
         actions: [
           { label: 'Open Brand Dashboard', to: '/dashboard?role=brand_manager' },
+          { label: 'Approval Queue', to: '/dashboard/queue' },
           { label: 'View Asset Library', to: '/brand-manager/assets' },
           { label: 'Ingest Guideline PDF', to: '/brand-manager/uploads' },
         ],
       };
-    } else if (role === 'reviewer') {
-      return {
-        text: `Welcome to **BrandDNA**, Sarah! As a **Brand Reviewer**, you hold sign-off authority for submitted marketing copy.\n\nHere is your walkthrough:\n1. **[Reviewer Dashboard](/dashboard?role=reviewer)**: View approval rates, turnaround times, and pending reviews.\n2. **[Approval Queue](/dashboard/queue)**: Urgent items appear in the first lane. Click any item to compare revisions.\n3. **Review Studio**: Inspect diffs side-by-side, verify compliance scores, request required changes with notes, or approve & seal the certificate.\n\nReady to inspect the queue?`,
-        outcome: 'answer',
-        actions: [
-          { label: 'Open Approval Queue', to: '/dashboard/queue' },
-          { label: 'All Submissions', to: '/submissions' },
-        ],
-      };
     } else if (role === 'admin') {
       return {
-        text: `Welcome, Jordan! As the **Workspace Admin**, you manage enterprise operations across all workspaces.\n\nQuick Walkthrough:\n1. **[Platform Dashboard](/dashboard?role=admin)**: Real-time pass rates, active creators, and audit volumes.\n2. **[User & Role Mgmt](/admin/users)**: Invite team members and configure roles (Admin, Brand Manager, Reviewer, Creator).\n3. **[Brand Workspaces](/brands)**: Manage multi-brand workspaces (NovaFit, OmniCloud, Apex FinTech).\n4. **[Audit Log Ledger](/audit)**: Verify cryptographic audit integrity.\n\nWhat would you like to manage first?`,
+        text: `Welcome, Jordan! As the **Workspace Admin**, you manage enterprise operations across all workspaces.\n\nQuick Walkthrough:\n1. **[Platform Dashboard](/dashboard?role=admin)**: Real-time pass rates, active creators, and audit volumes.\n2. **[Approval Queue](/dashboard/queue)**: Review creator submissions and seal audit certificates.\n3. **[User & Role Mgmt](/admin/users)**: Invite team members and configure roles (Admin, Brand Manager, Creator).\n4. **[Brand Workspaces](/brands)**: Manage multi-brand workspaces (NovaFit, OmniCloud, Apex FinTech).\n5. **[Audit Log Ledger](/audit)**: Verify cryptographic audit integrity.\n\nWhat would you like to manage first?`,
         outcome: 'answer',
         actions: [
+          { label: 'Approval Queue', to: '/dashboard/queue' },
           { label: 'User & Role Mgmt', to: '/admin/users' },
           { label: 'Brand Workspaces', to: '/brands' },
         ],
       };
     } else {
       return {
-        text: `Welcome to **BrandDNA**, Alex! As a **Content Creator**, you can draft ad copy and marketing assets with guaranteed compliance.\n\nHere is your 3-step walkthrough:\n1. **[Create New Content](/reviews/new)**: Choose your brand workspace, paste your copy or upload documents.\n2. **Automated Pre-Flight Check**: Brad checks your draft against brand colors, banned terminology, and pricing rules with 1-click fixes.\n3. **[My Submissions & Drafts](/dashboard/content)**: Track your drafts as reviewers inspect and seal certificates.\n\nReady to create your first content?`,
+        text: `Welcome to **BrandDNA**, Alex! As a **Content Creator**, you can draft ad copy and marketing assets with guaranteed compliance.\n\nHere is your 3-step walkthrough:\n1. **[Create New Content](/reviews/new)**: Choose your brand workspace, paste your copy or upload documents.\n2. **Automated Pre-Flight Check**: Brad checks your draft against brand colors, banned terminology, and pricing rules with 1-click fixes.\n3. **[My Submissions & Drafts](/dashboard/content)**: Track your drafts as Brand Managers and Admins inspect and seal certificates.\n\nReady to create your first content?`,
         outcome: 'answer',
         actions: [
           { label: 'Create New Content', to: '/reviews/new' },
@@ -136,7 +127,7 @@ function getFallbackReply(message, context = {}) {
 
   if (lower.includes('message') || lower.includes('contact') || lower.includes('tell') || lower.includes('priya') || lower.includes('manager')) {
     return {
-      text: `In **BrandDNA**, team collaboration is built directly into review threads and audit records:\n\n- To communicate about a specific submission or creative draft, open the review thread in **[All Submissions](/submissions)** or **[Review Queue](/dashboard/queue)** and post a note in the discussion tab.\n- **Priya Kapoor** (Brand Manager) receives instant notifications for rule exemption requests and guideline feedback.\n- **Sarah Chen** (Brand Reviewer) gets notified when you apply fixes or submit a revised version.\n\nWould you like to open your submissions to leave a note?`,
+      text: `In **BrandDNA**, team collaboration is built directly into review threads and audit records:\n\n- To communicate about a specific submission or creative draft, open the review thread in **[All Submissions](/submissions)** or **[Approval Queue](/dashboard/queue)** and post a note in the discussion tab.\n- **Priya Kapoor** (Brand Manager) evaluates submissions, approves content, and manages brand rules.\n- **Jordan Blake** (Platform Admin) oversees platform compliance and approvals.\n\nWould you like to open your submissions to leave a note?`,
       outcome: 'answer',
       actions: [
         { label: 'Open Submissions', to: '/submissions' },

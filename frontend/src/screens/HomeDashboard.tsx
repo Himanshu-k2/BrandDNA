@@ -6,6 +6,7 @@ import { Stagger } from '@/components/mono/ui';
 import { DURATION, EASE } from '@/lib/motion';
 import { useSession } from '@/state/session';
 import { NotificationBell } from '@/components/mono/NotificationBell';
+import { OnlineTeamPresence } from '@/components/mono/OnlineTeamPresence';
 import { AuditCard } from './dashboard/AuditCard';
 import type { View } from './dashboard/data';
 import { OverviewCard } from './dashboard/OverviewCard';
@@ -21,7 +22,10 @@ export function HomeDashboard({ view }: { view: View }) {
     <>
       <header className="flex items-center justify-between gap-4">
         <RevealText text={`Hello, ${firstName}!`} className="font-display text-display font-semibold tracking-tight text-ink" delay={0.2} />
-        <NotificationBell />
+        <div className="flex items-center gap-3">
+          <OnlineTeamPresence />
+          <NotificationBell />
+        </div>
       </header>
 
       {/* Upgrade banner: radius 24, padding 8 → 16 inner (32px controls read as pills). */}

@@ -41,7 +41,7 @@ export function AlertsPage() {
           title: n.title || 'Brand Governance Update',
           body: n.message || n.body || 'Review status update recorded.',
           time: 'Recently',
-          audience: ['creator', 'reviewer', 'admin'],
+          audience: ['creator', 'brand_manager', 'admin'],
           urgent: n.priority === 'urgent' || n.priority === 'high'
         }));
         setLiveAlerts(mapped);

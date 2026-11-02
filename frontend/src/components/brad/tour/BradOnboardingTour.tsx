@@ -48,38 +48,6 @@ const getRoleSteps = (role: Role, firstName: string): TourStep[] => {
         expression: 'proud',
       },
     ],
-    reviewer: [
-      {
-        targetId: 'reviewer-dashboard',
-        title: 'Your Review Headquarters',
-        description: `Hey ${firstName}! Here’s your daily snapshot: pending sign-offs, team pass rates, and review turnaround times all in one clean view.`,
-        expression: 'happy',
-      },
-      {
-        targetId: 'approval-queue',
-        title: 'The Review Studio',
-        description: `The most important stop for your day! Compare version diffs side-by-side, verify pricing and terminology against official rules, and seal certified sign-offs with one click.`,
-        expression: 'attentive',
-      },
-      {
-        targetId: 'all-submissions',
-        title: 'The Complete Content Ledger',
-        description: `Search through the entire archive of approved campaigns and historical revisions. Every asset is cryptographically sealed for permanent audit proof.`,
-        expression: 'curious',
-      },
-      {
-        targetId: 'brand-workspaces',
-        title: 'Multi-Brand Switcher',
-        description: `Easily jump between isolated brand spaces—NovaFit, OmniCloud, and Apex FinTech—with zero guideline leaks between brands.`,
-        expression: 'excited',
-      },
-      {
-        targetId: 'ask-brad-capsule',
-        title: 'Your Pair-Reviewing Partner',
-        description: `All caught up! Whenever you need me to verify a claim, check color contrast, or explain a rule violation, just tap my capsule down here!`,
-        expression: 'proud',
-      },
-    ],
     brand_manager: [
       {
         targetId: 'brand-dashboard',

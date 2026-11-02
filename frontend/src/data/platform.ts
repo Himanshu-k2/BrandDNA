@@ -15,10 +15,10 @@ export interface WorkspaceUser {
 
 export const USERS: WorkspaceUser[] = [
   { id: 'u1', name: 'Jordan Blake', initials: 'JB', email: 'admin@demobrands.test', role: 'admin', brands: ['All workspaces'], lastActive: 'Online now', status: 'active' },
-  { id: 'u2', name: 'Sarah Chen', initials: 'SC', email: 'reviewer@demobrands.test', role: 'reviewer', brands: ['NovaFit', 'OmniCloud'], lastActive: '4 mins ago', status: 'active' },
-  { id: 'u3', name: 'Alex Rivera', initials: 'AR', email: 'creator@demobrands.test', role: 'creator', brands: ['NovaFit', 'OmniCloud'], lastActive: '18 mins ago', status: 'active' },
-  { id: 'u4', name: 'Priya Nair', initials: 'PN', email: 'priya@demobrands.test', role: 'reviewer', brands: ['NovaFit', 'Apex FinTech'], lastActive: '1 hr ago', status: 'active' },
-  { id: 'u5', name: 'Marcus Vance', initials: 'MV', email: 'marcus@demobrands.test', role: 'reviewer', brands: ['Apex FinTech'], lastActive: 'Yesterday', status: 'active' },
+  { id: 'u2', name: 'Priya Kapoor', initials: 'PK', email: 'brandmanager@branddna.com', role: 'brand_manager', brands: ['NovaFit', 'OmniCloud'], lastActive: 'Online now', status: 'active' },
+  { id: 'u3', name: 'Alex Rivera', initials: 'AR', email: 'creator@demobrands.test', role: 'creator', brands: ['NovaFit', 'OmniCloud'], lastActive: 'Online now', status: 'active' },
+  { id: 'u4', name: 'Priya Nair', initials: 'PN', email: 'priya@demobrands.test', role: 'brand_manager', brands: ['NovaFit', 'Apex FinTech'], lastActive: '1 hr ago', status: 'active' },
+  { id: 'u5', name: 'Marcus Vance', initials: 'MV', email: 'marcus@demobrands.test', role: 'brand_manager', brands: ['Apex FinTech'], lastActive: 'Yesterday', status: 'active' },
   { id: 'u6', name: 'Lena Okafor', initials: 'LO', email: 'lena@demobrands.test', role: 'creator', brands: ['Apex FinTech'], lastActive: '2 days ago', status: 'active' },
   { id: 'u7', name: 'Diego Ramos', initials: 'DR', email: 'diego@demobrands.test', role: 'creator', brands: ['OmniCloud'], lastActive: 'Invite sent', status: 'invited' },
   { id: 'u8', name: 'Hannah Moore', initials: 'HM', email: 'hannah@demobrands.test', role: 'creator', brands: ['NovaFit'], lastActive: '3 weeks ago', status: 'suspended' }
@@ -38,12 +38,12 @@ export interface Alert {
 }
 
 export const ALERTS: Alert[] = [
-  { id: 'al1', kind: 'sla', title: '2 urgent sign-offs due Friday 5:00 PM EST', body: 'NovaFit Summer Membership Promo and OmniCloud Partner Launch Email are blocking launch.', time: '12 mins ago', urgent: true, to: '/dashboard/queue', audience: ['reviewer', 'admin'] },
-  { id: 'al2', kind: 'review', title: 'Changes requested on Quarterly Product Brochure', body: 'Sarah Chen: savings claim needs the Q2 benchmark citation; use “clients”, not “customers”.', time: '1 hr ago', urgent: true, to: '/reviews/rev-1049', audience: ['creator'] },
-  { id: 'al3', kind: 'pricing', title: 'NovaFit price sheet updated to ₹999/mo', body: 'Drafts still quoting ₹799 are now flagged as high-severity pricing violations.', time: '3 hrs ago', urgent: false, to: '/guidelines', audience: ['creator', 'reviewer', 'admin'] },
-  { id: 'al4', kind: 'review', title: 'Member Referral Landing Hero approved', body: 'Sealed as CERT-8841 by Sarah Chen. The receipt is ready to download.', time: '5 hrs ago', urgent: false, to: '/reviews/rev-1049?tab=compare', audience: ['creator'] },
-  { id: 'al5', kind: 'system', title: 'Gemini contextual checks degraded for 6 minutes', body: 'Deterministic rules stayed active; 3 drafts were audited in rule-only fallback mode.', time: 'Yesterday', urgent: false, audience: ['reviewer', 'admin'] },
-  { id: 'al6', kind: 'guideline', title: 'Apex FinTech added an APY disclosure rule', body: 'All savings and rate content must include the APY disclosure line.', time: 'Yesterday', urgent: false, to: '/guidelines', audience: ['creator', 'reviewer', 'admin'] },
+  { id: 'al1', kind: 'sla', title: '2 urgent sign-offs due Friday 5:00 PM EST', body: 'NovaFit Summer Membership Promo and OmniCloud Partner Launch Email are blocking launch.', time: '12 mins ago', urgent: true, to: '/dashboard/queue', audience: ['brand_manager', 'admin'] },
+  { id: 'al2', kind: 'review', title: 'Changes requested on Quarterly Product Brochure', body: 'Priya Kapoor: savings claim needs the Q2 benchmark citation; use “clients”, not “customers”.', time: '1 hr ago', urgent: true, to: '/reviews/rev-1049', audience: ['creator'] },
+  { id: 'al3', kind: 'pricing', title: 'NovaFit price sheet updated to ₹999/mo', body: 'Drafts still quoting ₹799 are now flagged as high-severity pricing violations.', time: '3 hrs ago', urgent: false, to: '/guidelines', audience: ['creator', 'brand_manager', 'admin'] },
+  { id: 'al4', kind: 'review', title: 'Member Referral Landing Hero approved', body: 'Sealed as CERT-8841 by Priya Kapoor. The receipt is ready to download.', time: '5 hrs ago', urgent: false, to: '/reviews/rev-1049?tab=compare', audience: ['creator'] },
+  { id: 'al5', kind: 'system', title: 'Gemini contextual checks degraded for 6 minutes', body: 'Deterministic rules stayed active; 3 drafts were audited in rule-only fallback mode.', time: 'Yesterday', urgent: false, audience: ['brand_manager', 'admin'] },
+  { id: 'al6', kind: 'guideline', title: 'Apex FinTech added an APY disclosure rule', body: 'All savings and rate content must include the APY disclosure line.', time: 'Yesterday', urgent: false, to: '/guidelines', audience: ['creator', 'brand_manager', 'admin'] },
   { id: 'al7', kind: 'system', title: 'Diego Ramos has not accepted his invite', body: 'The OmniCloud creator invite expires in 2 days.', time: '2 days ago', urgent: false, to: '/admin/users', audience: ['admin'] }
 ];
 
@@ -58,14 +58,14 @@ export interface LedgerEntry {
 }
 
 export const AUDIT_LOG: LedgerEntry[] = [
-  { id: 'L-20931', at: 'Today 14:42', actor: 'Sarah Chen', role: 'reviewer', action: 'Approved & sealed', target: 'Member Referral Landing Hero · CERT-8841', hash: '9f2c…a71e' },
+  { id: 'L-20931', at: 'Today 14:42', actor: 'Priya Kapoor', role: 'brand_manager', action: 'Approved & sealed', target: 'Member Referral Landing Hero · CERT-8841', hash: '9f2c…a71e' },
   { id: 'L-20930', at: 'Today 14:32', actor: 'Alex Rivera', role: 'creator', action: 'Submitted for sign-off', target: 'NovaFit Summer Membership Promo · v2', hash: '41bd…0c93' },
   { id: 'L-20929', at: 'Today 14:31', actor: 'BrandDNA engine', role: 'system', action: 'Deterministic audit', target: 'NovaFit Summer Membership Promo · 98/100', hash: 'c07e…5f12' },
-  { id: 'L-20928', at: 'Today 11:05', actor: 'Sarah Chen', role: 'reviewer', action: 'Requested changes', target: 'Quarterly Product Brochure · v1', hash: '7aa1…e4d0' },
+  { id: 'L-20928', at: 'Today 11:05', actor: 'Priya Kapoor', role: 'brand_manager', action: 'Requested changes', target: 'Quarterly Product Brochure · v1', hash: '7aa1…e4d0' },
   { id: 'L-20927', at: 'Today 09:12', actor: 'Jordan Blake', role: 'admin', action: 'Updated approved fact', target: 'NovaFit · subscription_price → ₹999', hash: 'e5d3…28bb' },
   { id: 'L-20926', at: 'Yesterday 18:40', actor: 'BrandDNA engine', role: 'system', action: 'Fallback mode engaged', target: 'Gemini contextual checks · 6 min', hash: '0b6f…9a44' },
-  { id: 'L-20925', at: 'Yesterday 16:03', actor: 'Jordan Blake', role: 'admin', action: 'Changed role', target: 'Priya Nair · Creator → Reviewer', hash: '3c18…d7f5' },
-  { id: 'L-20924', at: 'Yesterday 10:21', actor: 'Marcus Vance', role: 'reviewer', action: 'Rejected', target: 'Credit Card Cashback Explainer · v2', hash: 'b9e2…1c08' },
+  { id: 'L-20925', at: 'Yesterday 16:03', actor: 'Jordan Blake', role: 'admin', action: 'Changed role', target: 'Priya Nair · Creator → Brand Manager', hash: '3c18…d7f5' },
+  { id: 'L-20924', at: 'Yesterday 10:21', actor: 'Marcus Vance', role: 'brand_manager', action: 'Rejected', target: 'Credit Card Cashback Explainer · v2', hash: 'b9e2…1c08' },
   { id: 'L-20923', at: '2 days ago', actor: 'Jordan Blake', role: 'admin', action: 'Invited user', target: 'Diego Ramos · OmniCloud creator', hash: '6d47…f3a9' },
   { id: 'L-20922', at: '3 days ago', actor: 'Jordan Blake', role: 'admin', action: 'Added rule', target: 'Apex FinTech · APY disclosure', hash: 'f1a0…7be6' }
 ];

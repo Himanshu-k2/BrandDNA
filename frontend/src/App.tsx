@@ -26,7 +26,7 @@ function Dashboard() {
   const { persona } = useSession();
   const param = params.get('role');
   const view: Role =
-    param === 'creator' || param === 'reviewer' || param === 'admin' || param === 'brand_manager'
+    param === 'creator' || param === 'admin' || param === 'brand_manager'
       ? param
       : persona.role;
   if (view === 'brand_manager') return <BrandManagerDashboard />;

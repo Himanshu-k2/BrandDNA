@@ -117,7 +117,7 @@ export function AuditLedger() {
               items={[
                 { id: 'all', label: 'All', count: AUDIT_LOG.length },
                 { id: 'admin', label: 'Admin', count: count('admin') },
-                { id: 'reviewer', label: 'Reviewer', count: count('reviewer') },
+                { id: 'brand_manager', label: 'Brand Manager', count: count('brand_manager') },
                 { id: 'creator', label: 'Creator', count: count('creator') },
                 { id: 'system', label: 'System', count: count('system') }
               ]}

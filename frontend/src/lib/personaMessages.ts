@@ -82,13 +82,11 @@ export function parseRecipientRole(query: string): Role | null {
 
   // 1. Direct persona names (unambiguous)
   if (/\b(priya|kapoor)\b/i.test(lower)) return 'brand_manager';
-  if (/\b(sarah|chen)\b/i.test(lower)) return 'reviewer';
   if (/\b(jordan|blake)\b/i.test(lower)) return 'admin';
   if (/\b(alex|rivera)\b/i.test(lower)) return 'creator';
 
   // 2. Full role names with word boundaries
-  if (/\bbrand\s*manager\b/i.test(lower)) return 'brand_manager';
-  if (/\b(brand\s*)?reviewer\b|\bapprover\b/i.test(lower)) return 'reviewer';
+  if (/\bbrand\s*manager\b|\b(brand\s*)?reviewer\b|\bapprover\b/i.test(lower)) return 'brand_manager';
   if (/\b(platform\s*)?admin(istrator)?\b/i.test(lower)) return 'admin';
   if (/\b(content\s*)?creator\b/i.test(lower)) return 'creator';
 

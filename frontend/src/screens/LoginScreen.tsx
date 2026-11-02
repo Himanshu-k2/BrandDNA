@@ -14,11 +14,10 @@ import { dashboardPath, PERSONAS, useSession, type Role } from '@/state/session'
 import { authAPI } from '@/api/auth';
 
 const DEMO_PASSWORD = 'branddna-demo';
-const ORDER: Role[] = ['creator', 'reviewer', 'brand_manager', 'admin'];
+const ORDER: Role[] = ['brand_manager', 'creator', 'admin'];
 const DEMO_LABEL: Record<Role, string> = {
-  creator: 'Creator',
-  reviewer: 'Reviewer',
   brand_manager: 'Brand Manager',
+  creator: 'Creator',
   admin: 'Admin'
 };
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

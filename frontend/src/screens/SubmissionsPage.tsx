@@ -6,7 +6,6 @@ import { Button, Card, EmptyState, ICON, PageHeader, Pill, ScoreBadge, Stagger, 
 import { StatusDot, type Tone } from '@/components/mono/status';
 import { SUBMISSIONS, type Submission, type SubmissionStatus } from '@/data/demo';
 import { cn } from '@/lib/cn';
-import { useSession } from '@/state/session';
 import type { LucideIcon } from 'lucide-react';
 import { reviewsAPI } from '@/api/reviews';
 
@@ -31,7 +30,6 @@ const initials = (name: string) => name.split(' ').map(part => part[0]).join('')
 /** "My Submissions & Drafts" (creator) and "All Submissions" (reviewer / admin). */
 export function SubmissionsPage({ scope }: { scope: 'mine' | 'all' }) {
   const navigate = useNavigate();
-  const { persona } = useSession();
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState(false);
@@ -92,7 +90,7 @@ export function SubmissionsPage({ scope }: { scope: 'mine' | 'all' }) {
         title={mine ? 'My Submissions & Drafts' : 'All Submissions'}
         subtitle={
           mine
-            ? `${counts.needs_changes} assets need changes and ${counts.pending} are waiting on reviewer sign-off.`
+            ? `${counts.needs_changes} assets need changes and ${counts.pending} are waiting on sign-off.`
             : 'Every asset sent through brand governance, across all isolated brand workspaces.'
         }
         actions={
@@ -101,7 +99,7 @@ export function SubmissionsPage({ scope }: { scope: 'mine' | 'all' }) {
               <CirclePlus className="size-5" {...ICON} /> New Content
             </Button>
           ) : (
-            <Button size="lg" onClick={() => navigate(persona.role === 'reviewer' ? '/dashboard?role=reviewer' : '/dashboard/queue')}>
+            <Button size="lg" onClick={() => navigate('/dashboard/queue')}>
               <Inbox className="size-5" {...ICON} /> Open Approvals
             </Button>
           )

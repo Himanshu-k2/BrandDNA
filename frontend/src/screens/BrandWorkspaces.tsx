@@ -5,7 +5,6 @@ import { MonoAvatar } from '@/components/mono/Brand';
 import { Button, Card, ICON, PageHeader, Pill, Stagger } from '@/components/mono/ui';
 import { BRANDS } from '@/data/demo';
 import { BRAND_STATS } from '@/data/platform';
-import { useSession } from '@/state/session';
 import { brandsAPI } from '@/api/brands';
 
 const initials = (name: string) => name.split(' ').map(part => part[0]).join('');
@@ -13,7 +12,6 @@ const initials = (name: string) => name.split(' ').map(part => part[0]).join('')
 /** Brand card: radius 24 · padding 8 → inner blocks and tiles radius 16. */
 export function BrandWorkspaces() {
   const navigate = useNavigate();
-  const { persona } = useSession();
   const [brandsList, setBrandsList] = useState<any[]>([...BRANDS]);
 
   useEffect(() => {
@@ -38,9 +36,9 @@ export function BrandWorkspaces() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Brand Workspaces"
-        subtitle="Each brand keeps an isolated set of approved facts, lexicon rules, disclaimers and reviewers. Nothing leaks between workspaces."
+        subtitle="Each brand keeps an isolated set of approved facts, lexicon rules, disclaimers and governance rules. Nothing leaks between workspaces."
         actions={
-          <Button size="lg" onClick={() => navigate(persona.role === 'reviewer' ? '/dashboard?role=reviewer' : '/dashboard/queue')}>
+          <Button size="lg" onClick={() => navigate('/dashboard/queue')}>
             <Inbox className="size-5" {...ICON} /> Open approvals
           </Button>
         }

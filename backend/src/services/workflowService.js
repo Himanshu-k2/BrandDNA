@@ -100,7 +100,7 @@ export const submitReviewForApproval = async (reviewId, user) => {
 
   // Notify reviewers and admins
   await sendNotification({
-    role: 'reviewer',
+    role: 'brand_manager',
     organizationId: review.organizationId,
     reviewId: review._id,
     type: 'review_submitted',
@@ -400,7 +400,7 @@ export const createReviewRevision = async (
   // 7. Notify reviewers if ready for approval
   if (initialStatus === 'pending_approval') {
     await sendNotification({
-      role: 'reviewer',
+      role: 'brand_manager',
       organizationId: review.organizationId,
       reviewId: review._id,
       type: 'review_submitted',
@@ -432,7 +432,7 @@ export const approveContentReview = async (reviewId, user, { comment = '' }) => 
   // Prevent creator self-approval
   if (review.submittedBy.toString() === user._id.toString()) {
     const error = new Error(
-      'Forbidden: Content creators are not permitted to approve their own submissions. Approval requires an independent reviewer or admin decision.'
+      'Forbidden: Content creators are not permitted to approve their own submissions. Approval requires an independent brand manager or admin decision.'
     );
     error.statusCode = 403;
     throw error;
@@ -664,7 +664,7 @@ export const addReviewComment = async (reviewId, user, { body, commentType = 'ge
     });
   } else {
     await sendNotification({
-      role: 'reviewer',
+      role: 'brand_manager',
       organizationId: review.organizationId,
       reviewId: review._id,
       type: 'comment_added',

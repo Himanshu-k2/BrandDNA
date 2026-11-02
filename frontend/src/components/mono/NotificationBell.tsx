@@ -66,8 +66,7 @@ export function NotificationBell({ className }: { className?: string }) {
 
   // Unread system alerts for current role
   const unreadAlertsCount = useMemo(() => {
-    const targetRole = persona.role === 'brand_manager' ? 'reviewer' : persona.role;
-    const applicable = ALERTS.filter(alert => alert.audience.includes(targetRole));
+    const applicable = ALERTS.filter(alert => alert.audience.includes(persona.role));
     return applicable.filter(alert => !readIds.has(alert.id)).length;
   }, [persona.role, readIds]);
 
@@ -79,8 +78,7 @@ export function NotificationBell({ className }: { className?: string }) {
     setIsClicked(true);
     try {
       localStorage.setItem(`${CLICKED_STORAGE_KEY}_${persona.role}`, 'true');
-      const targetRole = persona.role === 'brand_manager' ? 'reviewer' : persona.role;
-      const applicable = ALERTS.filter(alert => alert.audience.includes(targetRole));
+      const applicable = ALERTS.filter(alert => alert.audience.includes(persona.role));
       markAlertsAsRead(applicable.map(a => a.id));
     } catch {}
     navigate(targetPath);

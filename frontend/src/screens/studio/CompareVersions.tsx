@@ -7,7 +7,7 @@ import { diffStats, diffWords, toLines, type DiffOp } from '@/lib/diff';
 import { auditDraft, NOVAFIT_RULES } from '@/lib/rules';
 
 export const SELF_APPROVAL_COPY =
-  'To prevent compliance leakage, content authors cannot approve their own submissions. Another authorized reviewer must sign off.';
+  'To prevent compliance leakage, content authors cannot approve their own submissions. An authorized brand manager or admin must sign off.';
 
 export interface Decision {
   kind: 'approved' | 'changes' | 'rejected';

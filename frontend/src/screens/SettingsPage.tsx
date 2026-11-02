@@ -17,12 +17,8 @@ const PERMISSIONS: Record<Role, Array<{ label: string; allowed: boolean }>> = {
   brand_manager: [
     { label: 'Manage brand asset libraries & hex swatches', allowed: true },
     { label: 'Ingest guidelines & approve rule updates', allowed: true },
-    { label: 'Sign-off on brand compliance reviews', allowed: true }
-  ],
-  reviewer: [
-    { label: 'Inspect revision diffs & audit trail', allowed: true },
-    { label: 'Request changes with required notes', allowed: true },
-    { label: 'Approve & seal audit certificates', allowed: true }
+    { label: 'Review & sign-off on creator submissions', allowed: true },
+    { label: 'Approve & seal compliance audit certificates', allowed: true }
   ],
   creator: [
     { label: 'Draft & run dual-track audits', allowed: true },

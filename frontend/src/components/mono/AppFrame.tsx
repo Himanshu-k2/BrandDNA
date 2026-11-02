@@ -10,6 +10,7 @@ import { Logo } from './Logo';
 import { CommandPalette } from './CommandPalette';
 import { Sidebar } from './Sidebar';
 import { NotificationBell } from './NotificationBell';
+import { OnlineTeamPresence } from './OnlineTeamPresence';
 import { TONE_ICON, TONE_SUBTLE, type Tone } from './tone';
 import { focusRing, ICON } from './ui';
 
@@ -133,6 +134,7 @@ export function AppFrame() {
             <div className="mb-6 flex h-12 items-center justify-between md:hidden">
               <Logo variant="horizontal" size="md" />
               <div className="flex items-center gap-2">
+                <OnlineTeamPresence compact />
                 <NotificationBell className="size-10" />
                 <button
                   type="button"

@@ -16,7 +16,7 @@ const STATUS: Record<UserStatus, { label: string; tone: Tone; icon: LucideIcon }
   invited: { label: 'Invited', tone: 'info', icon: Mail },
   suspended: { label: 'Suspended', tone: 'danger', icon: Ban }
 };
-const ROLES: Role[] = ['admin', 'reviewer', 'creator'];
+const ROLES: Role[] = ['admin', 'brand_manager', 'creator'];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function RestrictedState({ title }: { title: string }) {
@@ -47,7 +47,7 @@ export function UsersPage() {
           id: u._id || u.id,
           name: u.name || 'BrandDNA User',
           initials: (u.name || 'User').split(' ').map((p: string) => p[0]).join('').slice(0, 2),
-          role: (u.role === 'admin' ? 'admin' : u.role === 'reviewer' ? 'reviewer' : 'creator') as Role,
+          role: (u.role === 'admin' ? 'admin' : u.role === 'brand_manager' ? 'brand_manager' : 'creator') as Role,
           email: u.email || 'user@demobrands.test',
           status: (u.isActive === false ? 'suspended' : 'active') as UserStatus,
           joined: 'Recently',
@@ -93,7 +93,7 @@ export function UsersPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="User & Role Mgmt"
-        subtitle="Role-based access: creators draft and submit, reviewers sign off, admins manage facts, people and workspaces."
+        subtitle="Role-based access: creators draft and submit, brand managers and admins review and sign off."
         actions={
           <Button size="lg" onClick={() => setInviting(true)}>
             <UserPlus className="size-5" {...ICON} /> Invite user
@@ -108,7 +108,7 @@ export function UsersPage() {
         items={[
           { id: 'all', label: 'All', count: users.length },
           { id: 'admin', label: 'Admins', count: count('admin') },
-          { id: 'reviewer', label: 'Reviewers', count: count('reviewer') },
+          { id: 'brand_manager', label: 'Brand Managers', count: count('brand_manager') },
           { id: 'creator', label: 'Creators', count: count('creator') }
         ]}
       />

@@ -26,22 +26,17 @@ const on =
 export const NAV: Record<Role, NavItem[]> = {
   brand_manager: [
     { label: 'Brand Dashboard', icon: LayoutGrid, to: dashboardPath('brand_manager'), match: on('/dashboard') },
+    { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Sign-off', short: 'Sign-off' } },
     { label: 'Brand Asset Library', icon: Building2, to: '/brand-manager/assets', match: on('/brand-manager/assets') },
     { label: 'Guideline Ingestion', icon: BookOpen, to: '/brand-manager/uploads', match: on('/brand-manager/uploads') },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
     { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') }
   ],
-  reviewer: [
-    { label: 'Reviewer Dashboard', icon: LayoutGrid, to: dashboardPath('reviewer'), match: on('/dashboard') },
-    { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Needs sign-off', short: 'Sign-off' } },
-    { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
-    { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') }
-  ],
   admin: [
     { label: 'Platform Dashboard', icon: LayoutGrid, to: dashboardPath('admin'), match: on('/dashboard') },
+    { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Sign-off', short: 'Sign-off' } },
     { label: 'User & Role Mgmt', icon: UserCog, to: '/admin/users', match: on('/admin/users') },
     { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') },
-    { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Sign-off', short: 'Sign-off' } },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },
     { label: 'Audit Log Ledger', icon: ClipboardList, to: '/audit', match: on('/audit') }
   ],

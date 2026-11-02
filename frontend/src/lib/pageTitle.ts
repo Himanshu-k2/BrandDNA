@@ -3,7 +3,6 @@ import type { Role } from '@/state/session';
 const DASHBOARD: Record<Role, string> = {
   creator: 'Creator Dashboard',
   admin: 'Platform Dashboard',
-  reviewer: 'Reviewer Dashboard',
   brand_manager: 'Brand Manager Dashboard'
 };
 
@@ -31,7 +30,7 @@ export function pageTitle(pathname: string, search: string, role: Role) {
   let name = STATIC[pathname];
   if (!name && pathname === '/dashboard') {
     const param = new URLSearchParams(search).get('role');
-    name = DASHBOARD[param === 'creator' || param === 'admin' || param === 'reviewer' || param === 'brand_manager' ? param : role];
+    name = DASHBOARD[param === 'creator' || param === 'admin' || param === 'brand_manager' ? param : role];
   }
   if (!name && pathname.startsWith('/reviews/')) name = 'Review';
   return name ? `${name} | BrandDNA` : 'BrandDNA';

@@ -78,10 +78,10 @@ export function ReviewStudio() {
 
   const audit = useMemo(() => auditDraft(draft), [draft]);
   const isAuthor = persona.role === 'creator';
-  const editable = persona.role !== 'reviewer' && ['draft', 'needs_changes', 'changes_requested'].includes(status);
+  const editable = persona.role === 'creator' && ['draft', 'needs_changes', 'changes_requested'].includes(status);
   const lockedReason =
-    persona.role === 'reviewer'
-      ? 'Reviewers inspect and sign off; only the content author can revise this draft.'
+    persona.role !== 'creator'
+      ? 'Brand Managers and Admins inspect and sign off; only the content author can revise this draft.'
       : !editable
         ? 'This revision is locked while it is in review.'
         : undefined;
@@ -161,7 +161,7 @@ export function ReviewStudio() {
     needs_changes: audit.canSubmit
       ? { label: `${audit.score}% Compliant · Ready for Sign-Off`, tone: 'success' }
       : { label: `Needs Changes · Score ${audit.score}/100`, tone: 'danger' },
-    in_review: { label: `In Review · Assigned to ${REVIEW.reviewer}`, tone: 'warning' },
+    in_review: { label: `In Review · Awaiting Sign-off`, tone: 'warning' },
     approved: { label: 'Approved & Sealed', tone: 'success' },
     changes_requested: { label: 'Changes Requested', tone: 'danger' },
     rejected: { label: 'Rejected', tone: 'danger' }
@@ -171,7 +171,7 @@ export function ReviewStudio() {
   const comparisonLabel = draft !== REVIEW.v1 && draft.trim() ? 'v2 · Working Revision' : 'v2 · Current Revision';
   const versionLabel = isNew ? 'New draft · Version 1' : draft === REVIEW.v1 ? 'Viewing Version 1 of 2' : 'Editing Version 2';
   const severityCount = (severity: 'high' | 'medium' | 'low') => audit.open.filter(rule => rule.severity === severity).length;
-  const homePath = isAuthor ? '/dashboard/content' : persona.role === 'reviewer' ? '/dashboard?role=reviewer' : '/dashboard/queue';
+  const homePath = isAuthor ? '/dashboard/content' : '/dashboard/queue';
   const decisionBlocked = !canApprove(persona.role) ? SELF_APPROVAL_COPY : status === 'approved' || status === 'rejected' ? 'A decision has already been recorded.' : undefined;
 
   const emptyCanvas = (
@@ -258,7 +258,7 @@ export function ReviewStudio() {
             </Tooltip>
           )}
           <span className="ml-auto text-caption text-graphite">
-            Author <span className="font-medium text-ink">{REVIEW.author}</span> · Reviewer <span className="font-medium text-ink">{REVIEW.reviewer}</span>
+            Author <span className="font-medium text-ink">{REVIEW.author}</span> · Approver <span className="font-medium text-ink">Brand Manager / Admin</span>
           </span>
         </div>
       </header>
@@ -298,7 +298,7 @@ export function ReviewStudio() {
                 {status === 'in_review' && (
                   <div className="flex flex-wrap items-center gap-2 rounded-min bg-silver/40 p-2 pl-4 text-ui text-ink">
                     <CircleCheck className="size-5" {...ICON} />
-                    <span className="flex-1">Submitted for sign-off. Editing is locked while {REVIEW.reviewer} reviews v2.</span>
+                    <span className="flex-1">Submitted for sign-off. Editing is locked while Brand Manager reviews v2.</span>
                     <Button variant="secondary" size="sm" onClick={() => setTab('compare')}>
                       View diff
                     </Button>
@@ -333,12 +333,12 @@ export function ReviewStudio() {
                         <PenLine className="size-4" {...ICON} /> {editing ? 'Done editing' : 'Edit & revise (v2)'}
                       </Button>
                       <div className="ml-auto">
-                        {persona.role === 'reviewer' ? (
+                        {canApprove(persona.role) ? (
                           <Button onClick={() => setTab('compare')}>
                             Go to compare & sign-off <ChevronRight className="size-4" {...ICON} />
                           </Button>
                         ) : (
-                          <Tooltip content={audit.canSubmit ? 'Sends v2 to Sarah Chen for formal sign-off.' : `Resolve high-severity issues and reach ${SUBMIT_THRESHOLD}+ to unlock submission.`}>
+                          <Tooltip content={audit.canSubmit ? 'Sends v2 to Brand Manager / Admin for formal sign-off.' : `Resolve high-severity issues and reach ${SUBMIT_THRESHOLD}+ to unlock submission.`}>
                             <Button size="lg" onClick={submit} disabled={!audit.canSubmit || !editable}>
                               <Send className="size-5" {...ICON} /> Submit for sign-off
                             </Button>

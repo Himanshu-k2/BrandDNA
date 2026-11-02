@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-export type Role = 'creator' | 'reviewer' | 'brand_manager' | 'admin';
+export type Role = 'brand_manager' | 'creator' | 'admin';
 
 export interface Persona {
   role: Role;
@@ -12,14 +12,6 @@ export interface Persona {
 }
 
 export const PERSONAS: Record<Role, Persona> = {
-  admin: {
-    role: 'admin',
-    name: 'Jordan Blake',
-    initials: 'JB',
-    title: 'Workspace Admin',
-    org: 'Enterprise Brand Director',
-    email: 'admin@demobrands.test'
-  },
   brand_manager: {
     role: 'brand_manager',
     name: 'Priya Kapoor',
@@ -28,14 +20,6 @@ export const PERSONAS: Record<Role, Persona> = {
     org: 'Brand Asset Operations',
     email: 'brandmanager@branddna.com'
   },
-  reviewer: {
-    role: 'reviewer',
-    name: 'Sarah Chen',
-    initials: 'SC',
-    title: 'Brand Reviewer',
-    org: 'Account & Brand Manager',
-    email: 'reviewer@demobrands.test'
-  },
   creator: {
     role: 'creator',
     name: 'Alex Rivera',
@@ -43,17 +27,25 @@ export const PERSONAS: Record<Role, Persona> = {
     title: 'Content Creator',
     org: 'Horizon Media Agency',
     email: 'creator@demobrands.test'
+  },
+  admin: {
+    role: 'admin',
+    name: 'Jordan Blake',
+    initials: 'JB',
+    title: 'Workspace Admin',
+    org: 'Enterprise Brand Director',
+    email: 'admin@demobrands.test'
   }
 };
 
-export const canApprove = (role: Role) => role !== 'creator';
+/** Only brand manager and admin can review and accept / sign off content. */
+export const canApprove = (role: Role) => role === 'brand_manager' || role === 'admin';
 
 /** Short role names shown in the sidebar role pill. */
 export const ROLE_LABEL: Record<Role, string> = {
-  reviewer: 'Reviewer',
   brand_manager: 'Brand Manager',
-  admin: 'Platform Admin',
-  creator: 'Content Creator'
+  creator: 'Content Creator',
+  admin: 'Platform Admin'
 };
 
 /** Each persona's landing route (the default-active sidebar item). */
@@ -69,9 +61,9 @@ const STORAGE_KEY = 'branddna.role';
 
 function readRole(): Role {
   const stored = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
-  return stored === 'admin' || stored === 'brand_manager' || stored === 'reviewer' || stored === 'creator'
+  return stored === 'admin' || stored === 'brand_manager' || stored === 'creator'
     ? stored
-    : 'creator';
+    : 'brand_manager';
 }
 
 export function SessionProvider({ children }: { children: ReactNode }) {
