@@ -4,6 +4,7 @@
  */
 
 const GEMINI_STORAGE_KEY = 'branddna_gemini_api_key';
+const GEMINI_MODEL_KEY = 'branddna_gemini_model';
 
 export function getStoredGeminiKey(): string {
   if (typeof window === 'undefined') return '';
@@ -17,6 +18,21 @@ export function setStoredGeminiKey(key: string): void {
     localStorage.setItem(GEMINI_STORAGE_KEY, clean);
   } else {
     localStorage.removeItem(GEMINI_STORAGE_KEY);
+  }
+}
+
+export function getStoredGeminiModel(): string {
+  if (typeof window === 'undefined') return 'gemini-2.5-pro';
+  return localStorage.getItem(GEMINI_MODEL_KEY) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-pro';
+}
+
+export function setStoredGeminiModel(model: string): void {
+  if (typeof window === 'undefined') return;
+  const clean = model.trim();
+  if (clean) {
+    localStorage.setItem(GEMINI_MODEL_KEY, clean);
+  } else {
+    localStorage.removeItem(GEMINI_MODEL_KEY);
   }
 }
 
@@ -88,7 +104,10 @@ export async function askGeminiDirect(
   const apiKey = getStoredGeminiKey();
   if (!apiKey) throw new Error('No Gemini API key available');
 
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const preferredModel = getStoredGeminiModel();
+  const models = Array.from(
+    new Set([preferredModel, 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'])
+  );
   let lastError: any = null;
 
   // Build context-rich user prompt
@@ -120,7 +139,7 @@ ${message}`;
           contents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 2048,
           }
         })
       });
@@ -152,10 +171,9 @@ ${message}`;
       };
     } catch (err: any) {
       lastError = err;
-      console.warn(`Gemini model ${model} failed, trying fallback:`, err.message);
+      console.warn(`Gemini model ${model} notice:`, err.message);
     }
   }
 
   throw lastError || new Error('All Gemini model attempts failed');
 }
-

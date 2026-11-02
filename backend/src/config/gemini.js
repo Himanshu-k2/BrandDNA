@@ -33,23 +33,23 @@ export const isGeminiConfigured = () => {
 
 /**
  * Resolves the configured Gemini model name.
- * Replaces the retired 'gemini-1.5-pro' with the supported 'gemini-3.8-flash' model.
+ * Defaults to Google's premier intelligence model: 'gemini-2.5-pro'.
  */
 export const getGeminiModelName = () => {
   const envModel = process.env.GEMINI_MODEL;
-  if (!envModel || envModel === 'gemini-1.5-pro' || envModel === 'gemini-1.5-flash' || envModel === 'gemini-2.5-flash') {
-    return 'gemini-3.8-flash';
+  if (envModel && envModel.trim() !== '') {
+    return envModel.trim();
   }
-  return envModel;
+  return 'gemini-2.5-pro';
 };
 
 /**
  * Resolves the secondary fallback Gemini model name if the primary experiences high demand spikes (503/504).
  */
 export const getGeminiFallbackModelName = () => {
-  if (process.env.GEMINI_FALLBACK_MODEL) {
-    return process.env.GEMINI_FALLBACK_MODEL;
+  if (process.env.GEMINI_FALLBACK_MODEL && process.env.GEMINI_FALLBACK_MODEL.trim() !== '') {
+    return process.env.GEMINI_FALLBACK_MODEL.trim();
   }
   const primary = getGeminiModelName();
-  return primary === 'gemini-3.8-flash' ? 'gemini-3-flash-preview' : 'gemini-3.8-flash';
+  return primary === 'gemini-2.5-pro' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
 };
