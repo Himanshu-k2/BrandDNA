@@ -8,6 +8,7 @@ import {
   ChevronDown,
   CircleAlert,
   Clock,
+  Compass,
   Copy,
   EllipsisVertical,
   FileText,
@@ -162,6 +163,15 @@ export function BradChatPanel({
                   transition={{ duration: DURATION.fast, ease: EASE }}
                   className="absolute top-full right-0 z-30 mt-2 flex min-w-56 origin-top-right flex-col rounded-item border border-silver bg-paper p-2 shadow-lift"
                 >
+                  <MenuRow
+                    onClick={() => {
+                      setMenu(false);
+                      onClose?.();
+                      window.dispatchEvent(new CustomEvent('branddna:start_tour'));
+                    }}
+                  >
+                    <Compass className="size-4" {...ICON} /> Take Platform Tour
+                  </MenuRow>
                   <MenuRow
                     onClick={() => {
                       setMenu(false);

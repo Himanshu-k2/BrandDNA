@@ -1,4 +1,4 @@
-import { forwardRef, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -29,8 +29,19 @@ export const AskBradButton = forwardRef<
 >(function AskBradButton({ open, compact = false, expression = 'neutral', scan, onClick, onHoverChange, forceHover, badge = false, className }, ref) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
+  const [splashing, setSplashing] = useState(false);
   const measure = useRef<HTMLSpanElement>(null);
   const [pillWidth, setPillWidth] = useState(136);
+
+  useEffect(() => {
+    const onSplash = () => {
+      setSplashing(true);
+      setTimeout(() => setSplashing(false), 900);
+    };
+    window.addEventListener('branddna:capsule_splash', onSplash);
+    return () => window.removeEventListener('branddna:capsule_splash', onSplash);
+  }, []);
+
   useLayoutEffect(() => {
     if (measure.current) setPillWidth(Math.ceil(measure.current.getBoundingClientRect().width));
   }, []);
@@ -58,6 +69,7 @@ export const AskBradButton = forwardRef<
       <motion.button
         ref={ref}
         type="button"
+        data-tour-target="ask-brad-capsule"
         onClick={onClick}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
@@ -67,8 +79,20 @@ export const AskBradButton = forwardRef<
         aria-expanded={open}
         aria-haspopup="dialog"
         initial={false}
-        animate={{ width: round ? 48 : pillWidth }}
-        transition={{ duration: reduce ? 0 : DURATION.base, ease: EASE }}
+        animate={
+          splashing
+            ? {
+                width: round ? 48 : pillWidth,
+                scaleX: [1, 1.25, 0.88, 1.06, 1],
+                scaleY: [1, 0.74, 1.16, 0.94, 1],
+              }
+            : {
+                width: round ? 48 : pillWidth,
+                scaleX: 1,
+                scaleY: 1,
+              }
+        }
+        transition={{ duration: reduce ? 0 : splashing ? 0.65 : DURATION.base, ease: EASE }}
         className={cn(
           'relative flex h-12 cursor-pointer items-center justify-center overflow-hidden rounded-full',
           'bg-white/80 backdrop-blur-xl backdrop-saturate-150',

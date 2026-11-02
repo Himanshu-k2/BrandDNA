@@ -299,6 +299,8 @@ function NavRow({ item, compact, active, onClick, tipHandlers }: { item: NavItem
   return (
     <button
       type="button"
+      data-tour-target={item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+      data-tour-to={item.to}
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       aria-label={compact ? item.label : undefined}
@@ -361,6 +363,7 @@ function UserRow({ icon: Icon, label, compact, active, onClick, tipHandlers }: {
   return (
     <button
       type="button"
+      data-tour-target={label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
       onClick={onClick}
       aria-label={compact ? label : undefined}
       aria-current={active ? 'page' : undefined}

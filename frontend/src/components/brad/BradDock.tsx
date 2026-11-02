@@ -10,6 +10,7 @@ import { getUnreadMessagesForRole, markMessageAsRead, type PersonaDispatchMessag
 import { AskBradButton } from './AskBradButton';
 import { BradChatPanel } from './BradChatPanel';
 import { useBrad } from './BradProvider';
+import { BradOnboardingTour } from './tour/BradOnboardingTour';
 
 function useMedia(query: string) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
@@ -290,6 +291,7 @@ export function BradDock() {
           </motion.div>
         )}
       </AnimatePresence>
+      <BradOnboardingTour />
     </>
   );
 }
