@@ -106,11 +106,11 @@ export function BradProvider({ children }: { children: ReactNode }) {
     setIntroPlayed(true);
     flash('happy', 2400);
     setThinking(true);
-    const first = 'Hi, I’m Brad. Need any help?';
+    const first = 'Hi, I’m Brad! Your AI personal assistant & brand guide. Ask me anything!';
     later(() => {
       setThinking(false);
       push({ from: 'brad', text: first, reveal: true });
-      later(() => push({ from: 'brad', text: 'Here are a few things I can help with right now.', reveal: true, chips: SUGGESTIONS[persona.role] }), revealMs(first) + 400);
+      later(() => push({ from: 'brad', text: 'Ask me any question, creative idea, or explore brand tools:', reveal: true, chips: ['Ask me anything...', ...SUGGESTIONS[persona.role]] }), revealMs(first) + 400);
     }, 600);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persona.role, flash]);

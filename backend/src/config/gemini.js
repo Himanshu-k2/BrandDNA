@@ -33,22 +33,22 @@ export const isGeminiConfigured = () => {
 
 /**
  * Resolves the configured Gemini model name.
- * Defaults to Google AI Studio's 'gemini-3.8-flash'.
+ * Defaults to Google AI Studio's 'gemini-3.6-flash'.
  */
 export const getGeminiModelName = () => {
   const envModel = process.env.GEMINI_MODEL;
-  if (envModel && envModel.trim() !== '') {
+  if (envModel && envModel.trim() !== '' && !envModel.includes('2.5') && !envModel.includes('3.8')) {
     return envModel.trim();
   }
-  return 'gemini-3.8-flash';
+  return 'gemini-3.6-flash';
 };
 
 /**
  * Resolves the secondary fallback Gemini model name if the primary experiences high demand spikes (503/504).
  */
 export const getGeminiFallbackModelName = () => {
-  if (process.env.GEMINI_FALLBACK_MODEL && process.env.GEMINI_FALLBACK_MODEL.trim() !== '') {
+  if (process.env.GEMINI_FALLBACK_MODEL && process.env.GEMINI_FALLBACK_MODEL.trim() !== '' && !process.env.GEMINI_FALLBACK_MODEL.includes('2.5')) {
     return process.env.GEMINI_FALLBACK_MODEL.trim();
   }
-  return 'gemini-3.6-flash';
+  return 'gemini-3.5-flash';
 };

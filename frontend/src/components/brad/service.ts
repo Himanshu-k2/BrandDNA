@@ -259,7 +259,7 @@ function answer(raw: string, context: BradContext): BradReply {
   if (/^(hi|hello|hey|yo|greetings|good morning|good evening)$/i.test(text)) {
     return {
       outcome: 'answer',
-      text: `Hi ${firstName}! I'm Brad, your BrandDNA AI assistant. Ask me anything about the platform, brand guidelines, color rules, or how to get started!`,
+      text: `Hi ${firstName}! I'm Brad, your AI personal assistant & Brand Guardian. I can answer any question in the universe — from coding, science, and creative writing to brand guidelines and platform walkthroughs. What can I do for you today?`,
       actions: [
         { label: 'Give me a walkthrough', to: '/dashboard' },
         { label: 'Brand Asset Library', to: '/brand-manager/assets' },
@@ -270,7 +270,7 @@ function answer(raw: string, context: BradContext): BradReply {
   // 7. General Open-Ended Answer
   return {
     outcome: 'answer',
-    text: `I'm **Brad**, your AI Brand Guardian! I can help you with anything across BrandDNA — from platform walkthroughs and brand guidelines to color rules, pricing facts, and review approvals.\n\nQuick questions you can ask me:\n- *"Give me a walkthrough of the platform"*\n- *"What are the approved colors and hex codes?"*\n- *"How do I message the brand manager or reviewer?"*\n- *"What is the official subscription pricing?"*\n\n*(💡 Tip: To ask completely unrestricted open-ended questions like general copywriting or custom topics, you can configure your Google Gemini API key in Brad's options menu!)*`,
+    text: `I'm **Brad**, your AI Personal Assistant & Brand Guardian!\n\nI can help you with anything across BrandDNA or answer any general question on science, technology, coding, and creative ideas.\n\nQuick examples to try:\n- *"Give me a walkthrough of the platform"*\n- *"What are the approved colors and hex codes for NovaFit?"*\n- *"Write an energetic ad copy for our new launch"*\n- *"Explain the theory of relativity in simple terms"*\n\n*(💡 Powered by Google Gemini 3.6 Flash for instant answers!)*`,
     actions: [
       { label: 'Brand Asset Library', to: '/brand-manager/assets' },
       { label: 'Create New Content', to: '/reviews/new' },

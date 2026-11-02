@@ -31,7 +31,6 @@ import {
 import { MonoAvatar } from '@/components/mono/Brand';
 import { TONE_TEXT } from '@/components/mono/tone';
 import { Button, focusRing, ICON, MenuRow } from '@/components/mono/ui';
-import { BRANDS } from '@/data/demo';
 import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
 import { DURATION, EASE } from '@/lib/motion';
@@ -40,8 +39,7 @@ import { useBrad, WORD_MS, type BradMessage } from './BradProvider';
 import { BradFace } from './face/BradFace';
 import { countWords, Markdown } from './Markdown';
 import { BradIconButton, ListeningBars, ModeSwitch, TypingDots } from './parts';
-import { useActiveWorkspace } from './workspace';
-import { getStoredGeminiKey, setStoredGeminiKey, isGeminiDirectActive, getStoredGeminiModel } from './gemini';
+import { getStoredGeminiKey, setStoredGeminiKey, isGeminiDirectActive, getStoredGeminiModel, formatGeminiModelName } from './gemini';
 
 /*
  * Radii: panel 24 − 16 padding → bubbles 8 (radius-chip), sender corner 4 (radius-min).
@@ -264,8 +262,8 @@ export function BradChatPanel({
                   )}
                 </div>
                 <div className="flex items-center justify-between text-caption text-graphite pt-0.5">
-                  <span className="text-caption">
-                    {geminiActive ? `✅ ${getStoredGeminiModel() === 'gemini-3.8-flash' ? 'Gemini 3.8 Flash' : getStoredGeminiModel()} active` : 'Using built-in knowledge'}
+                  <span className="text-caption font-medium">
+                    {geminiActive ? `✅ ${formatGeminiModelName(getStoredGeminiModel())} active` : 'Using built-in knowledge'}
                   </span>
                   <a
                     href="https://aistudio.google.com/app/apikey"
@@ -319,8 +317,6 @@ export function BradChatPanel({
 
 function MessageLog({ onNavigate }: { onNavigate?: () => void }) {
   const brad = useBrad();
-  const workspaceId = useActiveWorkspace();
-  const workspace = BRANDS.find(brand => brand.id === workspaceId) ?? BRANDS[0];
   const reduce = useReducedMotion() ?? false;
   const listRef = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
@@ -365,7 +361,7 @@ function MessageLog({ onNavigate }: { onNavigate?: () => void }) {
       >
         <div className="flex flex-col items-center gap-2 pt-4 pb-2 text-center" aria-hidden>
           <BradFace size="lg" expression={brad.expression} scan={brad.scanning} />
-          <p className="max-w-64 text-caption text-mid">Ask about {workspace.name} guidelines, submissions, findings, or where to find something.</p>
+          <p className="max-w-72 text-caption text-mid">Ask Brad anything — general knowledge, creative ideas, coding, or brand guidelines!</p>
         </div>
 
         {brad.messages.map((message, index) =>
@@ -731,7 +727,7 @@ function Composer({ variant, inputRef, onLayer }: { variant: Variant; inputRef: 
               </div>
             )}
             <label htmlFor="brad-input" className="sr-only">
-              Message Brad
+              Ask Brad anything
             </label>
             <textarea
               id="brad-input"
@@ -741,7 +737,7 @@ function Composer({ variant, inputRef, onLayer }: { variant: Variant; inputRef: 
               maxLength={MAX_CHARS}
               onChange={event => onType(event.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Message Brad..."
+              placeholder="Ask Brad anything..."
               aria-describedby="brad-hint"
               className="block max-h-[6.4em] w-full resize-none bg-transparent px-2 pt-1 text-body leading-copy text-ink outline-none placeholder:text-mid"
             />

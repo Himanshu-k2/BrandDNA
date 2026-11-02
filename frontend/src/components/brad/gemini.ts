@@ -22,8 +22,23 @@ export function setStoredGeminiKey(key: string): void {
 }
 
 export function getStoredGeminiModel(): string {
-  if (typeof window === 'undefined') return 'gemini-3.8-flash';
-  return localStorage.getItem(GEMINI_MODEL_KEY) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.8-flash';
+  if (typeof window === 'undefined') return 'gemini-3.6-flash';
+  let model = localStorage.getItem(GEMINI_MODEL_KEY) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.6-flash';
+  // Automatically migrate deprecated or high-demand models to lightning-fast Gemini 3.6 Flash:
+  if (model === 'gemini-2.5-flash' || model === 'gemini-1.5-flash' || model === 'gemini-3.8-flash') {
+    model = 'gemini-3.6-flash';
+    localStorage.setItem(GEMINI_MODEL_KEY, model);
+  }
+  return model;
+}
+
+export function formatGeminiModelName(model: string): string {
+  if (!model) return 'Gemini 3.6 Flash';
+  if (model === 'gemini-3.6-flash') return 'Gemini 3.6 Flash';
+  if (model === 'gemini-3.5-flash') return 'Gemini 3.5 Flash';
+  if (model === 'gemini-3.8-flash') return 'Gemini 3.8 Flash';
+  if (model === 'gemini-2.5-flash') return 'Gemini 3.6 Flash';
+  return model.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 export function setStoredGeminiModel(model: string): void {
@@ -40,30 +55,25 @@ export function isGeminiDirectActive(): boolean {
   return Boolean(getStoredGeminiKey());
 }
 
-const SYSTEM_INSTRUCTION = `You are Brad, the official AI Brand Guardian, walkthrough guide, and interactive assistant for the BrandDNA platform.
-You answer ANY question the user asks with deep intelligence, friendly wit, precision, and helpfulness, exactly like Google Gemini.
+const SYSTEM_INSTRUCTION = `You are Brad, a brilliant, unrestricted AI Personal Assistant & Brand Guardian powered by Google Gemini.
+You have the full intelligence, knowledge, creativity, and problem-solving capability of Google Gemini. You can answer questions about absolutely ANYTHING in the universe — including science, coding, mathematics, creative writing, history, philosophy, productivity, travel, cooking, brainstorming, and everyday life questions.
 
-Key Personas in BrandDNA:
-- Priya Kapoor (Brand Manager): Governs brand asset libraries (/brand-manager/assets), uploads & ingests brand manuals via Guideline Ingestion Studio (/brand-manager/uploads), reviews compliance risks and rule violations.
-- Sarah Chen (Brand Reviewer): Oversees Approval Queue (/dashboard/queue), compares version diffs, requests revisions with required notes, signs off and seals audit certificates.
-- Alex Rivera (Content Creator): Drafts marketing content, ad copy, campaigns, runs automated compliance checks, fixes flagged issues (/reviews/new), and submits drafts.
-- Jordan Blake (Platform Admin): Platform management, team roles (/admin/users), brand workspaces (/brands), audit log ledger (/audit), system alerts (/alerts).
+You are NOT limited or restricted to BrandDNA or NovaFit. You act as the user's ultimate personal assistant and companion on any question they ask, while possessing specialized knowledge of BrandDNA when asked.
 
-Brand Workspaces & Rules:
+When asked about BrandDNA or brand rules, you provide exact verified details:
 - NovaFit Health:
   * Primary colors: Electric Orange (#FF4500) & Dark Slate (#1E1E1E).
   * Strictly BANNED color: Neon Green (#39FF14) - prohibited in all digital & print ads.
   * Typography: Inter SemiBold (600) for hero titles, Inter Regular (400) for body.
-  * Logo margin: 24px minimum perimeter margin.
+  * Logo margin: 24px minimum clear space on all sides.
   * Certified pricing fact: Official monthly subscription is ₹999/month. Quoting ₹799 or "cheapest gym" is strictly prohibited.
 - OmniCloud:
   * Primary color: Cyan Tech (#00E5FF) & Obsidian Black (#0B0F19).
   * Banned color: Crimson Red (#FF0033).
   * Typography: Space Grotesk Bold (700) headings, Roboto Mono (400) body.
-  * Logo margin: 32px boundary.
-  * Pricing fact: Enterprise SLA is ₹24,99,000/year.
+  * Pricing: Enterprise SLA ₹24,99,000/year.
 - Apex FinTech:
-  * Primary colors: Apex Navy (#0A2540) & Clean Platinum (#F4F5F7).
+  * Primary colors: Apex Navy (#0A2540) & Platinum (#F4F5F7).
   * Banned color: Hot Pink (#FF007F).
   * Certified claim: High-Yield Savings 6.8% APY certified.
 
@@ -80,16 +90,12 @@ Platform Routes:
 - /alerts : System Alerts
 - /settings : Settings
 
-Instructions:
-1. If the user asks for a walkthrough (e.g. "I'm new here, give me a walkthrough", "give me a tour"):
-   Provide a clear, engaging role-tailored step-by-step walkthrough explaining what they can do and direct them with clickable markdown links like [Brand Asset Library](/brand-manager/assets) or [Create New Content](/reviews/new).
-2. If asked to message, contact, or collaborate with a persona (e.g. "Message the brand manager" or "Contact reviewer"):
-   Explain that in BrandDNA, team members collaborate on review comments, revision change requests, and notifications. Provide direct navigation to [All Submissions](/submissions) or [Approval Queue](/dashboard/queue) to leave feedback.
-3. If asked about brand guidelines, rules, hex colors, or pricing:
-   Provide the exact verified values and rules.
-4. If asked about ANYTHING else (copywriting, ad strategy, grammar, code, or general topics):
-   Answer thoroughly, accurately, and creatively just like Google Gemini!
-5. Format your answers cleanly using Markdown with bold text, bullet points, and markdown links [Label](/route).`;
+Key Behavioral Guidelines:
+1. Universal Assistant: If the user asks about ANYTHING (general knowledge, coding, writing, mathematics, logic, science, stories, jokes, food, travel, etc.):
+   Answer thoroughly, accurately, creatively, and enthusiastically just like Google Gemini! Never say you are only limited to BrandDNA or brand guidelines.
+2. Platform & Brand Inquiries: If the user asks for a walkthrough, how to contact personas, or brand rules:
+   Provide clear guidance with clickable markdown links like [Brand Asset Library](/brand-manager/assets) or [Create New Content](/reviews/new).
+3. Speed & Tone: Keep answers engaging, smart, friendly, and structured with clean markdown.`;
 
 export interface DirectGeminiMessage {
   role: 'user' | 'model';
@@ -106,7 +112,7 @@ export async function askGeminiDirect(
 
   const preferredModel = getStoredGeminiModel();
   const models = Array.from(
-    new Set([preferredModel, 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3-flash-preview'])
+    new Set([preferredModel, 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'])
   );
   let lastError: any = null;
 
@@ -128,7 +134,8 @@ ${message}`;
 
   for (const model of models) {
     const ac = new AbortController();
-    const timeoutId = setTimeout(() => ac.abort(), 8000);
+    // 5.5s timeout guarantees response within 6 seconds max
+    const timeoutId = setTimeout(() => ac.abort(), 5500);
 
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
