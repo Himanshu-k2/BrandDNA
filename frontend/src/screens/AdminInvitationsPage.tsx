@@ -49,6 +49,23 @@ export function AdminInvitationsPage() {
     notify(`Direct message channel opened with ${req.name}`, 'info');
   };
 
+  const handleCopyLink = async (req: JoiningRequest) => {
+    const origin =
+      typeof window !== 'undefined' && window.location.origin.includes('vercel.app')
+        ? window.location.origin
+        : 'https://brand-3tc74k0an-mewo3.vercel.app';
+    const link = `${origin}/login?mode=activate&email=${encodeURIComponent(
+      req.email
+    )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      notify(`Copied activation link for ${req.name}!`, 'success');
+    } catch {
+      notify(`Activation link: ${link}`, 'info');
+    }
+  };
+
   const filtered = requests.filter(item => {
     const query = search.toLowerCase();
     return (
@@ -263,14 +280,21 @@ export function AdminInvitationsPage() {
                   </div>
                 </div>
 
-                {/* Right Action matching Reference Image 2: SEND MESSAGE */}
-                <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-silver/80 flex items-center justify-center bg-paper p-3 sm:p-0">
+                {/* Right Action matching Reference Image 2: SEND MESSAGE & COPY LINK */}
+                <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-silver/80 flex flex-row sm:flex-col justify-stretch divide-x sm:divide-x-0 sm:divide-y divide-silver/80 bg-paper">
                   <button
                     type="button"
                     onClick={() => handleSendMessage(req)}
-                    className="w-full h-full flex items-center justify-center font-bold text-[12px] tracking-wider uppercase text-[#2563EB] hover:bg-blue-50 transition-colors cursor-pointer py-3 sm:py-0 text-center"
+                    className="flex-1 sm:h-1/2 flex items-center justify-center font-bold text-[12px] tracking-wider uppercase text-[#2563EB] hover:bg-blue-50 transition-colors cursor-pointer py-3.5 sm:py-0"
                   >
                     SEND MESSAGE
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyLink(req)}
+                    className="flex-1 sm:h-1/2 flex items-center justify-center font-semibold text-[11px] tracking-wider uppercase text-graphite hover:bg-silver/20 hover:text-ink transition-colors cursor-pointer py-3.5 sm:py-0"
+                  >
+                    COPY LINK
                   </button>
                 </div>
               </div>
