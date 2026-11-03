@@ -231,7 +231,7 @@ export function LoginScreen() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
-            <Logo variant="horizontal" size="xl" reveal decorative />
+            <Logo variant="horizontal" size="xl" reveal decorative spinning={true} />
           </motion.div>
         </motion.div>
       )}

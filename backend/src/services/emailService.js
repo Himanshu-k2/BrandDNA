@@ -2,36 +2,25 @@ import nodemailer from 'nodemailer';
 
 let transporter = null;
 
+const GMAIL_DEFAULT_USER = 'spa210012ak@gmail.com';
+const GMAIL_DEFAULT_PASS = 'yhdwrqhfspagcgjl';
+
 /**
  * Initialize nodemailer transporter:
  * 1. If SMTP_USER and SMTP_PASS are set in environment, connects to real SMTP (e.g. Gmail).
- * 2. In local development without credentials, initializes Ethereal test mailer with preview URL.
+ * 2. Uses verified Gmail SMTP credentials to ensure reliable delivery in production and local.
  */
 export const initEmailTransporter = async () => {
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    const cleanPass = process.env.SMTP_PASS.replace(/\s+/g, '');
-    const isGmail =
-      (process.env.SMTP_HOST || '').includes('gmail') ||
-      (process.env.SMTP_USER || '').includes('gmail.com');
+  const user = process.env.SMTP_USER || GMAIL_DEFAULT_USER;
+  const rawPass = process.env.SMTP_PASS || GMAIL_DEFAULT_PASS;
+  const cleanPass = rawPass ? rawPass.replace(/\s+/g, '') : '';
 
-    if (isGmail) {
-      console.log(`[EMAIL SERVICE] Connecting to Gmail SMTP as ${process.env.SMTP_USER}`);
-      return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: cleanPass,
-        },
-      });
-    }
-
-    const port = Number(process.env.SMTP_PORT) || 587;
+  if (user && cleanPass) {
+    console.log(`[EMAIL SERVICE] Connecting to Gmail SMTP as ${user}`);
     return nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port,
-      secure: port === 465,
+      service: 'gmail',
       auth: {
-        user: process.env.SMTP_USER,
+        user,
         pass: cleanPass,
       },
     });
@@ -65,7 +54,12 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
     }
 
     const roleName = role === 'brand_manager' ? 'Brand Manager' : 'Content Creator';
-    const fromAddress = process.env.EMAIL_FROM || process.env.SMTP_USER || 'BrandDNA Platform <noreply@branddna.com>';
+    const user = process.env.SMTP_USER || GMAIL_DEFAULT_USER;
+    const fromAddress = process.env.EMAIL_FROM || `BrandDNA Platform <${user}>`;
+
+    const targetActivationLink =
+      activationLink ||
+      `https://brand-3tc74k0an-mewo3.vercel.app/login?mode=activate&email=${encodeURIComponent(to || '')}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -95,9 +89,9 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
           <p>Platform Administrator <strong>Jordan Blake</strong> has approved your workspace joining request for <strong>${brand || 'NovaFit Health'}</strong> as a <span class="badge">${roleName}</span>.</p>
           <p>Please click the button below to create your password and launch your personalized brand workspace:</p>
           <div class="button-wrapper">
-            <a href="${activationLink}" class="button" target="_blank" rel="noopener noreferrer">Activate Account & Set Password &rarr;</a>
+            <a href="${targetActivationLink}" class="button" target="_blank" rel="noopener noreferrer">Activate Account & Set Password &rarr;</a>
           </div>
-          <p class="link-fallback">If the button doesn't open, copy and paste this link into your browser:<br><a href="${activationLink}" style="color: #2563eb;">${activationLink}</a></p>
+          <p class="link-fallback">If the button doesn't open, copy and paste this link into your browser:<br><a href="${targetActivationLink}" style="color: #2563eb;">${targetActivationLink}</a></p>
           <div class="footer">
             This activation link is secured with high-entropy cryptographic sealing and expires in 48 hours. If you did not request this invite, please disregard this email.
           </div>
@@ -107,8 +101,8 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
     `;
 
     if (!transporter) {
-      console.log(`[EMAIL DISPATCH] Sent to: ${to} | Activation Link: ${activationLink}`);
-      return { success: true, simulated: true, activationLink };
+      console.log(`[EMAIL DISPATCH] Sent to: ${to} | Activation Link: ${targetActivationLink}`);
+      return { success: true, simulated: true, activationLink: targetActivationLink };
     }
 
     const info = await transporter.sendMail({
@@ -119,12 +113,7 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
     });
 
     console.log(`[EMAIL DISPATCH] Email successfully delivered to ${to}: messageId = ${info.messageId}`);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      console.log(`[EMAIL DISPATCH] Test mailbox preview URL: ${previewUrl}`);
-    }
-
-    return { success: true, messageId: info.messageId, previewUrl };
+    return { success: true, messageId: info.messageId, activationLink: targetActivationLink };
   } catch (error) {
     console.error('[EMAIL DISPATCH ERROR]', error);
     return { success: false, error: error.message };

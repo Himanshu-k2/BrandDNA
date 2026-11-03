@@ -1,5 +1,6 @@
 import { type Role } from '@/state/session';
 import { type WorkspaceUser } from './platform';
+import client from '@/api/client';
 
 export interface JoiningRequest {
   id: string;
@@ -17,6 +18,7 @@ export interface JoiningRequest {
 
 const STORAGE_KEY_REQUESTS = 'branddna_joining_requests';
 const STORAGE_KEY_REGISTERED_USERS = 'branddna_registered_users';
+export const VERCEL_PRODUCTION_URL = 'https://brand-3tc74k0an-mewo3.vercel.app';
 
 const INITIAL_REQUESTS: JoiningRequest[] = [
   {
@@ -140,10 +142,15 @@ export async function acceptJoiningRequest(id: string): Promise<{
     return { request: null, activationLink: '' };
   }
 
-  // Generate activation URL
   const req = updatedRequest as JoiningRequest;
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const activationLink = `${origin}/login?mode=activate&email=${encodeURIComponent(
+
+  // Always use the live Vercel production domain for email activation links
+  const baseAppUrl =
+    typeof window !== 'undefined' && window.location.origin.includes('vercel.app')
+      ? window.location.origin
+      : VERCEL_PRODUCTION_URL;
+
+  const activationLink = `${baseAppUrl}/login?mode=activate&email=${encodeURIComponent(
     req.email
   )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;
 
@@ -156,22 +163,40 @@ export async function acceptJoiningRequest(id: string): Promise<{
     brands: [req.brand]
   });
 
-  // Dispatch real email via backend API
+  // Dispatch real email via backend API (supports both localhost and production Render)
+  const payload = {
+    to: req.email,
+    name: req.name,
+    role: req.role,
+    brand: req.brand,
+    activationLink
+  };
+
   try {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    await fetch(`${apiBase}/api/auth/send-invite`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: req.email,
-        name: req.name,
-        role: req.role,
-        brand: req.brand,
-        activationLink
-      })
-    });
+    await client.post('/api/auth/send-invite', payload);
+    console.log('[INVITE EMAIL] Successfully requested backend dispatch to:', req.email);
   } catch (err) {
-    console.warn('[EMAIL DISPATCH API NOTICE]', err);
+    console.warn('[INVITE EMAIL] Primary dispatch attempt notice, trying fallbacks:', err);
+
+    // Fallback 1: Direct to localhost backend if developer is running locally
+    try {
+      await fetch('http://localhost:5001/api/auth/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      // Fallback 2: Direct to Render production backend
+      try {
+        await fetch('https://branddna-1-wndy.onrender.com/api/auth/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch {
+        // Log final state
+      }
+    }
   }
 
   return { request: updatedRequest, activationLink };

@@ -199,6 +199,21 @@
   animation: skeleton-shimmer 1.8s infinite linear;
 }
 
+@keyframes branddna-clockwise-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.branddna-clockwise-spinner {
+  transform-origin: 10px 18px;
+  transform-box: view-box;
+  animation: branddna-clockwise-spin 1.25s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mono *,
   .mono *::before,

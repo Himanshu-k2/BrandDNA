@@ -59,6 +59,7 @@ export function Logo({
   size = 'md',
   reveal = false,
   decorative = false,
+  spinning = false,
   className
 }: {
   variant?: LogoVariant;
@@ -67,6 +68,8 @@ export function Logo({
   /** Splash only: the mark fades in, the wordmark follows 120ms later. */
   reveal?: boolean;
   decorative?: boolean;
+  /** When true, the burst/asterisk spins clockwise continuously like a loader */
+  spinning?: boolean;
   className?: string;
 }) {
   const { ink, accent } = THEME[theme];
@@ -115,8 +118,36 @@ export function Logo({
       {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': 'BrandDNA' })}
       focusable="false"
     >
+      {spinning && (
+        <style>{`
+          @keyframes branddna-clockwise-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .branddna-clockwise-spinner {
+            transform-origin: 10px 18px;
+            transform-box: view-box;
+            animation: branddna-clockwise-spin 1.25s linear infinite;
+          }
+        `}</style>
+      )}
       <g style={fade(0)}>
-        <path d={MARK.burst} fill="none" stroke={ink} strokeWidth={MARK.stroke} />
+        <path
+          d={MARK.burst}
+          fill="none"
+          stroke={ink}
+          strokeWidth={MARK.stroke}
+          className={spinning ? 'branddna-clockwise-spinner' : undefined}
+          style={
+            spinning
+              ? {
+                  transformOrigin: '10px 18px',
+                  transformBox: 'view-box',
+                  animation: 'branddna-clockwise-spin 1.25s linear infinite'
+                }
+              : undefined
+          }
+        />
         <path d={MARK.bracket} fill="none" stroke={accent} strokeWidth={MARK.stroke} strokeLinejoin="miter" />
       </g>
       {variant === 'horizontal' && (
