@@ -95,6 +95,7 @@ export function LoginScreen() {
       console.warn('Backend authentication notice (using session fallback):', apiErr);
     }
 
+    localStorage.setItem('branddna_authenticated', 'true');
     setRole(role);
 
     // Step 2: After 850ms of center-aligned logo splash, load the exact skeleton screen loader

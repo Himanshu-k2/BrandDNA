@@ -181,7 +181,19 @@ export function Sidebar({ compact, canCollapse, onToggleCompact, onNavigate, onS
         </AnimatePresence>
         <span className="my-2 h-px bg-silver" />
         <UserRow icon={Settings} label="Settings" compact={compact} active={pathname === '/settings'} onClick={() => go('/settings')} tipHandlers={tipHandlers('Settings')} />
-        <UserRow icon={LogOut} label="Log out" compact={compact} onClick={() => go('/login')} tipHandlers={tipHandlers('Log out')} />
+        <UserRow
+          icon={LogOut}
+          label="Log out"
+          compact={compact}
+          onClick={() => {
+            localStorage.removeItem('branddna_token');
+            localStorage.removeItem('branddna_user');
+            localStorage.removeItem('branddna_authenticated');
+            localStorage.removeItem('branddna.role');
+            go('/login');
+          }}
+          tipHandlers={tipHandlers('Log out')}
+        />
       </div>
 
       <AnimatePresence>

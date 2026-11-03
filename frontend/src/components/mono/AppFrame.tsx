@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { useLocation, useOutlet } from 'react-router-dom';
+import { Navigate, useLocation, useOutlet } from 'react-router-dom';
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { Menu } from 'lucide-react';
 import { DURATION, EASE } from '@/lib/motion';
@@ -74,6 +74,20 @@ export function AppFrame() {
   const outlet = useOutlet();
   const { pathname, search } = useLocation();
   const { persona } = useSession();
+
+  const isAuth =
+    typeof window !== 'undefined'
+      ? Boolean(
+          localStorage.getItem('branddna_authenticated') ||
+          localStorage.getItem('branddna_token') ||
+          localStorage.getItem('branddna.role')
+        )
+      : true;
+
+  if (!isAuth) {
+    return <Navigate to="/login" replace state={{ from: pathname }} />;
+  }
+
   useEffect(() => {
     document.title = pageTitle(pathname, search, persona.role);
   }, [pathname, search, persona.role]);
