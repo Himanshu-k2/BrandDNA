@@ -177,12 +177,8 @@ export function AdminInvitationsPage() {
                       </span>
                     </span>
 
-                    <span className="text-[12px] text-mid mt-0.5 flex items-center gap-1.5">
-                      <span>{req.connectionsCount} connections</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3" /> {req.requestedAt}
-                      </span>
+                    <span className="text-[12px] text-mid mt-0.5 flex items-center gap-1">
+                      <Clock className="size-3" /> {req.requestedAt}
                     </span>
                   </div>
                 </div>
@@ -274,9 +270,7 @@ export function AdminInvitationsPage() {
                       {req.brand}
                     </span>
 
-                    <span className="text-[12px] text-mid mt-0.5">
-                      {req.connectionsCount} connections
-                    </span>
+
                   </div>
                 </div>
 
