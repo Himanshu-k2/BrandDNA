@@ -119,10 +119,10 @@ export function addJoiningRequest(data: {
   return newRequest;
 }
 
-export function acceptJoiningRequest(id: string): {
+export async function acceptJoiningRequest(id: string): Promise<{
   request: JoiningRequest | null;
   activationLink: string;
-} {
+}> {
   const current = getJoiningRequests();
   let updatedRequest: JoiningRequest | null = null;
 
@@ -155,6 +155,24 @@ export function acceptJoiningRequest(id: string): {
     status: 'invited',
     brands: [req.brand]
   });
+
+  // Dispatch real email via backend API
+  try {
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    await fetch(`${apiBase}/api/auth/send-invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: req.email,
+        name: req.name,
+        role: req.role,
+        brand: req.brand,
+        activationLink
+      })
+    });
+  } catch (err) {
+    console.warn('[EMAIL DISPATCH API NOTICE]', err);
+  }
 
   return { request: updatedRequest, activationLink };
 }

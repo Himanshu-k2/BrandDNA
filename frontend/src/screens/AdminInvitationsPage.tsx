@@ -10,16 +10,12 @@ import {
   declineJoiningRequest,
   type JoiningRequest
 } from '@/data/invitations';
-import { SimulatedEmailModal } from '@/screens/admin/SimulatedEmailModal';
 
 export function AdminInvitationsPage() {
   const { persona } = useSession();
   const { notify } = useFrame();
   const [requests, setRequests] = useState<JoiningRequest[]>(() => getJoiningRequests());
   const [search, setSearch] = useState('');
-  const [selectedRequest, setSelectedRequest] = useState<JoiningRequest | null>(null);
-  const [activeLink, setActiveLink] = useState('');
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   if (persona.role !== 'admin') {
     return (
@@ -37,15 +33,10 @@ export function AdminInvitationsPage() {
     setRequests(getJoiningRequests());
   };
 
-  const handleAccept = (req: JoiningRequest) => {
-    const result = acceptJoiningRequest(req.id);
-    if (result.request) {
-      setSelectedRequest(result.request);
-      setActiveLink(result.activationLink);
-      setIsEmailModalOpen(true);
-      notify(`Accepted ${req.name}'s request and dispatched invitation email!`, 'success');
-      reloadRequests();
-    }
+  const handleAccept = async (req: JoiningRequest) => {
+    await acceptJoiningRequest(req.id);
+    notify(`Invitation sent to ${req.email}`, 'success');
+    reloadRequests();
   };
 
   const handleDecline = (req: JoiningRequest) => {
@@ -54,15 +45,8 @@ export function AdminInvitationsPage() {
     reloadRequests();
   };
 
-  const handleViewEmail = (req: JoiningRequest) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const activationLink = `${origin}/login?mode=activate&email=${encodeURIComponent(
-      req.email
-    )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;
-
-    setSelectedRequest(req);
-    setActiveLink(activationLink);
-    setIsEmailModalOpen(true);
+  const handleSendMessage = (req: JoiningRequest) => {
+    notify(`Direct message channel opened with ${req.name}`, 'info');
   };
 
   const filtered = requests.filter(item => {
@@ -144,7 +128,6 @@ export function AdminInvitationsPage() {
                         alt={req.name}
                         className="size-full object-cover"
                         onError={(e) => {
-                          // Fallback to initials if image cannot load
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
@@ -280,11 +263,11 @@ export function AdminInvitationsPage() {
                   </div>
                 </div>
 
-                {/* Right Action matching Reference Image 2: SEND MESSAGE / VIEW INVITATION EMAIL */}
+                {/* Right Action matching Reference Image 2: SEND MESSAGE */}
                 <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-silver/80 flex items-center justify-center bg-paper p-3 sm:p-0">
                   <button
                     type="button"
-                    onClick={() => handleViewEmail(req)}
+                    onClick={() => handleSendMessage(req)}
                     className="w-full h-full flex items-center justify-center font-bold text-[12px] tracking-wider uppercase text-[#2563EB] hover:bg-blue-50 transition-colors cursor-pointer py-3 sm:py-0 text-center"
                   >
                     SEND MESSAGE
@@ -295,14 +278,6 @@ export function AdminInvitationsPage() {
           </div>
         )}
       </div>
-
-      {/* Simulated Corporate Email Modal Preview */}
-      <SimulatedEmailModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        request={selectedRequest}
-        activationLink={activeLink}
-      />
     </div>
   );
 }

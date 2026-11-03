@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import { generateToken } from '../utils/jwt.js';
+import { sendInvitationEmail } from '../services/emailService.js';
 
 /**
  * @route   POST /api/auth/register
@@ -154,4 +155,38 @@ export const getMe = async (req, res) => {
       user: req.user.toJSON(),
     },
   });
+};
+
+/**
+ * @route   POST /api/auth/send-invite
+ * @desc    Dispatch corporate workspace invitation email with secure activation link
+ * @access  Public
+ */
+export const sendInviteEmail = async (req, res, next) => {
+  try {
+    const { to, name, role, brand, activationLink } = req.body;
+
+    if (!to) {
+      return res.status(400).json({
+        success: false,
+        message: 'Recipient email address (to) is required',
+      });
+    }
+
+    const result = await sendInvitationEmail({
+      to,
+      name,
+      role: role || 'creator',
+      brand: brand || 'NovaFit Health',
+      activationLink: activationLink || `${process.env.CLIENT_URL || 'http://localhost:3000'}/login`,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Invitation email dispatched to ${to}`,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
