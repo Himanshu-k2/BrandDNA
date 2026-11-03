@@ -1,6 +1,20 @@
 # BrandDNA — AI-Powered Brand Governance Platform
 
 > *"Protecting the identity behind every brand message."*
+>
+> **Inkloom AI Hackathon — Final Round Submission**  
+> **Team Name:** Meow  
+> **Team Leader:** Himanshu Kumar  
+> **Team Member:** Abhishek Kumar Prajapati  
+> **Product Category:** AI-powered Brand Governance  
+
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-h4o9ffgb4-mewo3.vercel.app/)
+[![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
+[![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
+
+- **Production Web App**: `https://brand-h4o9ffgb4-mewo3.vercel.app/`
+- **Production API URL**: `https://branddna-1-wndy.onrender.com/api`
+- **Admin Invitations & Access**: `https://brand-h4o9ffgb4-mewo3.vercel.app/admin/invitations`
 
 **BrandDNA** is an enterprise brand governance and compliance platform designed to help organisations maintain a unified, trustworthy, and consistent brand identity. It acts as an intelligent pre-publication checkpoint, checking marketing content, social media captions, brochures, and visual creatives against approved brand guidelines, verified facts, current pricing, tone-of-voice directives, and terminology rules before publication.
 
@@ -202,7 +216,7 @@ frontend/
 Ensure the following tools are installed on your workstation:
 - **Node.js:** `v18.0.0` or higher (tested on Node `v24.x`).
 - **npm:** `v9.0.0` or higher.
-- A running instance of the **BrandDNA Backend** (e.g. deployed at `https://branddna-tup9.onrender.com` or local backend).
+- A running instance of the **BrandDNA Backend** (e.g. deployed at `https://branddna-1-wndy.onrender.com` or local backend).
 
 ### Local Setup
 
@@ -261,14 +275,14 @@ The frontend uses Vite's `import.meta.env` mechanism to connect to the backend A
 
 ```env
 # URL where the BrandDNA Node.js / Express backend API is listening
-VITE_API_URL=https://branddna-tup9.onrender.com
-VITE_API_BASE_URL=https://branddna-tup9.onrender.com
+VITE_API_URL=https://branddna-1-wndy.onrender.com
+VITE_API_BASE_URL=https://branddna-1-wndy.onrender.com
 ```
 
 ### Connection Architecture
 
 1. **Direct Axios Calls (`src/api/client.js`):**
-   The central Axios client reads `VITE_API_URL` / `VITE_API_BASE_URL` (defaulting to `https://branddna-tup9.onrender.com` if unset). 
+   The central Axios client reads `VITE_API_URL` / `VITE_API_BASE_URL` (defaulting to `https://branddna-1-wndy.onrender.com` if unset). 
    - Requests automatically inject the JWT bearer token from `localStorage`:
      ```http
      Authorization: Bearer <branddna_token>
@@ -283,7 +297,7 @@ VITE_API_BASE_URL=https://branddna-tup9.onrender.com
      port: 3000,
      proxy: {
        '/api': {
-         target: 'https://branddna-tup9.onrender.com',
+         target: 'https://branddna-1-wndy.onrender.com',
          changeOrigin: true,
          secure: false
        }
@@ -292,7 +306,7 @@ VITE_API_BASE_URL=https://branddna-tup9.onrender.com
    ```
 
 > [!IMPORTANT]
-> The backend server (or deployed service at `https://branddna-tup9.onrender.com`) must be accessible before using authentication, document uploads, or AI review features.
+> The backend server (or deployed service at `https://branddna-1-wndy.onrender.com`) must be accessible before using authentication, document uploads, or AI review features.
 
 ---
 
@@ -452,7 +466,7 @@ A clean build compiles in approximately 6–9 seconds and outputs bundled chunks
 
 | Symptom / Error | Root Cause | Solution |
 | :--- | :--- | :--- |
-| **`Network Error` / `ERR_CONNECTION_REFUSED`** | Backend server is not running or unreachable. | Verify internet access to `https://branddna-tup9.onrender.com` or start the local backend server. |
+| **`Network Error` / `ERR_CONNECTION_REFUSED`** | Backend server is not running or unreachable. | Verify internet access to `https://branddna-1-wndy.onrender.com` or start the local backend server. |
 | **`401 Unauthorized` loop on protected pages** | Missing or expired JWT token in `localStorage`. | Navigate to `/login` and sign in. The client interceptor will automatically clear stale tokens. |
 | **File upload fails with `413 Payload Too Large`** | Submission exceeds the maximum payload limit. | Ensure each individual file is $\le$ 15MB. The backend body parser is configured for up to 50MB total. |
 | **Unsupported format error on drag-and-drop** | Uploaded file extension is not in the allowed list. | Ensure uploads are one of: `.pdf`, `.docx`, `.doc`, `.txt`, `.md`, `.png`, `.jpg`, `.jpeg`, or `.webp`. |

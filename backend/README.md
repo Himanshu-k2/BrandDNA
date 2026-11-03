@@ -1,5 +1,19 @@
 # BrandDNA Backend: AI-Powered Multimodal Brand Governance Engine
 
+> **Inkloom AI Hackathon — Final Round Submission**  
+> **Team Name:** Meow  
+> **Team Leader:** Himanshu Kumar  
+> **Team Member:** Abhishek Kumar Prajapati  
+> **Product Category:** AI-powered Brand Governance  
+
+[![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-h4o9ffgb4-mewo3.vercel.app/)
+[![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
+
+- **Production API Base URL**: https://branddna-1-wndy.onrender.com/api\r
+- **Health Check Endpoint**: https://branddna-1-wndy.onrender.com/api/health\r
+- **Local Development URL**: http://localhost:5001/api\r
+
 BrandDNA is an enterprise-grade AI brand governance and compliance platform. It intercepts and inspects marketing copy, multi-page PDF documents, and visual marketing assets prior to publication, ensuring absolute fidelity to approved brand guidelines, verified pricing, approved factual claims, and brand voice standards.
 
 The backend operates as a decoupled RESTful microservice built with **Node.js**, **Express**, **MongoDB/Mongoose**, and **Google Gemini AI** (`@google/genai`).
