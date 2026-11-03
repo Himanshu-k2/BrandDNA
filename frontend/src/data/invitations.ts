@@ -18,7 +18,7 @@ export interface JoiningRequest {
 
 const STORAGE_KEY_REQUESTS = 'branddna_joining_requests';
 const STORAGE_KEY_REGISTERED_USERS = 'branddna_registered_users';
-export const VERCEL_PRODUCTION_URL = 'https://brand-3tc74k0an-mewo3.vercel.app';
+export const VERCEL_PRODUCTION_URL = 'https://brand-dna-murex.vercel.app';
 
 const INITIAL_REQUESTS: JoiningRequest[] = [
   {
@@ -144,11 +144,8 @@ export async function acceptJoiningRequest(id: string): Promise<{
 
   const req = updatedRequest as JoiningRequest;
 
-  // Always use the live Vercel production domain for email activation links
-  const baseAppUrl =
-    typeof window !== 'undefined' && window.location.origin.includes('vercel.app')
-      ? window.location.origin
-      : VERCEL_PRODUCTION_URL;
+  // Always use the public production domain without deployment protection gates
+  const baseAppUrl = VERCEL_PRODUCTION_URL;
 
   const activationLink = `${baseAppUrl}/login?mode=activate&email=${encodeURIComponent(
     req.email

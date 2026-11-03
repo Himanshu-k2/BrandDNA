@@ -55,10 +55,7 @@ export function AdminInvitationsPage() {
   };
 
   const handleCopyLink = async (req: JoiningRequest) => {
-    const origin =
-      typeof window !== 'undefined' && window.location.origin.includes('vercel.app')
-        ? window.location.origin
-        : 'https://brand-h4o9ffgb4-mewo3.vercel.app';
+    const origin = 'https://brand-dna-murex.vercel.app';
     const link = `${origin}/login?mode=activate&email=${encodeURIComponent(
       req.email
     )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;
