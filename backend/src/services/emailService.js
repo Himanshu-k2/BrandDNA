@@ -73,7 +73,7 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
 
   const targetActivationLink =
     activationLink ||
-    `https://brand-8vqycqotg-mewo3.vercel.app/login?mode=activate&email=${encodeURIComponent(to || '')}`;
+    `https://brand-klsctk93x-mewo3.vercel.app/login?mode=activate&email=${encodeURIComponent(to || '')}`;
 
   const htmlContent = `
     <!DOCTYPE html>

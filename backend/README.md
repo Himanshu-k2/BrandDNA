@@ -7,7 +7,7 @@
 > **Product Category:** AI-powered Brand Governance  
 
 [![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
-[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-8vqycqotg-mewo3.vercel.app/)
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-klsctk93x-mewo3.vercel.app/)
 [![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
 
 - **Production API Base URL**: https://branddna-1-wndy.onrender.com/api\r

@@ -58,7 +58,7 @@ export function AdminInvitationsPage() {
     const origin =
       typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost')
         ? window.location.origin
-        : 'https://brand-8vqycqotg-mewo3.vercel.app';
+        : 'https://brand-klsctk93x-mewo3.vercel.app';
     const link = `${origin}/login?mode=activate&email=${encodeURIComponent(
       req.email
     )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;

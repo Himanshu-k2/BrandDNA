@@ -18,7 +18,7 @@ export interface JoiningRequest {
 
 const STORAGE_KEY_REQUESTS = 'branddna_joining_requests';
 const STORAGE_KEY_REGISTERED_USERS = 'branddna_registered_users';
-export const VERCEL_PRODUCTION_URL = 'https://brand-8vqycqotg-mewo3.vercel.app';
+export const VERCEL_PRODUCTION_URL = 'https://brand-klsctk93x-mewo3.vercel.app';
 
 const INITIAL_REQUESTS: JoiningRequest[] = [
   {
