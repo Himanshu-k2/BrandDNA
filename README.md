@@ -61,9 +61,14 @@ Here is a step-by-step testing guide so evaluators and users can experience ever
   - `Creator (Alex)` → Signs in with Marketing Author & Studio access.
 - **Experience**: Notice the animated BrandDNA logo asterisk spinning clockwise as the workspace authenticates!
 
-### 2. Brad — The Conversational AI Governance Copilot
-- **How to access**: Click the **Brad AI icon (chat bubble/bot)** at the bottom-right of any authenticated screen.
-- **What to try**:
+### 2. Brad — The Conversational AI Governance Copilot & Interactive Walkthrough
+- **Interactive Workspace Walkthrough**:
+  - **Auto-Emergence**: When landing on the dashboard, Brad automatically emerges from his bottom-right capsule with a greeting card asking if you'd like a guided walkthrough!
+  - **On-Demand 1-Click Launch**: Click the **"✨ Brad Walkthrough"** button at the top header of the Platform/Admin Dashboard, or click **"Take walkthrough"** inside the **Brand Advisor** card, or ask Brad *"Take Platform Tour"* in chat.
+  - **Interactive Spotlighting**: Brad highlights each core area in sequence (Platform Overview, Team & Role Access, Brand Workspaces, Approval Queue, and the Ask Brad Capsule), with step badges, next/prev navigation, spotlight cutouts, and liquid splash dive animations!
+  - **Interactive Expressions**: Click Brad's avatar at any point during the tour or chat to make him react with real-time emotional expressions (`excited`, `happy`, `attentive`, `proud`)!
+- **Conversational Copilot**:
+  - Click the **Ask Brad** capsule at the bottom right anytime.
   - Type: *"What is our approved price for NovaFit Premium?"* → Brad quotes ₹999/mo from the verified facts database.
   - Type: *"Can I say users in my post?"* → Brad warns you to use "members" based on the brand terminology rule.
   - Type: *"Take me to the review queue"* → Brad renders a clickable navigation pill that routes you directly to the approval queue.

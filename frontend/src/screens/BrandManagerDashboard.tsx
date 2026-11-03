@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Sparkles } from 'lucide-react';
 import { RevealText } from '@/components/mono/RevealText';
 import { Stagger } from '@/components/mono/ui';
 import { useSession } from '@/state/session';
@@ -43,6 +44,18 @@ export function BrandManagerDashboard() {
         />
 
         <div className="ml-auto flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('branddna:start_tour'));
+            }}
+            className="flex items-center gap-2 rounded-full border border-silver/80 bg-paper px-3.5 py-1.5 text-ui font-medium text-ink shadow-xs hover:border-brand-orange hover:text-brand-orange hover:bg-brand-orange/5 transition-all cursor-pointer"
+            title="Start interactive workspace walkthrough with Brad"
+          >
+            <Sparkles className="size-4 text-brand-orange" />
+            <span className="hidden sm:inline">Brad Walkthrough</span>
+            <span className="sm:hidden">Tour</span>
+          </button>
           <OnlineTeamPresence />
           <NotificationBell />
         </div>

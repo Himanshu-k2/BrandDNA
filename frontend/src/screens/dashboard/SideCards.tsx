@@ -14,12 +14,27 @@ const listPath = (view: View) => {
 export function AdvisorCard({ view }: { view?: View } = {}) {
   const navigate = useNavigate();
   const isBrandManager = view === 'brand_manager';
+  const isAdmin = view === 'admin';
   const targetUrl = isBrandManager ? '/brand-manager/uploads' : '/reviews/rev-1049';
-  const title = isBrandManager ? 'NovaFit guideline staging' : 'NovaFit pricing rule updated';
-  const desc = isBrandManager
-    ? '6 staged rules verified at 98% confidence. Ready to activate.'
-    : '₹999/mo is the verified rate. Drafts quoting old prices are flagged.';
-  const btnLabel = isBrandManager ? 'Review rules' : 'View update';
+  const title = isAdmin
+    ? 'Brad AI Platform Guardian'
+    : isBrandManager
+      ? 'NovaFit guideline staging'
+      : 'NovaFit pricing rule updated';
+  const desc = isAdmin
+    ? 'Interactive platform walkthrough: role permissions, multi-brand workspaces & queue.'
+    : isBrandManager
+      ? '6 staged rules verified at 98% confidence. Ready to activate.'
+      : '₹999/mo is the verified rate. Drafts quoting old prices are flagged.';
+  const btnLabel = isAdmin ? 'Take walkthrough' : isBrandManager ? 'Review rules' : 'View update';
+
+  const handleAction = () => {
+    if (isAdmin) {
+      window.dispatchEvent(new CustomEvent('branddna:start_tour'));
+    } else {
+      navigate(targetUrl);
+    }
+  };
 
   return (
     <section className="flex flex-col gap-4">
@@ -33,7 +48,7 @@ export function AdvisorCard({ view }: { view?: View } = {}) {
           <p className="text-caption leading-copy text-graphite">{desc}</p>
           <button
             type="button"
-            onClick={() => navigate(targetUrl)}
+            onClick={handleAction}
             className="press mt-2 h-8 w-max cursor-pointer rounded-full border border-silver bg-paper px-4 text-caption font-medium text-ink transition-colors hover:bg-silver/40 focus-visible:outline-2 focus-visible:outline-ink"
           >
             {btnLabel}

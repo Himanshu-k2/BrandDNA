@@ -8,13 +8,13 @@
 > **Team Member:** Abhishek Kumar Prajapati  
 > **Product Category:** AI-powered Brand Governance  
 
-[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-h4o9ffgb4-mewo3.vercel.app/)
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-8fj38h0sr-mewo3.vercel.app/)
 [![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
 [![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
 
-- **Production Web App**: `https://brand-h4o9ffgb4-mewo3.vercel.app/`
+- **Production Web App**: `https://brand-8fj38h0sr-mewo3.vercel.app/`
 - **Production API URL**: `https://branddna-1-wndy.onrender.com/api`
-- **Admin Invitations & Access**: `https://brand-h4o9ffgb4-mewo3.vercel.app/admin/invitations`
+- **Admin Invitations & Access**: `https://brand-8fj38h0sr-mewo3.vercel.app/admin/invitations`
 
 **BrandDNA** is an enterprise brand governance and compliance platform designed to help organisations maintain a unified, trustworthy, and consistent brand identity. It acts as an intelligent pre-publication checkpoint, checking marketing content, social media captions, brochures, and visual creatives against approved brand guidelines, verified facts, current pricing, tone-of-voice directives, and terminology rules before publication.
 

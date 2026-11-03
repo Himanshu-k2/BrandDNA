@@ -147,6 +147,7 @@ export function BradOnboardingTour() {
 
   // Storage key per persona to identify new users
   const storageKey = `branddna_tour_seen_${persona.role}_${persona.email}`;
+  const sessionKey = `branddna_tour_seen_session_${persona.role}_${persona.email}`;
 
   // Listen to interactive clicks on any Brad avatar across the app
   useEffect(() => {
@@ -242,17 +243,23 @@ export function BradOnboardingTour() {
     return () => window.removeEventListener('resize', handleResize);
   }, [updateCapsulePos, updateTargetPos]);
 
-  // Start the onboarding sequence after 6-second delay for new accounts
+  // Start the onboarding sequence after a brief 1.5-second delay for users
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem(storageKey);
-    if (hasSeenTour) return;
+    // If URL contains ?tour=true or ?walkthrough=true, launch immediately
+    const searchParams = new URLSearchParams(window.location.search);
+    const forceTour = searchParams.get('tour') === 'true' || searchParams.get('walkthrough') === 'true';
+
+    if (!forceTour) {
+      const hasSeenSession = sessionStorage.getItem(sessionKey);
+      if (hasSeenSession) return;
+    }
 
     const timer = window.setTimeout(() => {
       startOnboarding();
-    }, 6_000); // 6-second delay as requested
+    }, 1_500); // 1.5-second delay for smooth, responsive arrival
 
     return () => window.clearTimeout(timer);
-  }, [storageKey]);
+  }, [sessionKey]);
 
   // Allow manual trigger via global event and window helper
   useEffect(() => {
@@ -266,6 +273,12 @@ export function BradOnboardingTour() {
   }, []);
 
   const startOnboarding = () => {
+    setStepIndex(0);
+    setTargetRect(null);
+    setClonedHtml('');
+    setSplashActive(false);
+    setDeclinedMessage('');
+
     const cap = updateCapsulePos();
     setBradPos(cap);
     setPhase('emerging');
@@ -291,10 +304,14 @@ export function BradOnboardingTour() {
   useEffect(() => {
     if (phase === 'tour') {
       updateTargetPos();
+      const t = setTimeout(updateTargetPos, 80);
+      return () => clearTimeout(t);
     }
   }, [phase, stepIndex, updateTargetPos]);
 
   const handleDeclineTour = () => {
+    sessionStorage.setItem(sessionKey, 'true');
+    localStorage.setItem(storageKey, 'true');
     setPhase('declined');
     setDeclinedMessage(
       `No problem, ${firstName}! Tap my capsule anytime if you need a hand.`
@@ -320,11 +337,14 @@ export function BradOnboardingTour() {
   };
 
   const finishTour = () => {
+    sessionStorage.setItem(sessionKey, 'true');
     localStorage.setItem(storageKey, 'true');
     returnToCapsule();
   };
 
   const returnToCapsule = () => {
+    sessionStorage.setItem(sessionKey, 'true');
+    localStorage.setItem(storageKey, 'true');
     setPhase('returning');
     const cap = updateCapsulePos();
     setBradPos(cap);
@@ -337,7 +357,6 @@ export function BradOnboardingTour() {
 
     window.setTimeout(() => {
       setPhase('finished');
-      localStorage.setItem(storageKey, 'true');
     }, 1500);
   };
 
@@ -688,7 +707,7 @@ export function BradOnboardingTour() {
             </div>
 
             {/* Speech bubble pointer arrow pointing back to the highlighted sidebar element */}
-            {!isFinalStep && (
+            {!isFinalStep && targetRect && (
               <div className="absolute top-6 -left-2 size-4 rotate-45 border-b border-l border-silver/80 bg-paper" />
             )}
 
