@@ -8,7 +8,7 @@
 > **Team Member:** Abhishek Kumar Prajapati  
 > **Product Category:** AI-powered Brand Governance  
 
-[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-3tc74k0an-mewo3.vercel.app)
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-h4o9ffgb4-mewo3.vercel.app/)
 [![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
 [![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -32,9 +32,9 @@ Modern organisations create content across dozens of channels, relying on a dist
 
 | Component | Provider | Live URL |
 | :--- | :--- | :--- |
-| **Production Web App** | Vercel | **[https://brand-3tc74k0an-mewo3.vercel.app](https://brand-3tc74k0an-mewo3.vercel.app)** |
+| **Production Web App** | Vercel | **[https://brand-h4o9ffgb4-mewo3.vercel.app/](https://brand-h4o9ffgb4-mewo3.vercel.app/)** |
 | **Production API & Health** | Render | **[https://branddna-1-wndy.onrender.com/api/health](https://branddna-1-wndy.onrender.com/api/health)** |
-| **Admin Invitations & Access** | Vercel | **[https://brand-3tc74k0an-mewo3.vercel.app/admin/invitations](https://brand-3tc74k0an-mewo3.vercel.app/admin/invitations)** |
+| **Admin Invitations & Access** | Vercel | **[https://brand-h4o9ffgb4-mewo3.vercel.app/admin/invitations](https://brand-h4o9ffgb4-mewo3.vercel.app/admin/invitations)** |
 
 ---
 
