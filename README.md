@@ -8,7 +8,7 @@
 > **Team Member:** Abhishek Kumar Prajapati  
 > **Product Category:** AI-powered Brand Governance  
 
-[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-8fj38h0sr-mewo3.vercel.app/)
+[![Live Frontend (Vercel)](https://img.shields.io/badge/Vercel-Live%20Frontend-black?logo=vercel)](https://brand-8vqycqotg-mewo3.vercel.app/)
 [![Live Backend (Render)](https://img.shields.io/badge/Render-Live%20API-46E3B7?logo=render)](https://branddna-1-wndy.onrender.com/api/health)
 [![Test Suite Status](https://img.shields.io/badge/Tests-101%2F101%20Passed-brightgreen)](https://github.com/Himanshu-k2/BrandDNA)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -32,9 +32,9 @@ Modern organisations create content across dozens of channels, relying on a dist
 
 | Component | Provider | Live URL |
 | :--- | :--- | :--- |
-| **Production Web App** | Vercel | **[https://brand-8fj38h0sr-mewo3.vercel.app/](https://brand-8fj38h0sr-mewo3.vercel.app/)** |
+| **Production Web App** | Vercel | **[https://brand-8vqycqotg-mewo3.vercel.app/](https://brand-8vqycqotg-mewo3.vercel.app/)** |
 | **Production API & Health** | Render | **[https://branddna-1-wndy.onrender.com/api/health](https://branddna-1-wndy.onrender.com/api/health)** |
-| **Admin Invitations & Access** | Vercel | **[https://brand-8fj38h0sr-mewo3.vercel.app/admin/invitations](https://brand-8fj38h0sr-mewo3.vercel.app/admin/invitations)** |
+| **Admin Invitations & Access** | Vercel | **[https://brand-8vqycqotg-mewo3.vercel.app/admin/invitations](https://brand-8vqycqotg-mewo3.vercel.app/admin/invitations)** |
 
 ---
 
@@ -53,7 +53,7 @@ Modern organisations create content across dozens of channels, relying on a dist
 Here is a step-by-step testing guide so evaluators and users can experience every capability of the platform:
 
 ### 1. 1-Click Role Switcher & Login
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/login`
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/login`
 - **How to access**: Look at the bottom of the sign-in card. Click any of the **Demo Quick-Fill Pills**:
   - `Admin (Jordan)` → Signs in with full Platform Admin permissions.
   - `Reviewer (Sarah)` → Signs in with Authorized Content Approver access.
@@ -74,7 +74,7 @@ Here is a step-by-step testing guide so evaluators and users can experience ever
   - Type: *"Take me to the review queue"* → Brad renders a clickable navigation pill that routes you directly to the approval queue.
 
 ### 3. Create & Submit Content with Hybrid AI Review
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/reviews/new` (or click **"New Content"** / **"+"** from the sidebar).
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/reviews/new` (or click **"New Content"** / **"+"** from the sidebar).
 - **Step-by-step**:
   1. **Select Workspace**: Click the **Brand workspace** dropdown and choose from any of the 10 pre-seeded brands (e.g. `NovaFit Health`, `OmniCloud`, `FinWise`).
   2. **Select Content Type**: Choose `Social Media Post`, `Email Campaign`, `Website Copy`, etc.
@@ -83,14 +83,14 @@ Here is a step-by-step testing guide so evaluators and users can experience ever
   5. Click **"Run BrandDNA Check"** → The engine runs deterministic regex rules and Google Gemini LLM contextual analysis.
 
 ### 4. Interactive Review Studio & Before/After Revision Diff
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/dashboard/review`
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/dashboard/review`
 - **What to explore**:
   - **Evidence-Linked Finding Cards**: Click on any flagged issue to see the exact violation category, severity badge, source document clause citation, and why it was flagged.
   - **1-Click Apply Correction**: Click **"Accept Fix"** to replace the violation with the approved brand wording directly in the editor.
   - **Revision Snapshot (v1 → v2)**: Submitting your revised copy creates a new immutable revision snapshot. Use the **Version Diff comparison** toggle to view green/red visual line diffs of resolved errors.
 
 ### 5. Authorized Approvals Queue & Human-in-the-Loop Sign-off
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/dashboard/queue` (accessible to Reviewers & Admins).
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/dashboard/queue` (accessible to Reviewers & Admins).
 - **How to test**:
   - Log in as **Reviewer (Sarah)** or **Admin (Jordan)**.
   - Open any pending submission.
@@ -100,14 +100,14 @@ Here is a step-by-step testing guide so evaluators and users can experience ever
   - *Try self-approval as a Creator*: The backend strictly returns HTTP 403 Forbidden to guarantee governance integrity!
 
 ### 6. Brand Guidelines, Facts & Terminology Hub
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/guidelines` (from sidebar: **"Guidelines Hub"**).
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/guidelines` (from sidebar: **"Guidelines Hub"**).
 - **What to explore**:
   - Switch between **Approved Facts**, **Terminology Rules**, **Mandatory Disclaimers**, and **Tone Directives**.
   - Select any of the **10 Brand Workspaces** to inspect their isolated guidelines (e.g., NovaFit's ₹999 subscription, GreenBasket's ₹49 delivery fee, FinWise's ₹499 course).
   - Add or edit an approved fact — future content submissions for that brand immediately inherit the updated rule!
 
 ### 7. Admin Invitations & 1-Click Clipboard Activation
-- **URL**: `https://brand-8fj38h0sr-mewo3.vercel.app/admin/invitations` (Admin only).
+- **URL**: `https://brand-8vqycqotg-mewo3.vercel.app/admin/invitations` (Admin only).
 - **What to test**:
   - **Accept Pending Request**: Click **`ACCEPT`** on any applicant card.
   - **Copy Branded Activation Message**: Click the orange **`COPY LINK`** button at the top of an accepted member's card.
