@@ -31,7 +31,7 @@ const primaryButton =
   'press flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full text-ui font-medium transition-[background-color,transform] duration-200 ease-(--ease-refined) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-progress hover:scale-[1.02]';
 
 export function LoginScreen() {
-  const { setRole } = useSession();
+  const { setRole, setCustomUser } = useSession();
   const navigate = useNavigate();
   const reduce = useReducedMotion();
   const [email, setEmail] = useState('');
@@ -48,6 +48,7 @@ export function LoginScreen() {
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isOfflineError, setIsOfflineError] = useState(false);
+  const [activeAccount, setActiveAccount] = useState<GoogleAccount | null>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
@@ -97,6 +98,13 @@ export function LoginScreen() {
   const handleSelectGoogleAccount = (account: GoogleAccount) => {
     setIsGoogleModalOpen(false);
     setStatus('google');
+    setActiveAccount(account);
+    setCustomUser({
+      name: account.name,
+      email: account.email,
+      role: account.role,
+      initials: account.initials
+    });
     void enter(account.role, account.email);
   };
 
@@ -126,6 +134,8 @@ export function LoginScreen() {
     setDemo(role);
     setEmail(PERSONAS[role].email);
     setPassword(DEMO_PASSWORD);
+    setActiveAccount(null);
+    setCustomUser(null);
     resetFeedback();
   };
 
@@ -138,7 +148,13 @@ export function LoginScreen() {
     {/* Skeleton Loading Screen while workspace authenticates */}
     <AnimatePresence>
       {showSkeleton && (
-        <WorkspaceSkeleton message="Verifying credentials & syncing brand workspace..." />
+        <WorkspaceSkeleton
+          userName={activeAccount?.name || (demo ? PERSONAS[demo].name : 'Priya Kapoor')}
+          userEmail={activeAccount?.email || (demo ? PERSONAS[demo].email : 'brandmanager@branddna.com')}
+          roleLabel={activeAccount?.roleLabel || (demo ? DEMO_LABEL[demo] : 'Brand Manager')}
+          initials={activeAccount?.initials || (demo ? PERSONAS[demo].initials : 'PK')}
+          message="Loading workspace & syncing brand rules..."
+        />
       )}
     </AnimatePresence>
 

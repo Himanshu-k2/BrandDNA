@@ -54,10 +54,12 @@ export const dashboardPath = (role: Role) => `/dashboard?role=${role}`;
 interface SessionValue {
   persona: Persona;
   setRole: (role: Role) => void;
+  setCustomUser: (user: Partial<Persona> | null) => void;
 }
 
 const SessionContext = createContext<SessionValue | null>(null);
 const STORAGE_KEY = 'branddna.role';
+const CUSTOM_USER_KEY = 'branddna_custom_user';
 
 function readRole(): Role {
   const stored = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
@@ -66,13 +68,60 @@ function readRole(): Role {
     : 'brand_manager';
 }
 
+function readCustomUser(): Partial<Persona> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(CUSTOM_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<Role>(readRole);
+  const [customUser, setCustomUserState] = useState<Partial<Persona> | null>(readCustomUser);
+
   const setRole = useCallback((next: Role) => {
     window.localStorage.setItem(STORAGE_KEY, next);
     setRoleState(next);
   }, []);
-  const value = useMemo(() => ({ persona: PERSONAS[role], setRole }), [role, setRole]);
+
+  const setCustomUser = useCallback((user: Partial<Persona> | null) => {
+    if (user) {
+      window.localStorage.setItem(CUSTOM_USER_KEY, JSON.stringify(user));
+    } else {
+      window.localStorage.removeItem(CUSTOM_USER_KEY);
+    }
+    setCustomUserState(user);
+  }, []);
+
+  const persona: Persona = useMemo(() => {
+    const base = PERSONAS[role];
+    if (customUser) {
+      const name = customUser.name || base.name;
+      const initials =
+        customUser.initials ||
+        name
+          .split(' ')
+          .map(w => w[0])
+          .join('')
+          .slice(0, 2)
+          .toUpperCase() ||
+        base.initials;
+      return {
+        ...base,
+        ...customUser,
+        role,
+        name,
+        email: customUser.email || base.email,
+        initials
+      };
+    }
+    return base;
+  }, [role, customUser]);
+
+  const value = useMemo(() => ({ persona, setRole, setCustomUser }), [persona, setRole, setCustomUser]);
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
