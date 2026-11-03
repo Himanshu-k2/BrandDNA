@@ -318,21 +318,24 @@ Direct link: ${link}`;
                   </div>
                 </div>
 
-                {/* Right Action: COPY EMAIL & COPY LINK */}
+                {/* Right Action: COPY LINK (top, brand orange) & COPY EMAIL (bottom, ghost style) */}
                 <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-silver/80 flex flex-row sm:flex-col justify-stretch divide-x sm:divide-x-0 sm:divide-y divide-silver/80 bg-paper">
-                  <button
-                    type="button"
-                    onClick={() => handleCopyEmail(req)}
-                    className="flex-1 sm:h-1/2 flex items-center justify-center font-bold text-[12px] tracking-wider uppercase text-[#2563EB] hover:bg-blue-50 transition-colors cursor-pointer py-3.5 sm:py-0"
-                  >
-                    COPY EMAIL
-                  </button>
+                  {/* Top Button: COPY LINK in Brand Orange */}
                   <button
                     type="button"
                     onClick={() => handleCopyLink(req)}
-                    className="flex-1 sm:h-1/2 flex items-center justify-center font-semibold text-[11px] tracking-wider uppercase text-graphite hover:bg-silver/20 hover:text-ink transition-colors cursor-pointer py-3.5 sm:py-0"
+                    className="flex-1 sm:h-1/2 flex items-center justify-center font-bold text-[12px] tracking-wider uppercase text-[#FF5500] hover:bg-orange-50 transition-colors cursor-pointer py-3.5 sm:py-0"
                   >
                     COPY LINK
+                  </button>
+
+                  {/* Bottom Button: COPY EMAIL in clean Ghost Style */}
+                  <button
+                    type="button"
+                    onClick={() => handleCopyEmail(req)}
+                    className="flex-1 sm:h-1/2 flex items-center justify-center font-medium text-[11px] tracking-wider uppercase text-graphite hover:bg-silver/20 hover:text-ink transition-colors cursor-pointer py-3.5 sm:py-0"
+                  >
+                    COPY EMAIL
                   </button>
                 </div>
               </div>
