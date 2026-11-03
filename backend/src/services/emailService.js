@@ -9,6 +9,22 @@ let transporter = null;
  */
 export const initEmailTransporter = async () => {
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const cleanPass = process.env.SMTP_PASS.replace(/\s+/g, '');
+    const isGmail =
+      (process.env.SMTP_HOST || '').includes('gmail') ||
+      (process.env.SMTP_USER || '').includes('gmail.com');
+
+    if (isGmail) {
+      console.log(`[EMAIL SERVICE] Connecting to Gmail SMTP as ${process.env.SMTP_USER}`);
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: cleanPass,
+        },
+      });
+    }
+
     const port = Number(process.env.SMTP_PORT) || 587;
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -16,7 +32,7 @@ export const initEmailTransporter = async () => {
       secure: port === 465,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        pass: cleanPass,
       },
     });
   }
@@ -102,7 +118,7 @@ export const sendInvitationEmail = async ({ to, name, role, brand, activationLin
       html: htmlContent,
     });
 
-    console.log(`[EMAIL DISPATCH] Email successfully sent to ${to}: messageId = ${info.messageId}`);
+    console.log(`[EMAIL DISPATCH] Email successfully delivered to ${to}: messageId = ${info.messageId}`);
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
       console.log(`[EMAIL DISPATCH] Test mailbox preview URL: ${previewUrl}`);
