@@ -9,7 +9,6 @@ import { FloatingField, MonoCheckbox } from '@/components/mono/FloatingField';
 import { RevealText } from '@/components/mono/RevealText';
 import { GoogleAccountModal, type GoogleAccount } from '@/components/mono/GoogleAccountModal';
 import { WorkspaceSkeleton } from '@/components/mono/WorkspaceSkeleton';
-import { OfflineErrorScreen } from '@/screens/OfflineErrorScreen';
 import { RequestInviteModal } from '@/screens/login/RequestInviteModal';
 import { registerUser } from '@/data/invitations';
 import { cn } from '@/lib/cn';
@@ -59,7 +58,6 @@ export function LoginScreen() {
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isRequestInviteOpen, setIsRequestInviteOpen] = useState(false);
   const [inviteSuccessNotice, setInviteSuccessNotice] = useState('');
-  const [isOfflineError, setIsOfflineError] = useState(false);
 
   // Activation password creation states
   const [newPassword, setNewPassword] = useState('');
@@ -79,11 +77,6 @@ export function LoginScreen() {
 
   /** Sequence: Sign In clicked → 1. BrandDNA logo center aligned → 2. Skeleton screen loader → 3. Dashboard */
   const enter = async (role: Role, userEmail?: string, userPass?: string) => {
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setIsOfflineError(true);
-      return;
-    }
-
     // Step 1: Center-aligned BrandDNA Logo Splash Screen
     setTransitionStep('logo_splash');
 
@@ -99,11 +92,6 @@ export function LoginScreen() {
         localStorage.setItem('branddna_user', JSON.stringify(res.data.data.user));
       }
     } catch (apiErr: any) {
-      if (apiErr?.code === 'ERR_NETWORK' || !navigator.onLine) {
-        setTransitionStep('idle');
-        setIsOfflineError(true);
-        return;
-      }
       console.warn('Backend authentication notice (using session fallback):', apiErr);
     }
 
@@ -207,10 +195,6 @@ export function LoginScreen() {
     setCustomUser(null);
     resetFeedback();
   };
-
-  if (isOfflineError) {
-    return <OfflineErrorScreen forcedOffline={true} />;
-  }
 
   return (
     <>

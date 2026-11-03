@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RotateCcw, WifiOff } from 'lucide-react';
+import { RotateCcw, WifiOff, LogIn } from 'lucide-react';
 import { Logo } from '@/components/mono/Logo';
 import { Characters } from '@/screens/login/Characters';
 
@@ -41,7 +41,7 @@ export function OfflineErrorScreen({
       <header className="flex items-center justify-between">
         <button
           type="button"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/login')}
           className="cursor-pointer focus-visible:outline-2 focus-visible:outline-ink rounded-lg"
           aria-label="BrandDNA Home"
         >
@@ -65,21 +65,21 @@ export function OfflineErrorScreen({
         {/* 404 Text & Status Messages */}
         <div className="mt-2 flex flex-col items-center gap-2 max-w-lg">
           <span className="font-display text-6xl sm:text-7xl font-black tracking-tight text-ink">
-            404
+            {forced404 ? '404' : isOffline ? 'Offline' : 'Notice'}
           </span>
 
           <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">
             {isOffline
               ? 'No Internet Connection'
               : forced404
-              ? 'Not Found'
+              ? 'Page Not Found'
               : 'Something went wrong'}
           </h1>
 
           <p className="text-body text-graphite max-w-md mt-1 leading-relaxed">
             {isOffline
               ? 'Your internet connection appears to be offline. Check your network or Wi-Fi settings and refresh the page.'
-              : 'We couldn’t find the page you’re looking for or an unexpected error occurred. Refresh the page to reload.'}
+              : 'We couldn’t find the page you’re looking for. Return to the sign-in screen to continue.'}
           </p>
 
           {/* Action Buttons */}
@@ -94,10 +94,10 @@ export function OfflineErrorScreen({
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               className="press flex items-center gap-2 rounded-full border border-silver bg-paper px-6 py-3 text-ui font-semibold text-ink hover:bg-silver/30 transition-all cursor-pointer"
             >
-              Back to Dashboard
+              <LogIn className="size-4" /> Return to Sign In
             </button>
           </div>
         </div>
@@ -110,4 +110,3 @@ export function OfflineErrorScreen({
     </div>
   );
 }
-

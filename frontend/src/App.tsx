@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider, useSearchParams } from 'react-router-dom';
 import { AppFrame } from '@/components/mono/AppFrame';
 import { BradProvider } from '@/components/brad/BradProvider';
@@ -74,27 +73,6 @@ const router = createBrowserRouter([
 ]);
 
 export function App() {
-  const [isOffline, setIsOffline] = useState(
-    typeof navigator !== 'undefined' ? !navigator.onLine : false
-  );
-
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  if (isOffline) {
-    return <OfflineErrorScreen forcedOffline={true} />;
-  }
-
   return (
     <SessionProvider>
       {/* Brad's conversation lives above the router so it survives navigation (memory only). */}
