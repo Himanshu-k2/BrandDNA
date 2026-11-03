@@ -64,3 +64,4 @@
 - **Location**: [`backend/package.json`](file:///d:/Antigravity%20projects/New%20folder%20(2)/BrandDNA-main/backend/package.json)
 - **Root Cause**: Transitive dependency `minimatch` in dev dependencies was susceptible to ReDoS / glob amplification.
 - **Remediation**: Added npm `overrides` for `minimatch: "^11.0.4"`, achieving 0 vulnerabilities across `npm audit`.
+

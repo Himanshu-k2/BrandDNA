@@ -29,3 +29,4 @@ export const chatSchema = z.object({
     .optional()
     .default([]),
 });
+

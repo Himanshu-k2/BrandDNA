@@ -28,10 +28,11 @@ export function GoogleMark({ className }: { className?: string }) {
 export function MonoAvatar({ initials, className, tone = 'graphite' }: { initials: string; className?: string; tone?: 'graphite' | 'silver' | 'ink' }) {
   return (
     <span
+      style={tone === 'graphite' || tone === 'ink' ? { color: '#ffffff' } : undefined}
       className={cn(
         'flex size-10 shrink-0 items-center justify-center rounded-full text-caption font-semibold',
-        tone === 'graphite' && 'bg-graphite text-paper',
-        tone === 'ink' && 'bg-ink text-paper',
+        tone === 'graphite' && 'bg-graphite !text-white text-white',
+        tone === 'ink' && 'bg-ink !text-white text-white',
         tone === 'silver' && 'bg-silver text-ink',
         className
       )}

@@ -26,7 +26,7 @@ const PRESENCE_DATA: PersonaPresenceInfo[] = [
     role: 'brand_manager',
     initials: 'PK',
     bgColor: 'bg-[#FF5500]', // Electric Brand Orange
-    textColor: 'text-white',
+    textColor: '!text-white text-white',
     borderColor: 'border-[#FF5500]',
     activity: 'Reviewing assets & approval queue'
   },
@@ -34,7 +34,7 @@ const PRESENCE_DATA: PersonaPresenceInfo[] = [
     role: 'creator',
     initials: 'AR',
     bgColor: 'bg-[#141416]', // Obsidian Jet Black
-    textColor: 'text-white',
+    textColor: '!text-white text-white',
     borderColor: 'border-[#141416]',
     activity: 'Drafting new campaigns'
   },
@@ -42,7 +42,7 @@ const PRESENCE_DATA: PersonaPresenceInfo[] = [
     role: 'admin',
     initials: 'JB',
     bgColor: 'bg-[#374151]', // Slate Charcoal
-    textColor: 'text-white',
+    textColor: '!text-white text-white',
     borderColor: 'border-[#374151]',
     activity: 'Managing enterprise workspaces'
   }
@@ -76,15 +76,16 @@ export function OnlineTeamPresence({ className, compact = false }: OnlineTeamPre
             return (
               <div
                 key={item.role}
-                style={{ zIndex: 10 + idx }}
+                style={{ zIndex: 10 + idx, color: '#ffffff' }}
                 className={cn(
-                  'relative flex size-7 sm:size-8 items-center justify-center rounded-full font-bold text-caption tracking-wider ring-2 ring-paper shadow-sm transition-transform duration-200 group-hover:scale-105',
-                  item.bgColor,
-                  item.textColor
+                  'relative flex size-7 sm:size-8 items-center justify-center rounded-full font-bold text-caption tracking-wider ring-2 ring-paper shadow-sm transition-transform duration-200 group-hover:scale-105 !text-white text-white',
+                  item.bgColor
                 )}
                 title={`${PERSONAS[item.role].name} (${PERSONAS[item.role].title}) · Online`}
               >
-                <span>{item.initials}</span>
+                <span className="!text-white text-white font-bold select-none" style={{ color: '#ffffff' }}>
+                  {item.initials}
+                </span>
 
                 {/* Vivid Green Online Indicator Dot at Top Right */}
                 <span className="absolute -top-0.5 -right-0.5 flex size-2.5 sm:size-3">
@@ -151,13 +152,15 @@ export function OnlineTeamPresence({ className, compact = false }: OnlineTeamPre
                       {/* Avatar */}
                       <div className="relative shrink-0">
                         <div
+                          style={{ color: '#ffffff' }}
                           className={cn(
-                            'flex size-8 items-center justify-center rounded-full font-bold text-caption ring-1 ring-black/10',
-                            item.bgColor,
-                            item.textColor
+                            'flex size-8 items-center justify-center rounded-full font-bold text-caption ring-1 ring-black/10 !text-white text-white',
+                            item.bgColor
                           )}
                         >
-                          {item.initials}
+                          <span style={{ color: '#ffffff' }} className="!text-white text-white font-bold select-none">
+                            {item.initials}
+                          </span>
                         </div>
                         <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-[#10B981] ring-2 ring-paper" />
                       </div>

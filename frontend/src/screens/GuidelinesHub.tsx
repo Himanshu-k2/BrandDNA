@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -9,14 +9,16 @@ import {
   ChevronsUpDown,
   Copy,
   FileCheck,
+  FileText,
   Lock,
   Search,
   ShieldCheck,
   Sparkles,
-  Volume2
+  Volume2,
+  X
 } from 'lucide-react';
 import { useFrame } from '@/components/mono/AppFrame';
-import { Card, EmptyState, ICON, PageHeader, Pill, SectionHeader, Stagger, Tabs, focusRing } from '@/components/mono/ui';
+import { ICON, PageHeader, Pill, focusRing } from '@/components/mono/ui';
 import { RollingNumber } from '@/components/mono/accent';
 import { BRAND_GUIDELINES, type GuidelineSection } from '@/data/platform';
 import { BRANDS } from '@/data/demo';
@@ -26,11 +28,11 @@ import { cn } from '@/lib/cn';
 
 type Filter = 'all' | GuidelineSection['id'];
 
-const CATEGORY_TITLES: Record<string, string> = {
+const CATEGORY_NAMES: Record<GuidelineSection['id'], string> = {
   facts: 'Approved facts',
   terms: 'Terminology',
   disclaimers: 'Mandatory disclaimers',
-  tone: 'Tone of voice'
+  tone: 'Tone of voice',
 };
 
 export function GuidelinesHub() {
@@ -39,10 +41,11 @@ export function GuidelinesHub() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Active brand & category from URL query parameter (e.g. /guidelines?brand=apex&category=facts)
+  // Active brand workspace from URL (default novafit)
   const brandKey = searchParams.get('brand') || 'novafit';
   const brandConfig = BRAND_GUIDELINES[brandKey] || BRAND_GUIDELINES.novafit;
 
+  // Active category from URL parameter
   const categoryParam = searchParams.get('category') as Filter | null;
   const initialFilter: Filter =
     categoryParam && ['facts', 'terms', 'disclaimers', 'tone'].includes(categoryParam)
@@ -50,10 +53,11 @@ export function GuidelinesHub() {
       : 'all';
 
   const [filter, setFilter] = useState<Filter>(initialFilter);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [inCategorySearch, setInCategorySearch] = useState('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
   const brandDropdownRef = useRef<HTMLDivElement>(null);
+  const inspectedViewRef = useRef<HTMLDivElement>(null);
   useDismiss(brandDropdownRef, brandDropdownOpen, () => setBrandDropdownOpen(false));
 
   // Sync state if category param in URL changes
@@ -65,6 +69,13 @@ export function GuidelinesHub() {
     }
   }, [categoryParam]);
 
+  // Smooth scroll to the dedicated category view when a card is selected
+  useEffect(() => {
+    if (filter !== 'all' && inspectedViewRef.current) {
+      inspectedViewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [filter]);
+
   const handleSelectBrand = (id: string) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
@@ -75,6 +86,7 @@ export function GuidelinesHub() {
 
   const handleSelectCategory = (cat: Filter) => {
     setFilter(cat);
+    setInCategorySearch('');
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       if (cat === 'all') {
@@ -104,26 +116,22 @@ export function GuidelinesHub() {
   const toneCount = brandConfig.sections.find(s => s.id === 'tone')?.rows.length || 0;
   const totalRules = brandConfig.sections.reduce((acc, s) => acc + s.rows.length, 0);
 
-  // Filter sections by tab and query. When filter !== 'all', it shows ONLY that card's guidelines!
-  const filteredSections = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    return brandConfig.sections
-      .filter(section => filter === 'all' || section.id === filter)
-      .map(section => {
-        if (!q) return section;
-        const matchingRows = section.rows.filter(
-          row =>
-            row.label.toLowerCase().includes(q) ||
-            row.value.toLowerCase().includes(q) ||
-            row.note.toLowerCase().includes(q) ||
-            row.source.toLowerCase().includes(q)
-        );
-        return { ...section, rows: matchingRows };
-      })
-      .filter(section => section.rows.length > 0);
-  }, [brandConfig, filter, searchQuery]);
+  const activeSection = brandConfig.sections.find(s => s.id === filter);
+  const isCardOpen = filter !== 'all' && Boolean(activeSection);
 
-  const isCardOpen = filter !== 'all' || searchQuery.trim().length > 0;
+  // Filter rows within active category if search query typed
+  const filteredRows = useMemo(() => {
+    if (!activeSection) return [];
+    if (!inCategorySearch.trim()) return activeSection.rows;
+    const query = inCategorySearch.toLowerCase().trim();
+    return activeSection.rows.filter(
+      r =>
+        r.label.toLowerCase().includes(query) ||
+        r.value.toLowerCase().includes(query) ||
+        (r.note && r.note.toLowerCase().includes(query)) ||
+        (r.source && r.source.toLowerCase().includes(query))
+    );
+  }, [activeSection, inCategorySearch]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -148,7 +156,7 @@ export function GuidelinesHub() {
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
             Active workspace
           </span>
-          <span className="text-caption text-mid">
+          <span className="text-caption text-mid font-medium">
             {totalRules} active rules
           </span>
         </div>
@@ -166,7 +174,10 @@ export function GuidelinesHub() {
             )}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-caption font-bold text-paper">
+              <span
+                style={{ color: '#ffffff' }}
+                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-caption font-bold !text-white text-white select-none"
+              >
                 {brandConfig.brandInitials}
               </span>
               <span className="truncate text-ui font-semibold text-ink">
@@ -202,9 +213,10 @@ export function GuidelinesHub() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span
+                        style={isSelected ? { color: '#ffffff' } : undefined}
                         className={cn(
-                          'flex size-7 shrink-0 items-center justify-center rounded-full text-caption font-bold',
-                          isSelected ? 'bg-ink text-paper' : 'bg-silver/50 text-ink'
+                          'flex size-7 shrink-0 items-center justify-center rounded-full text-caption font-bold select-none',
+                          isSelected ? 'bg-ink !text-white text-white' : 'bg-silver/50 text-ink'
                         )}
                       >
                         {b.initials}
@@ -230,7 +242,7 @@ export function GuidelinesHub() {
         </div>
       </div>
 
-      {/* ── 4 Guideline Category Cards (Image 5 Bento Grid Layout) ── */}
+      {/* ── 4 Guideline Category Cards (Bento Grid Layout) ── */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
@@ -239,10 +251,7 @@ export function GuidelinesHub() {
           {isCardOpen && (
             <button
               type="button"
-              onClick={() => {
-                handleSelectCategory('all');
-                setSearchQuery('');
-              }}
+              onClick={() => handleSelectCategory('all')}
               className="press flex items-center gap-1.5 text-caption font-semibold text-brand-orange hover:underline cursor-pointer"
             >
               <ArrowLeft className="size-3.5" {...ICON} /> Close card view
@@ -254,17 +263,19 @@ export function GuidelinesHub() {
           {/* Card 1: Approved Facts (Hero Orange) */}
           <button
             type="button"
-            onClick={() => handleSelectCategory(filter === 'facts' ? 'all' : 'facts')}
+            onClick={() => handleSelectCategory('facts')}
             className={cn(
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel p-6 text-left transition-all duration-200 cursor-pointer',
               focusRing,
               'bg-brand-orange text-ink hover:scale-[1.01] hover:shadow-soft',
-              filter === 'facts' ? 'ring-4 ring-ink/30 shadow-lift' : 'opacity-95 hover:opacity-100'
+              filter === 'facts'
+                ? 'ring-4 ring-ink/30 border-2 border-ink shadow-lift'
+                : 'opacity-95 hover:opacity-100'
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-ui font-medium text-ink">Approved facts</p>
-              <span className="flex size-11 items-center justify-center rounded-full bg-ink text-brand-orange transition-transform duration-200 group-hover/card:scale-110">
+              <p className="text-ui font-bold text-ink">Approved facts</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-ink text-brand-orange transition-transform duration-200 group-hover/card:scale-110 shadow-sm">
                 <ArrowUpRight className="size-6 shrink-0" {...ICON} />
               </span>
             </div>
@@ -282,17 +293,19 @@ export function GuidelinesHub() {
           {/* Card 2: Terminology (Hero Black) */}
           <button
             type="button"
-            onClick={() => handleSelectCategory(filter === 'terms' ? 'all' : 'terms')}
+            onClick={() => handleSelectCategory('terms')}
             className={cn(
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel p-6 text-left transition-all duration-200 cursor-pointer',
               focusRing,
               'bg-ink text-paper hover:scale-[1.01] hover:shadow-soft',
-              filter === 'terms' ? 'ring-4 ring-brand-orange/40 shadow-lift' : 'opacity-95 hover:opacity-100'
+              filter === 'terms'
+                ? 'ring-4 ring-brand-orange/50 border-2 border-brand-orange shadow-lift'
+                : 'opacity-95 hover:opacity-100'
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-ui font-medium text-paper">Terminology</p>
-              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-ink transition-transform duration-200 group-hover/card:scale-110">
+              <p className="text-ui font-bold text-paper">Terminology</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-ink transition-transform duration-200 group-hover/card:scale-110 shadow-sm">
                 <ArrowUpRight className="size-6 shrink-0" {...ICON} />
               </span>
             </div>
@@ -310,16 +323,18 @@ export function GuidelinesHub() {
           {/* Card 3: Mandatory Disclaimers (White / Paper) */}
           <button
             type="button"
-            onClick={() => handleSelectCategory(filter === 'disclaimers' ? 'all' : 'disclaimers')}
+            onClick={() => handleSelectCategory('disclaimers')}
             className={cn(
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
               focusRing,
-              filter === 'disclaimers' ? 'ring-4 ring-brand-orange/30 border-brand-orange shadow-lift' : ''
+              filter === 'disclaimers'
+                ? 'ring-4 ring-brand-orange/40 border-2 border-brand-orange shadow-lift'
+                : ''
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-ui font-medium text-graphite">Mandatory disclaimers</p>
-              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110">
+              <p className="text-ui font-bold text-graphite">Mandatory disclaimers</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110 shadow-sm">
                 <ArrowUpRight className="size-6 shrink-0" {...ICON} />
               </span>
             </div>
@@ -342,16 +357,18 @@ export function GuidelinesHub() {
           {/* Card 4: Tone of Voice (White / Paper) */}
           <button
             type="button"
-            onClick={() => handleSelectCategory(filter === 'tone' ? 'all' : 'tone')}
+            onClick={() => handleSelectCategory('tone')}
             className={cn(
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
               focusRing,
-              filter === 'tone' ? 'ring-4 ring-brand-orange/30 border-brand-orange shadow-lift' : ''
+              filter === 'tone'
+                ? 'ring-4 ring-brand-orange/40 border-2 border-brand-orange shadow-lift'
+                : ''
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-ui font-medium text-graphite">Tone of voice</p>
-              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110">
+              <p className="text-ui font-bold text-graphite">Tone of voice</p>
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper transition-transform duration-200 group-hover/card:scale-110 shadow-sm">
                 <ArrowUpRight className="size-6 shrink-0" {...ICON} />
               </span>
             </div>
@@ -373,322 +390,359 @@ export function GuidelinesHub() {
         </div>
       </section>
 
-      {/* ── When a card is opened or search is active: Show only that card's guidelines ── */}
-      {isCardOpen ? (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Active Banner */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-silver/90 bg-silver/10 px-4 py-3">
+      {/* ── Dedicated Full Page Section Below the Cards ── */}
+      {isCardOpen && activeSection ? (
+        <section
+          ref={inspectedViewRef}
+          className="flex flex-col gap-6 pt-4 border-t border-silver/60 scroll-mt-6 animate-in fade-in duration-200"
+        >
+          {/* Section Subheader & Controls */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  handleSelectCategory('all');
-                  setSearchQuery('');
-                }}
-                className="press flex items-center gap-1.5 rounded-full border border-silver bg-paper px-3 py-1.5 text-caption font-semibold text-ink shadow-xs transition-colors hover:border-mid hover:bg-silver/20 cursor-pointer"
+              <span
+                style={{ color: '#ffffff' }}
+                className="flex size-9 items-center justify-center rounded-xl bg-ink !text-white text-white shadow-sm"
               >
-                <ArrowLeft className="size-4" {...ICON} /> Back to all cards
-              </button>
-              <span className="text-caption text-graphite">
-                {filter !== 'all' ? (
-                  <>Showing only <span className="font-semibold text-ink">{CATEGORY_TITLES[filter]}</span> for {brandConfig.brandName}</>
-                ) : (
-                  <>Search results for &ldquo;{searchQuery}&rdquo;</>
+                {activeSection.id === 'facts' && <ShieldCheck className="size-5" strokeWidth={2.5} />}
+                {activeSection.id === 'terms' && <BookMarked className="size-5" strokeWidth={2.5} />}
+                {activeSection.id === 'disclaimers' && <FileCheck className="size-5" strokeWidth={2.5} />}
+                {activeSection.id === 'tone' && <Volume2 className="size-5" strokeWidth={2.5} />}
+              </span>
+              <div>
+                <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
+                  {CATEGORY_NAMES[activeSection.id] || activeSection.title}
+                </h2>
+                <p className="text-caption text-graphite">
+                  {brandConfig.brandName} · Certified compliance specifications
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* In-category Search Bar */}
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-mid" {...ICON} />
+                <input
+                  type="text"
+                  value={inCategorySearch}
+                  onChange={e => setInCategorySearch(e.target.value)}
+                  placeholder={`Search ${activeSection.title.toLowerCase()}...`}
+                  className={cn(
+                    'h-10 w-full rounded-full border border-silver/90 bg-paper pl-9 pr-8 text-caption text-ink placeholder:text-mid transition-all hover:border-graphite/40',
+                    focusRing
+                  )}
+                />
+                {inCategorySearch && (
+                  <button
+                    type="button"
+                    onClick={() => setInCategorySearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-mid hover:text-ink cursor-pointer"
+                  >
+                    <X className="size-3.5" />
+                  </button>
                 )}
+              </div>
+
+              {/* Rules Count Badge */}
+              <span className="shrink-0 rounded-full border border-silver/80 bg-paper px-3 py-1.5 text-caption font-bold text-graphite shadow-2xs">
+                {filteredRows.length} {filteredRows.length === 1 ? 'rule' : 'rules'}
               </span>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                handleSelectCategory('all');
-                setSearchQuery('');
-              }}
-              className="text-caption font-medium text-brand-orange hover:underline cursor-pointer"
-            >
-              Close card
-            </button>
           </div>
 
-          {/* Toolbar: Category Filter Tabs + Real-Time Search */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <Tabs
-              label="Guideline categories"
-              value={filter}
-              onChange={handleSelectCategory}
-              items={[
-                { id: 'all' as Filter, label: 'All Rules' },
-                ...brandConfig.sections.map(section => ({
-                  id: section.id as Filter,
-                  label: section.title,
-                  count: section.rows.length
-                }))
-              ]}
-            />
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ── Category 1: Approved Facts (Exact match to Image 2) ── */}
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {activeSection.id === 'facts' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredRows.map(row => {
+                const rowKey = `fact-${row.label}`;
+                const isCopied = copiedKey === rowKey;
 
-            {/* Search input */}
-            <div className="relative w-full sm:w-72">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-graphite" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder={
-                  filter === 'all'
-                    ? `Search ${brandConfig.brandName} rules...`
-                    : `Search ${brandConfig.brandName} ${CATEGORY_TITLES[filter] || 'rules'}...`
-                }
-                className={cn(
-                  'h-10 w-full rounded-full border border-silver bg-paper pr-4 pl-10 text-caption text-ink placeholder:text-mid shadow-xs transition-colors hover:border-mid focus:border-ink focus:outline-none',
-                  focusRing
-                )}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-caption text-graphite hover:text-ink cursor-pointer"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Guideline Sections Display (Shows ONLY the selected card's guidelines, clean without clutter below) */}
-          {filteredSections.length === 0 ? (
-            <Card className="p-8">
-              <EmptyState icon={Search} title="No matching rules">
-                No rules match &ldquo;{searchQuery}&rdquo;. Try another search or switch categories.
-              </EmptyState>
-            </Card>
-          ) : (
-            <div className="flex flex-col gap-8">
-              {filteredSections.map((section, sIdx) => (
-                <Stagger key={section.id} index={sIdx + 1} className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex size-7 items-center justify-center rounded-chip bg-ink text-paper">
-                        {section.id === 'facts' && <ShieldCheck className="size-4" {...ICON} />}
-                        {section.id === 'terms' && <BookMarked className="size-4" {...ICON} />}
-                        {section.id === 'disclaimers' && <FileCheck className="size-4" {...ICON} />}
-                        {section.id === 'tone' && <Volume2 className="size-4" {...ICON} />}
+                return (
+                  <div
+                    key={row.label}
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-semibold tracking-wider text-graphite uppercase">
+                        {row.label}
                       </span>
-                      <SectionHeader title={section.title} />
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink">
+                          <ShieldCheck className="size-3.5 text-ink" strokeWidth={2.5} /> Certified Fact
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copy(rowKey, row.value)}
+                          title="Copy certified fact"
+                          className={cn(
+                            'flex size-7 items-center justify-center rounded-full border transition-colors cursor-pointer',
+                            isCopied
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                              : 'border-silver/80 bg-paper text-graphite hover:border-ink hover:text-ink'
+                          )}
+                        >
+                          {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
+                        </button>
+                      </div>
                     </div>
-                    <span className="rounded-full border border-silver bg-silver/20 px-2.5 py-0.5 text-caption font-semibold text-graphite">
-                      {section.rows.length} {section.rows.length === 1 ? 'rule' : 'rules'}
-                    </span>
+
+                    <p className="font-display text-subheading font-bold tracking-tight text-ink">
+                      {row.value}
+                    </p>
+
+                    <div className="flex flex-col gap-2 pt-1 border-t border-silver/40">
+                      <p className="text-caption leading-relaxed text-graphite">
+                        {row.note}
+                      </p>
+                      {row.source && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-mid">
+                          <FileText className="size-3 shrink-0" {...ICON} />
+                          <span className="truncate">{row.source}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-
-                  {/* ── Category 1: Approved Facts (Clean card: no citations / clutter below) ── */}
-                  {section.id === 'facts' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {section.rows.map(row => {
-                        const rowKey = `fact-${row.label}`;
-                        const isCopied = copiedKey === rowKey;
-
-                        return (
-                          <Card
-                            key={row.label}
-                            onClick={() => copy(rowKey, row.value)}
-                            className="group flex flex-col justify-between gap-3 p-5 transition-all duration-200 hover:border-graphite/40 hover:shadow-soft cursor-pointer relative"
-                          >
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-start justify-between gap-3">
-                                <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider">
-                                  {row.label}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="inline-flex items-center gap-1 rounded-full text-[11px] font-bold text-ink">
-                                    <ShieldCheck className="size-3.5 text-ink" strokeWidth={2.5} /> Certified Fact
-                                  </span>
-                                  <span
-                                    title="Click to copy fact"
-                                    className={cn(
-                                      'flex size-7 items-center justify-center rounded-full border transition-colors',
-                                      isCopied ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-silver bg-silver/20 text-graphite group-hover:text-ink'
-                                    )}
-                                  >
-                                    {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <p className="font-display text-subheading font-bold text-ink tracking-tight">
-                                {row.value}
-                              </p>
-
-                              <p className="text-caption text-graphite leading-relaxed">
-                                {row.note}
-                              </p>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* ── Category 2: Terminology / Lexicon (Clean card: no citations / clutter below) ── */}
-                  {section.id === 'terms' && (
-                    <div className="grid grid-cols-1 gap-4">
-                      {section.rows.map(row => {
-                        const rowKey = `term-${row.label}`;
-                        const isCopied = copiedKey === rowKey;
-
-                        return (
-                          <Card
-                            key={row.label}
-                            onClick={() => copy(rowKey, row.value)}
-                            className="group flex flex-col gap-3 p-5 transition-all duration-200 hover:border-graphite/40 cursor-pointer relative"
-                          >
-                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1.4fr] items-center gap-3">
-                              {/* Do not use */}
-                              <div className="rounded-item border border-silver/80 bg-silver/20 p-3.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-mid block mb-1">
-                                  Do Not Use
-                                </span>
-                                <span className="text-ui font-medium text-graphite line-through decoration-graphite">
-                                  {row.label}
-                                </span>
-                              </div>
-
-                              {/* Transition arrow badge */}
-                              <div className="flex justify-center py-1 md:py-0">
-                                <span className="flex size-7 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
-                                  <ArrowRight className="size-3.5" strokeWidth={2.5} />
-                                </span>
-                              </div>
-
-                              {/* Approved replacement */}
-                              <div className="rounded-item border border-ink/20 bg-ink/[0.04] p-3.5 flex items-center justify-between">
-                                <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange block mb-1">
-                                    Approved Standard
-                                  </span>
-                                  <span className="text-ui font-bold text-ink">
-                                    {row.value}
-                                  </span>
-                                </div>
-                                <span
-                                  title="Click to copy standard term"
-                                  className={cn(
-                                    'flex size-7 shrink-0 items-center justify-center rounded-full border transition-colors ml-2',
-                                    isCopied ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-silver bg-silver/20 text-graphite group-hover:text-ink'
-                                  )}
-                                >
-                                  {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* ── Category 3: Mandatory Disclaimers (Clean card: no citations / clutter below) ── */}
-                  {section.id === 'disclaimers' && (
-                    <div className="grid grid-cols-1 gap-4">
-                      {section.rows.map(row => {
-                        const rowKey = `disclaimer-${row.label}`;
-                        const isCopied = copiedKey === rowKey;
-
-                        return (
-                          <Card
-                            key={row.label}
-                            onClick={() => copy(rowKey, row.value)}
-                            className="group flex flex-col gap-3 border-l-4 border-l-brand-orange p-5 transition-all duration-200 hover:border-graphite/40 cursor-pointer"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex flex-col gap-1 min-w-0 flex-1">
-                                <h3 className="font-display text-subheading font-bold text-ink">
-                                  {row.label}
-                                </h3>
-                                <p className="text-caption text-graphite">
-                                  {row.note}
-                                </p>
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-[11px] font-bold text-brand-orange">
-                                  Mandatory Legal Text
-                                </span>
-                                <span
-                                  title="Click to copy verbatim disclaimer"
-                                  className={cn(
-                                    'flex size-7 items-center justify-center rounded-full border transition-colors',
-                                    isCopied ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-silver bg-silver/20 text-graphite group-hover:text-ink'
-                                  )}
-                                >
-                                  {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Verbatim quote block */}
-                            <div className="rounded-item border border-silver/80 bg-silver/15 p-4 font-sans text-body font-medium text-ink leading-relaxed">
-                              &ldquo;{row.value}&rdquo;
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* ── Category 4: Tone of Voice Directives (Clean card: no citations / clutter below) ── */}
-                  {section.id === 'tone' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {section.rows.map(row => {
-                        const rowKey = `tone-${row.label}`;
-                        const isCopied = copiedKey === rowKey;
-
-                        return (
-                          <Card
-                            key={row.label}
-                            onClick={() => copy(rowKey, row.value)}
-                            className="flex flex-col justify-between gap-3 p-5 hover:border-graphite/40 transition-colors cursor-pointer"
-                          >
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center justify-between">
-                                <span className="text-caption font-semibold uppercase tracking-wider text-graphite">
-                                  {row.label}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-0.5 text-caption font-semibold text-ink">
-                                    <Sparkles className="size-3 text-brand-orange" {...ICON} /> Brand Persona
-                                  </span>
-                                  <span
-                                    title="Click to copy voice directive"
-                                    className={cn(
-                                      'flex size-7 items-center justify-center rounded-full border transition-colors',
-                                      isCopied ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-silver bg-silver/20 text-graphite'
-                                    )}
-                                  >
-                                    {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <p className="font-display text-subheading font-bold text-ink">
-                                {row.value}
-                              </p>
-
-                              <p className="text-caption text-graphite leading-relaxed">
-                                {row.note}
-                              </p>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-                </Stagger>
-              ))}
+                );
+              })}
             </div>
           )}
+
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ── Category 2: Terminology / Lexicon (Matches Attachment 8) ── */}
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {activeSection.id === 'terms' && (
+            <div className="flex flex-col gap-4">
+              {filteredRows.map(row => {
+                const rowKey = `term-${row.label}`;
+                const isCopied = copiedKey === rowKey;
+
+                return (
+                  <div
+                    key={row.label}
+                    className="flex flex-col gap-4 rounded-2xl border border-silver/80 bg-paper p-5 sm:p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                  >
+                    {/* Comparison Block: DO NOT USE -> APPROVED STANDARD */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] items-center gap-3">
+                      {/* Prohibited Term Box */}
+                      <div className="flex flex-col justify-center rounded-xl border border-silver/80 bg-silver/15 p-4 min-h-[76px]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-mid">
+                          DO NOT USE
+                        </span>
+                        <p className="mt-1 font-sans text-base font-semibold text-graphite line-through decoration-graphite/80">
+                          {row.label}
+                        </p>
+                      </div>
+
+                      {/* Directional Transition Arrow */}
+                      <div className="flex items-center justify-center py-1 md:py-0">
+                        <span className="flex size-8 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange border border-brand-orange/30">
+                          <ArrowRight className="size-4 shrink-0" {...ICON} />
+                        </span>
+                      </div>
+
+                      {/* Approved Standard Term Box */}
+                      <div className="flex flex-col justify-center rounded-xl border border-brand-orange/40 bg-brand-orange/5 p-4 min-h-[76px]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
+                          APPROVED STANDARD
+                        </span>
+                        <p className="mt-1 font-sans text-base font-bold text-ink">
+                          {row.value}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Metadata & Copy */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-silver/40">
+                      <p className="text-caption text-graphite leading-relaxed">
+                        <strong className="text-ink font-semibold">Rationale: </strong>
+                        {row.note}
+                      </p>
+
+                      <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                        {row.source && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-silver/80 bg-silver/20 px-2 py-0.5 text-[11px] font-medium text-graphite">
+                            <BookMarked className="size-3 text-mid" {...ICON} />
+                            {row.source}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => copy(rowKey, row.value)}
+                          className={cn(
+                            'press flex items-center gap-1.5 rounded-full border px-3 py-1 text-caption font-semibold transition-colors cursor-pointer',
+                            isCopied
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                              : 'border-silver bg-paper text-ink hover:border-ink hover:bg-silver/20'
+                          )}
+                        >
+                          {isCopied ? (
+                            <>
+                              <Check className="size-3.5 text-emerald-600" /> Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="size-3.5" /> Copy Term
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ── Category 3: Mandatory Disclaimers ── */}
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {activeSection.id === 'disclaimers' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredRows.map(row => {
+                const rowKey = `disclaimer-${row.label}`;
+                const isCopied = copiedKey === rowKey;
+
+                return (
+                  <div
+                    key={row.label}
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-silver/80 border-l-4 border-l-brand-orange bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-semibold tracking-wider text-graphite uppercase">
+                        {row.label}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-[11px] font-bold text-brand-orange">
+                          <FileCheck className="size-3.5 text-brand-orange" strokeWidth={2.5} /> Mandatory
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copy(rowKey, row.value)}
+                          title="Copy verbatim disclaimer"
+                          className={cn(
+                            'flex size-7 items-center justify-center rounded-full border transition-colors cursor-pointer',
+                            isCopied
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                              : 'border-silver/80 bg-paper text-graphite hover:border-ink hover:text-ink'
+                          )}
+                        >
+                          {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-silver/80 bg-silver/15 p-4 font-sans text-body font-medium leading-relaxed text-ink">
+                      &ldquo;{row.value}&rdquo;
+                    </div>
+
+                    <div className="flex flex-col gap-2 pt-1 border-t border-silver/40">
+                      <p className="text-caption leading-relaxed text-graphite">
+                        {row.note}
+                      </p>
+                      {row.source && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-mid">
+                          <FileText className="size-3 shrink-0" {...ICON} />
+                          <span className="truncate">{row.source}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ── Category 4: Tone of Voice Directives ── */}
+          {/* ═════════════════════════════════════════════════════════════════ */}
+          {activeSection.id === 'tone' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredRows.map(row => {
+                const rowKey = `tone-${row.label}`;
+                const isCopied = copiedKey === rowKey;
+
+                return (
+                  <div
+                    key={row.label}
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-semibold tracking-wider text-graphite uppercase">
+                        {row.label}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-silver/40 px-2.5 py-0.5 text-[11px] font-semibold text-ink">
+                          <Sparkles className="size-3.5 text-brand-orange" strokeWidth={2.5} /> Brand Persona
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copy(rowKey, row.value)}
+                          title="Copy voice directive"
+                          className={cn(
+                            'flex size-7 items-center justify-center rounded-full border transition-colors cursor-pointer',
+                            isCopied
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                              : 'border-silver/80 bg-paper text-graphite hover:border-ink hover:text-ink'
+                          )}
+                        >
+                          {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="font-display text-subheading font-bold tracking-tight text-ink">
+                      {row.value}
+                    </p>
+
+                    <div className="flex flex-col gap-2 pt-1 border-t border-silver/40">
+                      <p className="text-caption leading-relaxed text-graphite">
+                        {row.note}
+                      </p>
+                      {row.source && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-mid">
+                          <FileText className="size-3 shrink-0" {...ICON} />
+                          <span className="truncate">{row.source}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty Search Result Fallback */}
+          {filteredRows.length === 0 && (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-silver/80 bg-paper p-12 text-center shadow-xs">
+              <Search className="size-8 text-mid mb-2" {...ICON} />
+              <p className="text-ui font-semibold text-ink">No matching rules found</p>
+              <p className="text-caption text-graphite mt-1">
+                No rules in {CATEGORY_NAMES[activeSection.id]} match &ldquo;{inCategorySearch}&rdquo;.
+              </p>
+              <button
+                type="button"
+                onClick={() => setInCategorySearch('')}
+                className="mt-4 rounded-full border border-silver bg-silver/20 px-4 py-1.5 text-caption font-semibold text-ink hover:bg-silver/40 cursor-pointer"
+              >
+                Clear Search
+              </button>
+            </div>
+          )}
+        </section>
+      ) : (
+        /* Prompt when no card is clicked yet */
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-silver/90 bg-silver/10 p-10 text-center">
+          <div className="flex size-11 items-center justify-center rounded-full bg-paper border border-silver/80 shadow-xs mb-3">
+            <Sparkles className="size-5 text-brand-orange" {...ICON} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-ink">Select a Card Above</h3>
+          <p className="max-w-md text-caption text-graphite mt-1">
+            Click on Approved facts, Terminology, Mandatory disclaimers, or Tone of voice to open its dedicated page below.
+          </p>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

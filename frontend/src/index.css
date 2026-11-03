@@ -14,6 +14,7 @@
   --color-mid: #777777; /* Middle Gray — placeholders, borders, 12px labels (4.48:1 on white) */
   --color-silver: #d6d6d6; /* Pale Silver */
   --color-paper: #ffffff; /* Clean White */
+  --color-white: #ffffff; /* Explicit white utility text-white / bg-white */
 
   /* Brand accent — Blaze Orange. Restrained: hero stat card, chart highlight +
      hatched secondary series, progress fills, nav indicator, one highlight CTA,
