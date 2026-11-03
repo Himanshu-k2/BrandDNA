@@ -81,7 +81,7 @@ router.post('/:id/submit', protect, submitReview);
 router.post(
   '/:id/approve',
   protect,
-  authorize('brand_manager', 'admin'),
+  authorize('brand_manager', 'reviewer', 'admin'),
   validateBody(approveReviewSchema),
   approveReview
 );
@@ -89,7 +89,7 @@ router.post(
 router.post(
   '/:id/reject',
   protect,
-  authorize('brand_manager', 'admin'),
+  authorize('brand_manager', 'reviewer', 'admin'),
   validateBody(rejectReviewSchema),
   rejectReview
 );
@@ -97,7 +97,7 @@ router.post(
 router.post(
   '/:id/request-changes',
   protect,
-  authorize('brand_manager', 'admin'),
+  authorize('brand_manager', 'reviewer', 'admin'),
   validateBody(requestChangesSchema),
   requestChanges
 );

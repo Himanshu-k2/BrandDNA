@@ -43,10 +43,7 @@ export const isTransientGeminiError = (error) => {
     message.includes('permission denied') ||
     message.includes('invalid_argument') ||
     message.includes('model not found') ||
-    message.includes('quota exceeded') ||
-    message.includes('exceeded your current quota') ||
-    message.includes('rate-limits') ||
-    (message.includes('401') && !message.includes('503')) ||
+        (message.includes('401') && !message.includes('503')) ||
     (message.includes('403') && !message.includes('503')) ||
     (message.includes('400') && !message.includes('503'))
   ) {
