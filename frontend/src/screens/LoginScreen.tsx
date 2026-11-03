@@ -48,7 +48,6 @@ export function LoginScreen() {
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isOfflineError, setIsOfflineError] = useState(false);
-  const [activeAccount, setActiveAccount] = useState<GoogleAccount | null>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
@@ -98,7 +97,6 @@ export function LoginScreen() {
   const handleSelectGoogleAccount = (account: GoogleAccount) => {
     setIsGoogleModalOpen(false);
     setStatus('google');
-    setActiveAccount(account);
     setCustomUser({
       name: account.name,
       email: account.email,
@@ -134,7 +132,6 @@ export function LoginScreen() {
     setDemo(role);
     setEmail(PERSONAS[role].email);
     setPassword(DEMO_PASSWORD);
-    setActiveAccount(null);
     setCustomUser(null);
     resetFeedback();
   };
@@ -148,13 +145,7 @@ export function LoginScreen() {
     {/* Skeleton Loading Screen while workspace authenticates */}
     <AnimatePresence>
       {showSkeleton && (
-        <WorkspaceSkeleton
-          userName={activeAccount?.name || (demo ? PERSONAS[demo].name : 'Priya Kapoor')}
-          userEmail={activeAccount?.email || (demo ? PERSONAS[demo].email : 'brandmanager@branddna.com')}
-          roleLabel={activeAccount?.roleLabel || (demo ? DEMO_LABEL[demo] : 'Brand Manager')}
-          initials={activeAccount?.initials || (demo ? PERSONAS[demo].initials : 'PK')}
-          message="Loading workspace & syncing brand rules..."
-        />
+        <WorkspaceSkeleton message="Loading workspace & syncing brand rules..." />
       )}
     </AnimatePresence>
 

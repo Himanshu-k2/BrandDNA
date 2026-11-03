@@ -1,327 +1,231 @@
 import { motion } from 'motion/react';
-import {
-  ChevronsLeft,
-  LayoutGrid,
-  Inbox,
-  Library,
-  BookOpen,
-  FileCheck2,
-  FileSpreadsheet,
-  Settings,
-  LogOut,
-  ArrowUpRight,
-  Bell,
-  ChevronDown,
-  Sparkles
-} from 'lucide-react';
-import { Logo } from '@/components/mono/Logo';
 
 interface WorkspaceSkeletonProps {
-  userName?: string;
-  userEmail?: string;
-  roleLabel?: string;
-  initials?: string;
   message?: string;
 }
 
+/**
+ * Low-fi wireframe skeleton loader matching the EXACT BrandDNA Dashboard layout.
+ * Every piece of text, metric, avatar, and control is rendered as a clean pulsating
+ * wireframe block/pill (pure low-fi design matching Image 2 & 3 reference).
+ */
 export function WorkspaceSkeleton({
-  userName = 'Priya Kapoor',
-  userEmail = 'brandmanager@branddna.com',
-  roleLabel = 'Brand Manager',
-  initials = 'PK',
-  message = 'Loading workspace & syncing brand rules...'
+  message = 'Loading workspace...'
 }: WorkspaceSkeletonProps) {
-  const firstName = userName.split(' ')[0] || 'there';
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="mono mono-wash fixed inset-0 z-50 flex overflow-hidden bg-wash"
+      transition={{ duration: 0.18 }}
+      className="mono mono-wash fixed inset-0 z-50 flex overflow-hidden bg-[#F6F7F9]"
       role="status"
       aria-label="Loading workspace"
     >
-      {/* ── Left Sidebar Skeleton (Exact match to BrandDNA AppFrame) ── */}
-      <aside className="hidden md:flex w-72 shrink-0 flex-col justify-between border-r border-silver/60 bg-paper p-5 select-none">
+      {/* ── Left Sidebar (Exact BrandDNA Shell in Pure Low-Fi Wireframe) ── */}
+      <aside className="hidden md:flex w-72 shrink-0 flex-col justify-between border-r border-neutral-200/80 bg-white p-5 select-none">
         <div className="flex flex-col gap-6">
-          {/* Logo & Collapse button */}
+          {/* Top Logo Mark & Wordmark Placeholder */}
           <div className="flex items-center justify-between">
-            <Logo variant="horizontal" size="md" />
-            <span className="flex size-7 items-center justify-center rounded-lg text-mid">
-              <ChevronsLeft className="size-4" />
-            </span>
-          </div>
-
-          {/* Search Bar Skeleton */}
-          <div className="flex h-10 w-full items-center justify-between rounded-xl border border-silver/80 bg-silver/10 px-3.5">
-            <div className="flex items-center gap-2">
-              <div className="size-3.5 rounded-full bg-silver/60 animate-pulse" />
-              <div className="h-3 w-16 rounded bg-silver/60 animate-pulse" />
+            <div className="flex items-center gap-2.5">
+              <div className="size-8 rounded-lg bg-neutral-300 animate-pulse" />
+              <div className="h-4.5 w-24 rounded-md bg-neutral-300 animate-pulse" />
             </div>
-            <span className="rounded border border-silver/80 bg-paper px-1.5 py-0.5 text-[10px] font-bold text-mid">
-              ⌘K
-            </span>
+            <div className="size-6 rounded-md bg-neutral-200/80 animate-pulse" />
           </div>
 
-          {/* Role Pill */}
-          <div className="self-start rounded-full bg-silver/30 border border-silver/70 px-3 py-1">
-            <span className="text-[11px] font-semibold text-graphite">
-              {roleLabel}
-            </span>
+          {/* Search Box Placeholder */}
+          <div className="flex h-10 w-full items-center justify-between rounded-xl border border-neutral-200/90 bg-neutral-100/70 px-3.5">
+            <div className="flex items-center gap-2.5">
+              <div className="size-3.5 rounded-full bg-neutral-300/80 animate-pulse" />
+              <div className="h-3 w-20 rounded bg-neutral-300/80 animate-pulse" />
+            </div>
+            <div className="h-4 w-7 rounded bg-neutral-200 animate-pulse" />
           </div>
 
-          {/* Navigation Menu */}
-          <div className="flex flex-col gap-1.5">
-            <span className="px-2 text-[11px] font-bold tracking-wider text-mid uppercase">
-              Menu
-            </span>
+          {/* Role Pill Placeholder */}
+          <div className="self-start h-6 w-28 rounded-full bg-neutral-200/90 animate-pulse" />
 
-            {/* Active item: Brand Dashboard */}
-            <div className="flex items-center gap-3 rounded-xl bg-silver/40 px-3 py-2.5 font-medium text-ink shadow-2xs">
-              <LayoutGrid className="size-4 text-ink" />
-              <span className="text-ui font-semibold">Brand Dashboard</span>
+          {/* Menu Section */}
+          <div className="flex flex-col gap-2 pt-1">
+            {/* "MENU" Label */}
+            <div className="h-2.5 w-12 rounded bg-neutral-300/70 animate-pulse ml-1 mb-1" />
+
+            {/* Menu Item 1: Active Brand Dashboard */}
+            <div className="flex items-center gap-3 rounded-xl bg-neutral-100 p-2.5 shadow-2xs">
+              <div className="size-4 rounded bg-neutral-400 animate-pulse shrink-0" />
+              <div className="h-3.5 w-28 rounded bg-neutral-400 animate-pulse" />
             </div>
 
-            {/* Inactive item: Approval Queue */}
-            <div className="flex items-center justify-between rounded-xl px-3 py-2 text-graphite">
+            {/* Menu Item 2: Approval Queue */}
+            <div className="flex items-center justify-between p-2.5">
               <div className="flex items-center gap-3">
-                <Inbox className="size-4 text-mid" />
-                <span className="text-ui">Approval Queue</span>
+                <div className="size-4 rounded bg-neutral-250 animate-pulse shrink-0" />
+                <div className="h-3.5 w-26 rounded bg-neutral-200 animate-pulse" />
               </div>
-              <span className="size-2 rounded-full bg-brand-orange" />
+              <div className="size-2 rounded-full bg-neutral-300 animate-pulse" />
             </div>
 
-            {/* Inactive item: Brand Asset Library */}
-            <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-graphite">
-              <Library className="size-4 text-mid" />
-              <span className="text-ui">Brand Asset Library</span>
+            {/* Menu Item 3: Brand Asset Library */}
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="size-4 rounded bg-neutral-250 animate-pulse shrink-0" />
+              <div className="h-3.5 w-32 rounded bg-neutral-200 animate-pulse" />
             </div>
 
-            {/* Inactive item: Guideline Ingestion */}
-            <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-graphite">
-              <BookOpen className="size-4 text-mid" />
-              <span className="text-ui">Guideline Ingestion</span>
+            {/* Menu Item 4: Guideline Ingestion */}
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="size-4 rounded bg-neutral-250 animate-pulse shrink-0" />
+              <div className="h-3.5 w-30 rounded bg-neutral-200 animate-pulse" />
             </div>
 
-            {/* Inactive item: All Submissions */}
-            <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-graphite">
-              <FileCheck2 className="size-4 text-mid" />
-              <span className="text-ui">All Submissions</span>
+            {/* Menu Item 5: All Submissions */}
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="size-4 rounded bg-neutral-250 animate-pulse shrink-0" />
+              <div className="h-3.5 w-24 rounded bg-neutral-200 animate-pulse" />
             </div>
 
-            {/* Inactive item: Audit Log Ledger */}
-            <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-graphite">
-              <FileSpreadsheet className="size-4 text-mid" />
-              <span className="text-ui">Audit Log Ledger</span>
+            {/* Menu Item 6: Audit Log Ledger */}
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="size-4 rounded bg-neutral-250 animate-pulse shrink-0" />
+              <div className="h-3.5 w-28 rounded bg-neutral-200 animate-pulse" />
             </div>
           </div>
         </div>
 
-        {/* Bottom Profile & Actions Skeleton */}
-        <div className="flex flex-col gap-3 border-t border-silver/40 pt-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-silver/80 bg-paper p-3 shadow-xs">
-            <span
-              style={{ color: '#ffffff' }}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-caption font-bold !text-white text-white"
-            >
-              {initials}
-            </span>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="truncate text-ui font-semibold text-ink">
-                {userName}
-              </span>
-              <span className="truncate text-caption text-graphite">
-                {userEmail}
-              </span>
+        {/* Bottom Profile Card & Actions */}
+        <div className="flex flex-col gap-3 border-t border-neutral-200/70 pt-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-neutral-200/90 bg-white p-3 shadow-2xs">
+            <div className="size-9 rounded-full bg-neutral-300 animate-pulse shrink-0" />
+            <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+              <div className="h-3 w-20 rounded bg-neutral-300 animate-pulse" />
+              <div className="h-2.5 w-32 rounded bg-neutral-200 animate-pulse" />
             </div>
-            <ChevronDown className="size-4 text-mid" />
+            <div className="size-3.5 rounded bg-neutral-200 animate-pulse" />
           </div>
 
-          <div className="flex items-center gap-3 px-3 py-1.5 text-graphite">
-            <Settings className="size-4 text-mid" />
-            <span className="text-caption font-medium">Settings</span>
+          <div className="flex items-center gap-3 px-3 py-1">
+            <div className="size-4 rounded bg-neutral-200 animate-pulse" />
+            <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
           </div>
 
-          <div className="flex items-center gap-3 px-3 py-1.5 text-graphite">
-            <LogOut className="size-4 text-mid" />
-            <span className="text-caption font-medium">Log out</span>
+          <div className="flex items-center gap-3 px-3 py-1">
+            <div className="size-4 rounded bg-neutral-200 animate-pulse" />
+            <div className="h-3 w-14 rounded bg-neutral-200 animate-pulse" />
           </div>
         </div>
       </aside>
 
-      {/* ── Main Dashboard Workspace Area (Exact 2-Column Match) ── */}
+      {/* ── Main Dashboard Content (Pure Low-Fi Wireframe Layout) ── */}
       <main className="flex-1 overflow-y-auto p-6 sm:p-10">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-          {/* Header Row: "Hello, Priya!" + Team Presence + Bell */}
+          {/* Header Row: Title Bar + Team Presence Pill + Bell */}
           <header className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-display font-semibold tracking-tight text-ink">
-                Hello, {firstName}!
-              </h1>
-            </div>
+            <div className="h-8 w-44 sm:w-56 rounded-xl bg-neutral-300 animate-pulse" />
 
             <div className="ml-auto flex items-center gap-3 shrink-0">
-              {/* Online Team Presence Pill Skeleton */}
-              <div className="flex items-center gap-2 rounded-full border border-silver/80 bg-paper px-3 py-1.5 shadow-2xs">
+              {/* Team presence pill placeholder */}
+              <div className="flex items-center gap-2 rounded-full border border-neutral-200/90 bg-white px-3 py-1.5 shadow-2xs">
                 <div className="flex -space-x-1.5">
-                  <span
-                    style={{ color: '#ffffff' }}
-                    className="flex size-6 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold !text-white text-white"
-                  >
-                    PK
-                  </span>
-                  <span
-                    style={{ color: '#ffffff' }}
-                    className="flex size-6 items-center justify-center rounded-full bg-ink text-[10px] font-bold !text-white text-white"
-                  >
-                    AR
-                  </span>
-                  <span
-                    style={{ color: '#ffffff' }}
-                    className="flex size-6 items-center justify-center rounded-full bg-slate-700 text-[10px] font-bold !text-white text-white"
-                  >
-                    JB
-                  </span>
+                  <div className="size-6 rounded-full bg-neutral-300 animate-pulse" />
+                  <div className="size-6 rounded-full bg-neutral-350 animate-pulse" />
+                  <div className="size-6 rounded-full bg-neutral-300 animate-pulse" />
                 </div>
-                <span className="text-caption font-semibold text-graphite">3 Online</span>
+                <div className="h-3 w-14 rounded bg-neutral-200 animate-pulse ml-1" />
               </div>
 
-              {/* Notification Bell with Orange Dot */}
-              <div className="relative flex size-10 items-center justify-center rounded-full border border-silver/80 bg-paper text-ink shadow-2xs">
-                <Bell className="size-4 text-graphite" />
-                <span className="absolute top-2 right-2 size-2 rounded-full bg-brand-orange" />
+              {/* Notification Bell placeholder */}
+              <div className="size-10 rounded-full border border-neutral-200/90 bg-white shadow-2xs flex items-center justify-center">
+                <div className="size-4 rounded-full bg-neutral-300 animate-pulse" />
               </div>
             </div>
           </header>
 
-          {/* Canonical Two-Column Grid (xl:grid-cols-[minmax(0,1fr)_320px]) */}
+          {/* Canonical Two-Column Persona Layout */}
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
             {/* ── Left Column: Performance Bento & Audit Volume ── */}
             <div className="flex min-w-0 flex-col gap-8">
-              {/* Section Header: Performance + Period Segmented Control */}
+              {/* Section Header: "Performance" + Segmented Time Control */}
               <div className="flex items-center justify-between">
-                <h2 className="font-display text-xl font-bold tracking-tight text-ink">
-                  Performance
-                </h2>
-
-                <div className="flex rounded-xl bg-silver/40 p-1">
-                  <span className="px-3 py-1 text-caption font-medium text-graphite">Day</span>
-                  <span className="rounded-lg bg-ink px-3 py-1 text-caption font-semibold text-paper shadow-xs">Week</span>
-                  <span className="px-3 py-1 text-caption font-medium text-graphite">Month</span>
-                  <span className="px-3 py-1 text-caption font-medium text-graphite">Year</span>
+                <div className="h-5 w-28 rounded bg-neutral-300 animate-pulse" />
+                <div className="flex items-center gap-1 rounded-xl bg-neutral-200/60 p-1">
+                  <div className="h-6 w-10 rounded bg-transparent" />
+                  <div className="h-6 w-12 rounded-lg bg-neutral-300 animate-pulse shadow-2xs" />
+                  <div className="h-6 w-12 rounded bg-transparent" />
+                  <div className="h-6 w-10 rounded bg-transparent" />
                 </div>
               </div>
 
-              {/* 4 Bento Cards (2x2 Grid) */}
+              {/* 4 Bento Cards (2x2 Grid) in Pure Low-Fi Style */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Bento Card 1: Orange Hero (Brand health score 94%) */}
-                <div className="flex min-h-40 flex-col justify-between rounded-panel bg-brand-orange p-6 text-ink shadow-soft">
+                {/* Bento Card 1 */}
+                <div className="flex min-h-38 flex-col justify-between rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-2xs">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-ui font-bold text-ink">Brand health score</p>
-                    <span className="flex size-11 items-center justify-center rounded-full bg-ink text-brand-orange shadow-sm">
-                      <ArrowUpRight className="size-6 shrink-0" />
-                    </span>
+                    <div className="h-3.5 w-32 rounded bg-neutral-300 animate-pulse" />
+                    <div className="size-9 rounded-full bg-neutral-200/80 animate-pulse shrink-0" />
                   </div>
-                  <div className="my-1">
-                    <span className="font-display text-display font-semibold tracking-tight text-ink">
-                      94%
-                    </span>
-                  </div>
-                  <p className="text-caption font-medium text-ink/90">
-                    +4 pts · vs 90% (last 7 days)
-                  </p>
+                  <div className="my-2 h-9 w-20 rounded-lg bg-neutral-300 animate-pulse" />
+                  <div className="h-3 w-36 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                {/* Bento Card 2: Black Hero (Active brand rules 142) */}
-                <div className="flex min-h-40 flex-col justify-between rounded-panel bg-ink p-6 text-paper shadow-soft">
+                {/* Bento Card 2 */}
+                <div className="flex min-h-38 flex-col justify-between rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-2xs">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-ui font-bold text-paper">Active brand rules</p>
-                    <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-ink shadow-sm">
-                      <ArrowUpRight className="size-6 shrink-0" />
-                    </span>
+                    <div className="h-3.5 w-32 rounded bg-neutral-300 animate-pulse" />
+                    <div className="size-9 rounded-full bg-neutral-200/80 animate-pulse shrink-0" />
                   </div>
-                  <div className="my-1">
-                    <span className="font-display text-display font-semibold tracking-tight text-brand-orange">
-                      142
-                    </span>
-                  </div>
-                  <p className="text-caption text-silver">
-                    +12 · vs 130 (last 7 days)
-                  </p>
+                  <div className="my-2 h-9 w-16 rounded-lg bg-neutral-300 animate-pulse" />
+                  <div className="h-3 w-32 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                {/* Bento Card 3: White Card (Verified brand assets 384) */}
-                <div className="flex min-h-40 flex-col justify-between rounded-panel border border-silver bg-paper p-6 shadow-soft">
+                {/* Bento Card 3 */}
+                <div className="flex min-h-38 flex-col justify-between rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-2xs">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-ui font-bold text-graphite">Verified brand assets</p>
-                    <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper shadow-sm">
-                      <ArrowUpRight className="size-6 shrink-0" />
-                    </span>
+                    <div className="h-3.5 w-32 rounded bg-neutral-300 animate-pulse" />
+                    <div className="size-9 rounded-full bg-neutral-200/80 animate-pulse shrink-0" />
                   </div>
-                  <div className="my-1 flex items-center justify-between">
-                    <span className="font-display text-display font-semibold tracking-tight text-ink">
-                      384
-                    </span>
-                    <span className="rounded-full bg-silver/40 px-2.5 py-0.5 text-caption font-bold text-ink">
-                      +24
-                    </span>
+                  <div className="my-2 flex items-center justify-between">
+                    <div className="h-9 w-16 rounded-lg bg-neutral-300 animate-pulse" />
+                    <div className="h-5 w-10 rounded-full bg-neutral-200 animate-pulse" />
                   </div>
-                  <p className="text-caption text-graphite">
-                    vs 360 (last 7 days)
-                  </p>
+                  <div className="h-3 w-28 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                {/* Bento Card 4: White Card (Turnaround velocity 18) */}
-                <div className="flex min-h-40 flex-col justify-between rounded-panel border border-silver bg-paper p-6 shadow-soft">
+                {/* Bento Card 4 */}
+                <div className="flex min-h-38 flex-col justify-between rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-2xs">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-ui font-bold text-graphite">Turnaround velocity</p>
-                    <span className="flex size-11 items-center justify-center rounded-full bg-brand-orange text-paper shadow-sm">
-                      <ArrowUpRight className="size-6 shrink-0" />
-                    </span>
+                    <div className="h-3.5 w-32 rounded bg-neutral-300 animate-pulse" />
+                    <div className="size-9 rounded-full bg-neutral-200/80 animate-pulse shrink-0" />
                   </div>
-                  <div className="my-1 flex items-center justify-between">
-                    <span className="font-display text-display font-semibold tracking-tight text-ink">
-                      18
-                    </span>
-                    <span className="rounded-full bg-silver/40 px-2.5 py-0.5 text-caption font-bold text-ink">
-                      -4
-                    </span>
+                  <div className="my-2 flex items-center justify-between">
+                    <div className="h-9 w-12 rounded-lg bg-neutral-300 animate-pulse" />
+                    <div className="h-5 w-10 rounded-full bg-neutral-200 animate-pulse" />
                   </div>
-                  <p className="text-caption text-graphite">
-                    vs 22 (last 7 days)
-                  </p>
+                  <div className="h-3 w-28 rounded bg-neutral-200 animate-pulse" />
                 </div>
               </div>
 
-              {/* Audit Volume Skeleton Card */}
-              <div className="flex flex-col gap-6 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs">
-                <div className="flex items-center justify-between border-b border-silver/40 pb-4">
-                  <div>
-                    <h3 className="font-display text-lg font-bold text-ink">Audit volume</h3>
-                    <p className="text-caption text-graphite">Continuous compliance audit telemetry</p>
+              {/* Audit Volume Card (Chart Skeleton matching Image 2 & 3) */}
+              <div className="flex flex-col gap-6 rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-neutral-200/60 pb-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="h-4.5 w-28 rounded bg-neutral-300 animate-pulse" />
+                    <div className="h-3 w-48 rounded bg-neutral-200 animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 rounded-full border border-silver/80 bg-paper px-3 py-1 text-caption font-semibold text-ink shadow-2xs">
-                      <span>Last Year</span>
-                      <ChevronDown className="size-3 text-mid" />
-                    </div>
-                  </div>
+                  <div className="h-7 w-24 rounded-full bg-neutral-200/90 animate-pulse" />
                 </div>
 
                 <div className="flex items-baseline gap-3">
-                  <span className="text-caption font-semibold uppercase text-graphite">Total audits</span>
-                  <span className="font-display text-2xl font-bold text-ink">12,349</span>
+                  <div className="h-3 w-20 rounded bg-neutral-200 animate-pulse" />
+                  <div className="h-7 w-24 rounded bg-neutral-300 animate-pulse" />
                 </div>
 
-                {/* Bar Chart Visualization Shimmer */}
-                <div className="flex h-36 items-end gap-2 sm:gap-3 pt-4">
-                  {[45, 65, 30, 80, 55, 95, 70, 85, 60, 90, 75, 100].map((h, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                {/* Vertical Bar Chart Skeleton */}
+                <div className="flex h-36 items-end gap-2.5 sm:gap-3.5 pt-4">
+                  {[40, 65, 30, 80, 55, 95, 70, 85, 60, 90, 75, 100].map((h, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center">
                       <div
                         style={{ height: `${h}%` }}
-                        className="w-full rounded-t-md bg-silver/50 animate-pulse transition-all"
+                        className="w-full rounded-t-md bg-neutral-200 animate-pulse transition-all"
                       />
                     </div>
                   ))}
@@ -331,77 +235,61 @@ export function WorkspaceSkeleton({
 
             {/* ── Right Column: Advisor, Review Queue, Recent Activity ── */}
             <div className="flex min-w-0 flex-col gap-6">
-              {/* Brand Advisor Card */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs">
+              {/* Brand Advisor Card Skeleton */}
+              <div className="flex flex-col gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display text-base font-bold text-ink">Brand Advisor</h3>
-                  <span className="text-caption font-semibold text-graphite">See All →</span>
+                  <div className="h-4 w-28 rounded bg-neutral-300 animate-pulse" />
+                  <div className="h-3 w-12 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                <div className="flex flex-col gap-3 rounded-xl border border-silver/80 bg-silver/10 p-4">
+                <div className="flex flex-col gap-3 rounded-xl border border-neutral-200/70 bg-neutral-50 p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-paper border border-silver/80 shadow-2xs">
-                      <Bell className="size-4 text-brand-orange" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-ui font-bold text-ink">NovaFit guideline staging</span>
-                      <p className="text-caption text-graphite mt-1 leading-snug">
-                        6 staged rules verified at 98% confidence. Ready to activate.
-                      </p>
+                    <div className="size-8 rounded-full bg-neutral-200 shrink-0 animate-pulse" />
+                    <div className="flex flex-col gap-1.5 flex-1">
+                      <div className="h-3.5 w-36 rounded bg-neutral-300 animate-pulse" />
+                      <div className="h-2.5 w-full rounded bg-neutral-200 animate-pulse" />
+                      <div className="h-2.5 w-4/5 rounded bg-neutral-200 animate-pulse" />
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    className="mt-1 self-start rounded-full border border-silver/90 bg-paper px-3 py-1 text-caption font-semibold text-ink shadow-2xs"
-                  >
-                    Review rules
-                  </button>
+                  <div className="h-7 w-24 rounded-full bg-neutral-200 animate-pulse self-start mt-1" />
                 </div>
               </div>
 
-              {/* Review Queue Card */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs">
+              {/* Review Queue Card Skeleton */}
+              <div className="flex flex-col gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display text-base font-bold text-ink">Review queue</h3>
-                  <span className="text-caption font-semibold text-graphite">See All →</span>
+                  <div className="h-4 w-28 rounded bg-neutral-300 animate-pulse" />
+                  <div className="h-3 w-12 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                <div className="flex flex-col divide-y divide-silver/40">
-                  <div className="flex items-center justify-between py-2.5">
-                    <span className="text-ui text-graphite">Rule approvals pending</span>
-                    <span className="font-display text-lg font-bold text-ink">6</span>
+                <div className="flex flex-col divide-y divide-neutral-200/60">
+                  <div className="flex items-center justify-between py-3">
+                    <div className="h-3.5 w-36 rounded bg-neutral-200 animate-pulse" />
+                    <div className="h-5 w-6 rounded bg-neutral-300 animate-pulse" />
                   </div>
-                  <div className="flex items-center justify-between py-2.5">
-                    <span className="text-ui text-graphite">Policy change requests</span>
-                    <span className="font-display text-lg font-bold text-ink">4</span>
+                  <div className="flex items-center justify-between py-3">
+                    <div className="h-3.5 w-38 rounded bg-neutral-200 animate-pulse" />
+                    <div className="h-5 w-6 rounded bg-neutral-300 animate-pulse" />
                   </div>
-                  <div className="flex items-center justify-between py-2.5">
-                    <span className="text-ui text-graphite">Certified assets sealed</span>
-                    <span className="font-display text-lg font-bold text-ink">18</span>
+                  <div className="flex items-center justify-between py-3">
+                    <div className="h-3.5 w-34 rounded bg-neutral-200 animate-pulse" />
+                    <div className="h-5 w-6 rounded bg-neutral-300 animate-pulse" />
                   </div>
                 </div>
               </div>
 
-              {/* Recent Activity Card */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs">
+              {/* Recent Activity Card Skeleton */}
+              <div className="flex flex-col gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display text-base font-bold text-ink">Recent activity</h3>
-                  <span className="text-caption font-semibold text-graphite">See All →</span>
+                  <div className="h-4 w-28 rounded bg-neutral-300 animate-pulse" />
+                  <div className="h-3 w-12 rounded bg-neutral-200 animate-pulse" />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span
-                    style={{ color: '#ffffff' }}
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-caption font-bold !text-white text-white"
-                  >
-                    SC
-                  </span>
-                  <div className="flex flex-col min-w-0">
-                    <p className="text-caption text-graphite leading-snug">
-                      <strong className="text-ink">Sarah Chen</strong> approved Membership Landing Hero
-                    </p>
-                    <span className="text-[11px] text-mid mt-0.5">14m ago</span>
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="size-9 rounded-full bg-neutral-200 animate-pulse shrink-0" />
+                  <div className="flex flex-col gap-1.5 flex-1">
+                    <div className="h-3 w-40 rounded bg-neutral-200 animate-pulse" />
+                    <div className="h-2 w-14 rounded bg-neutral-200/70 animate-pulse" />
                   </div>
                 </div>
               </div>
@@ -410,19 +298,16 @@ export function WorkspaceSkeleton({
         </div>
       </main>
 
-      {/* Floating Ask Brad Pill (Bottom Right - Exactly as in user screenshot) */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-silver/90 bg-paper px-4 py-2 text-ink shadow-float">
-        <span className="text-ui font-bold">Ask Brad</span>
-        <span className="flex size-5 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-paper">
-          ☻
-        </span>
-        <span className="size-2 rounded-full bg-brand-orange" />
+      {/* Floating Ask Brad Pill Skeleton (Bottom Right) */}
+      <div className="fixed bottom-6 right-6 z-50 flex h-10 w-28 items-center justify-between rounded-full border border-neutral-200/90 bg-white px-3 shadow-float">
+        <div className="h-3 w-14 rounded bg-neutral-300 animate-pulse" />
+        <div className="size-4 rounded-full bg-neutral-300 animate-pulse" />
       </div>
 
-      {/* Subtle Floating Bottom Synchronizing Pill */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full border border-silver/90 bg-ink px-4 py-2 text-paper shadow-float">
-        <Sparkles className="size-4 text-brand-orange animate-spin" />
-        <span className="text-caption font-semibold text-paper">
+      {/* Floating Center Loading Status Pill */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full border border-neutral-800 bg-neutral-900 px-4 py-2 text-white shadow-float">
+        <span className="size-2 rounded-full bg-brand-orange animate-ping" />
+        <span className="text-caption font-semibold tracking-wide text-white">
           {message}
         </span>
       </div>
