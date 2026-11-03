@@ -73,6 +73,105 @@ export const AUDIT_LOG: LedgerEntry[] = [
 export const BRAND_STATS: Record<string, { assets: number; passRate: number; open: number; reviewers: string[]; rules: number; updated: string; voice: string }> = {
   novafit: { assets: 486, passRate: 91, open: 4, reviewers: ['Sarah Chen', 'Priya Nair'], rules: 24, updated: 'Price sheet updated today', voice: 'Premium, encouraging, never discount-led.' },
   omnicloud: { assets: 312, passRate: 87, open: 3, reviewers: ['Sarah Chen'], rules: 18, updated: 'SLA facts updated 4 days ago', voice: 'Precise, technical, evidence-backed.' },
+  greenbasket: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Friendly and environmentally conscious"
+},
+  finwise: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Clear and responsible"
+},
+  travelnest: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Welcoming and inspiring"
+},
+  pureglow: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Calm and informative"
+},
+  byteforge: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Technical and direct"
+},
+  eduspark: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Encouraging and accessible"
+},
+  freshbite: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Fresh and friendly"
+},
+  homeease: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Reassuring and practical"
+},
+  ecodrive: {
+  "assets": 150,
+  "passRate": 92,
+  "open": 2,
+  "reviewers": [
+    "Sarah Chen"
+  ],
+  "rules": 15,
+  "updated": "Active",
+  "voice": "Innovative and factual"
+},
   apex: { assets: 198, passRate: 78, open: 5, reviewers: ['Marcus Vance', 'Priya Nair'], rules: 31, updated: 'APY disclosure added yesterday', voice: 'Calm, regulated, zero guarantees.' }
 };
 

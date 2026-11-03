@@ -2,6 +2,15 @@ import { DISCLAIMER } from '@/lib/rules';
 
 export const BRANDS = [
   { id: 'novafit', name: 'NovaFit Health', sector: 'Fitness & Wellness', initials: 'NF' },
+  { id: 'greenbasket', name: 'GreenBasket', sector: 'Organic Grocery', initials: 'GB' },
+  { id: 'finwise', name: 'FinWise', sector: 'Financial EdTech', initials: 'FW' },
+  { id: 'travelnest', name: 'TravelNest', sector: 'Luxury Getaways', initials: 'TN' },
+  { id: 'pureglow', name: 'PureGlow', sector: 'Clean Skincare', initials: 'PG' },
+  { id: 'byteforge', name: 'ByteForge', sector: 'Cloud Developer Tools', initials: 'BF' },
+  { id: 'eduspark', name: 'EduSpark', sector: 'K-12 Learning', initials: 'ES' },
+  { id: 'freshbite', name: 'FreshBite', sector: 'Healthy Meal Kits', initials: 'FB' },
+  { id: 'homeease', name: 'HomeEase', sector: 'Smart Home Services', initials: 'HE' },
+  { id: 'ecodrive', name: 'EcoDrive', sector: 'EV Mobility', initials: 'ED' },
   { id: 'omnicloud', name: 'OmniCloud', sector: 'B2B Cloud Software', initials: 'OC' },
   { id: 'apex', name: 'Apex FinTech', sector: 'Regulated Finance', initials: 'AX' }
 ] as const;
