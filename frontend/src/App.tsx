@@ -21,6 +21,7 @@ import { ReviewStudio } from '@/screens/ReviewStudio';
 import { SettingsPage } from '@/screens/SettingsPage';
 import { SubmissionsPage } from '@/screens/SubmissionsPage';
 import { UsersPage } from '@/screens/UsersPage';
+import { AdminInvitationsPage } from '@/screens/AdminInvitationsPage';
 
 /** `/dashboard?role=` → Creator Dashboard, Reviewer Dashboard, Platform Dashboard (admin), or Brand Manager Dashboard. */
 function Dashboard() {
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { path: '/alerts', element: <AlertsPage /> },
       { path: '/notifications', element: <AlertsPage /> },
       { path: '/admin/users', element: <UsersPage /> },
+      { path: '/admin/invitations', element: <AdminInvitationsPage /> },
       { path: '/audit', element: <AuditLedger /> },
       { path: '/guidelines', element: <GuidelinesRoute /> },
       { path: '/settings', element: <SettingsPage /> },

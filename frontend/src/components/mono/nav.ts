@@ -1,4 +1,4 @@
-import { BookOpen, Building2, CirclePlus, ClipboardList, FileCheck, FilePen, Inbox, LayoutGrid, UserCog, type LucideIcon } from 'lucide-react';
+import { BookOpen, Building2, CirclePlus, ClipboardList, FileCheck, FilePen, Inbox, LayoutGrid, UserCheck, UserCog, type LucideIcon } from 'lucide-react';
 import { dashboardPath, type Role } from '@/state/session';
 
 export interface NavBadge {
@@ -35,6 +35,7 @@ export const NAV: Record<Role, NavItem[]> = {
   admin: [
     { label: 'Platform Dashboard', icon: LayoutGrid, to: dashboardPath('admin'), match: on('/dashboard') },
     { label: 'Approval Queue', icon: Inbox, to: '/dashboard/queue', match: on('/dashboard/queue', '/reviews/*'), badge: { full: 'Sign-off', short: 'Sign-off' } },
+    { label: 'Joining Requests', icon: UserCheck, to: '/admin/invitations', match: on('/admin/invitations'), badge: { full: 'Pending', short: 'Req' } },
     { label: 'User & Role Mgmt', icon: UserCog, to: '/admin/users', match: on('/admin/users') },
     { label: 'Brand Workspaces', icon: Building2, to: '/brands', match: on('/brands') },
     { label: 'All Submissions', icon: FileCheck, to: '/submissions', match: on('/submissions') },

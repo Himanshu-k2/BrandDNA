@@ -10,6 +10,7 @@ import { cn } from '@/lib/cn';
 import { ROLE_LABEL, useSession, type Role } from '@/state/session';
 import type { LucideIcon } from 'lucide-react';
 import { adminAPI } from '@/api/admin';
+import { getRegisteredUsers } from '@/data/invitations';
 
 const STATUS: Record<UserStatus, { label: string; tone: Tone; icon: LucideIcon }> = {
   active: { label: 'Active', tone: 'success', icon: CircleCheck },
@@ -29,10 +30,18 @@ export function RestrictedState({ title }: { title: string }) {
   );
 }
 
+function mergeWithRegisteredUsers(baseUsers: WorkspaceUser[]): WorkspaceUser[] {
+  const registered = getRegisteredUsers();
+  if (!registered || registered.length === 0) return baseUsers;
+  const registeredEmails = new Set(registered.map(r => r.email.toLowerCase()));
+  const rest = baseUsers.filter(u => !registeredEmails.has(u.email.toLowerCase()));
+  return [...registered, ...rest];
+}
+
 export function UsersPage() {
   const { persona } = useSession();
   const { notify } = useFrame();
-  const [users, setUsers] = useState<WorkspaceUser[]>(USERS);
+  const [users, setUsers] = useState<WorkspaceUser[]>(() => mergeWithRegisteredUsers(USERS));
   const [filter, setFilter] = useState<'all' | Role>('all');
   const [inviting, setInviting] = useState(false);
   const [email, setEmail] = useState('');
@@ -55,9 +64,14 @@ export function UsersPage() {
           brands: u.assignedBrands || ['NovaFit']
         }));
         const existingIds = new Set(mapped.map(u => u.id));
-        setUsers([...mapped, ...USERS.filter(u => !existingIds.has(u.id))]);
+        const combined = [...mapped, ...USERS.filter(u => !existingIds.has(u.id))];
+        setUsers(mergeWithRegisteredUsers(combined));
+      } else {
+        setUsers(mergeWithRegisteredUsers(USERS));
       }
-    }).catch(() => {});
+    }).catch(() => {
+      setUsers(mergeWithRegisteredUsers(USERS));
+    });
   }, []);
 
   if (persona.role !== 'admin') {
@@ -177,9 +191,14 @@ export function UsersPage() {
                         <div className="flex items-center gap-3">
                           <MonoAvatar initials={user.initials} tone={user.status === 'suspended' ? 'silver' : 'graphite'} />
                           <div className="flex min-w-0 flex-col">
-                            <span className="font-medium text-ink">
+                            <span className="font-medium text-ink flex items-center gap-1.5">
                               {user.name}
                               {self && <span className="text-caption font-normal text-graphite"> · You</span>}
+                              {user.lastActive === 'Online now' && (
+                                <span className="rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-700">
+                                  Online
+                                </span>
+                              )}
                             </span>
                             <span className="text-caption text-graphite">{user.email}</span>
                           </div>
