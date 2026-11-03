@@ -576,7 +576,7 @@ export function GuidelinesHub() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* ── Category 3: Mandatory Disclaimers ── */}
+          {/* ── Category 3: Mandatory Disclaimers (Senior UX Redesign) ── */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeSection.id === 'disclaimers' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -587,15 +587,16 @@ export function GuidelinesHub() {
                 return (
                   <div
                     key={row.label}
-                    className="flex flex-col justify-between gap-4 rounded-2xl border border-silver/80 border-l-4 border-l-brand-orange bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                    className="flex flex-col justify-between gap-5 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
                   >
+                    {/* Top Row: Eyebrow + Legal Badge + Copy Button */}
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-semibold tracking-wider text-graphite uppercase">
+                      <span className="text-[11px] font-bold tracking-wider text-graphite uppercase">
                         {row.label}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-[11px] font-bold text-brand-orange">
-                          <FileCheck className="size-3.5 text-brand-orange" strokeWidth={2.5} /> Mandatory
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-800 tracking-wide uppercase">
+                          <FileCheck className="size-3 text-amber-600 stroke-[2.5]" /> Required Notice
                         </span>
                         <button
                           type="button"
@@ -613,18 +614,23 @@ export function GuidelinesHub() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-silver/80 bg-silver/15 p-4 font-sans text-body font-medium leading-relaxed text-ink">
-                      &ldquo;{row.value}&rdquo;
+                    {/* Middle: Verbatim Legal Statement with Editorial Accent Line */}
+                    <div className="relative pl-4 border-l-2 border-brand-orange/70 py-0.5">
+                      <p className="font-display text-subheading font-semibold tracking-tight text-ink leading-snug">
+                        &ldquo;{row.value}&rdquo;
+                      </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 pt-1 border-t border-silver/40">
+                    {/* Bottom Metadata: Scope & Legal Document Source */}
+                    <div className="flex flex-col gap-2 pt-3 border-t border-silver/40">
                       <p className="text-caption leading-relaxed text-graphite">
+                        <strong className="text-ink font-semibold">Scope: </strong>
                         {row.note}
                       </p>
                       {row.source && (
                         <div className="flex items-center gap-1.5 text-[11px] text-mid">
                           <FileText className="size-3 shrink-0" {...ICON} />
-                          <span className="truncate">{row.source}</span>
+                          <span className="truncate font-medium">{row.source}</span>
                         </div>
                       )}
                     </div>

@@ -7,6 +7,9 @@ import { GoogleMark } from '@/components/mono/Brand';
 import { Logo } from '@/components/mono/Logo';
 import { FloatingField, MonoCheckbox } from '@/components/mono/FloatingField';
 import { RevealText } from '@/components/mono/RevealText';
+import { GoogleAccountModal, type GoogleAccount } from '@/components/mono/GoogleAccountModal';
+import { WorkspaceSkeleton } from '@/components/mono/WorkspaceSkeleton';
+import { OfflineErrorScreen } from '@/screens/OfflineErrorScreen';
 import { cn } from '@/lib/cn';
 import { DURATION, EASE, rise, riseReduced } from '@/lib/motion';
 import { Characters } from '@/screens/login/Characters';
@@ -42,6 +45,9 @@ export function LoginScreen() {
   const [notice, setNotice] = useState('');
   const [demo, setDemo] = useState<Role | null>(null);
   const [leaving, setLeaving] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
+  const [isOfflineError, setIsOfflineError] = useState(false);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
@@ -49,11 +55,18 @@ export function LoginScreen() {
     document.title = 'Log in | BrandDNA';
   }, []);
 
-  const busy = status === 'loading' || status === 'google';
+  const busy = status === 'loading' || status === 'google' || showSkeleton;
   const fieldVariants = reduce ? riseReduced : rise;
 
-  /** Loading → login fades out while the logo splash scales in → dashboard. */
+  /** Loading → Skeleton screen → dashboard navigation. */
   const enter = async (role: Role, userEmail?: string, userPass?: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setIsOfflineError(true);
+      return;
+    }
+
+    setShowSkeleton(true);
+
     try {
       const emailToUse = userEmail || PERSONAS[role].email;
       const passToUse = userPass || 'DemoPasswordSecure2026!';
@@ -65,15 +78,26 @@ export function LoginScreen() {
         localStorage.setItem('branddna_token', res.data.data.token);
         localStorage.setItem('branddna_user', JSON.stringify(res.data.data.user));
       }
-    } catch (apiErr) {
+    } catch (apiErr: any) {
+      if (apiErr?.code === 'ERR_NETWORK' || !navigator.onLine) {
+        setShowSkeleton(false);
+        setIsOfflineError(true);
+        return;
+      }
       console.warn('Backend authentication notice (using session fallback):', apiErr);
     }
 
     setRole(role);
     timers.current.push(
-      window.setTimeout(() => setLeaving(true), 640),
-      window.setTimeout(() => navigate(dashboardPath(role)), 640 + 720)
+      window.setTimeout(() => setLeaving(true), 1200),
+      window.setTimeout(() => navigate(dashboardPath(role)), 1200 + 400)
     );
+  };
+
+  const handleSelectGoogleAccount = (account: GoogleAccount) => {
+    setIsGoogleModalOpen(false);
+    setStatus('google');
+    void enter(account.role, account.email);
   };
 
   const resetFeedback = () => {
@@ -105,8 +129,26 @@ export function LoginScreen() {
     resetFeedback();
   };
 
+  if (isOfflineError) {
+    return <OfflineErrorScreen forcedOffline={true} />;
+  }
+
   return (
     <>
+    {/* Skeleton Loading Screen while workspace authenticates */}
+    <AnimatePresence>
+      {showSkeleton && (
+        <WorkspaceSkeleton message="Verifying credentials & syncing brand workspace..." />
+      )}
+    </AnimatePresence>
+
+    {/* Google Account Chooser Modal */}
+    <GoogleAccountModal
+      isOpen={isGoogleModalOpen}
+      onClose={() => setIsGoogleModalOpen(false)}
+      onSelectAccount={handleSelectGoogleAccount}
+    />
+
     <motion.div
       className="mono mono-wash flex min-h-dvh gap-4 p-4"
       initial={{ opacity: 0 }}
@@ -220,10 +262,7 @@ export function LoginScreen() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => {
-                  setStatus('google');
-                  enter('creator');
-                }}
+                onClick={() => setIsGoogleModalOpen(true)}
                 className={cn(primaryButton, 'border border-silver bg-paper text-ink hover:bg-silver/40')}
               >
                 {status === 'google' ? <LoaderCircle className="size-5 animate-spin" strokeWidth={1.5} /> : <GoogleMark />}

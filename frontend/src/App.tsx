@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider, useSearchParams } from 'react-router-dom';
 import { AppFrame } from '@/components/mono/AppFrame';
 import { BradProvider } from '@/components/brad/BradProvider';
@@ -14,6 +15,7 @@ import { LoginScreen } from '@/screens/LoginScreen';
 import { LogoGuidelines } from '@/screens/LogoGuidelines';
 import { DesignSystem } from '@/screens/DesignSystem';
 import { RouteError } from '@/screens/RouteError';
+import { OfflineErrorScreen } from '@/screens/OfflineErrorScreen';
 import { ReviewerQueue } from '@/screens/ReviewerQueue';
 import { ReviewStudio } from '@/screens/ReviewStudio';
 import { SettingsPage } from '@/screens/SettingsPage';
@@ -40,6 +42,8 @@ function GuidelinesRoute() {
 const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   { path: '/login', element: <LoginScreen />, errorElement: <RouteError /> },
+  { path: '/404', element: <OfflineErrorScreen forced404={true} /> },
+  { path: '/offline', element: <OfflineErrorScreen forcedOffline={true} /> },
   {
     element: <AppFrame />,
     errorElement: <RouteError />,
@@ -64,10 +68,31 @@ const router = createBrowserRouter([
       { path: '/design-system', element: <DesignSystem /> }
     ]
   },
-  { path: '*', element: <Navigate to="/login" replace /> }
+  { path: '*', element: <OfflineErrorScreen forced404={true} /> }
 ]);
 
 export function App() {
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  if (isOffline) {
+    return <OfflineErrorScreen forcedOffline={true} />;
+  }
+
   return (
     <SessionProvider>
       {/* Brad's conversation lives above the router so it survives navigation (memory only). */}
