@@ -44,8 +44,7 @@ export function LoginScreen() {
   const [status, setStatus] = useState<Status>('idle');
   const [notice, setNotice] = useState('');
   const [demo, setDemo] = useState<Role | null>(null);
-  const [leaving, setLeaving] = useState(false);
-  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [transitionStep, setTransitionStep] = useState<'idle' | 'logo_splash' | 'skeleton' | 'navigating'>('idle');
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [isOfflineError, setIsOfflineError] = useState(false);
   const timers = useRef<number[]>([]);
@@ -55,17 +54,18 @@ export function LoginScreen() {
     document.title = 'Log in | BrandDNA';
   }, []);
 
-  const busy = status === 'loading' || status === 'google' || showSkeleton;
+  const busy = status === 'loading' || status === 'google' || transitionStep !== 'idle';
   const fieldVariants = reduce ? riseReduced : rise;
 
-  /** Loading → Skeleton screen → dashboard navigation. */
+  /** Sequence: Sign In clicked → 1. BrandDNA logo center aligned → 2. Skeleton screen loader → 3. Dashboard */
   const enter = async (role: Role, userEmail?: string, userPass?: string) => {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setIsOfflineError(true);
       return;
     }
 
-    setShowSkeleton(true);
+    // Step 1: Center-aligned BrandDNA Logo Splash Screen
+    setTransitionStep('logo_splash');
 
     try {
       const emailToUse = userEmail || PERSONAS[role].email;
@@ -80,7 +80,7 @@ export function LoginScreen() {
       }
     } catch (apiErr: any) {
       if (apiErr?.code === 'ERR_NETWORK' || !navigator.onLine) {
-        setShowSkeleton(false);
+        setTransitionStep('idle');
         setIsOfflineError(true);
         return;
       }
@@ -88,9 +88,17 @@ export function LoginScreen() {
     }
 
     setRole(role);
+
+    // Step 2: After 850ms of center-aligned logo splash, load the exact skeleton screen loader
     timers.current.push(
-      window.setTimeout(() => setLeaving(true), 1200),
-      window.setTimeout(() => navigate(dashboardPath(role)), 1200 + 400)
+      window.setTimeout(() => {
+        setTransitionStep('skeleton');
+      }, 850),
+      // Step 3: After skeleton loader finishes (~1800ms), navigate to the actual dashboard
+      window.setTimeout(() => {
+        setTransitionStep('navigating');
+        navigate(dashboardPath(role));
+      }, 850 + 1800)
     );
   };
 
@@ -142,10 +150,33 @@ export function LoginScreen() {
 
   return (
     <>
-    {/* Skeleton Loading Screen while workspace authenticates */}
+    {/* 1. Center-aligned BrandDNA Logo Splash Screen */}
     <AnimatePresence>
-      {showSkeleton && (
-        <WorkspaceSkeleton message="Loading workspace & syncing brand rules..." />
+      {transitionStep === 'logo_splash' && (
+        <motion.div
+          role="status"
+          aria-label="Opening BrandDNA"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <motion.div
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <Logo variant="horizontal" size="xl" reveal decorative />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* 2. Skeleton Screen Loader (Exact Dashboard Layout with Shimmer) */}
+    <AnimatePresence>
+      {transitionStep === 'skeleton' && (
+        <WorkspaceSkeleton />
       )}
     </AnimatePresence>
 
@@ -159,8 +190,8 @@ export function LoginScreen() {
     <motion.div
       className="mono mono-wash flex min-h-dvh gap-4 p-4"
       initial={{ opacity: 0 }}
-      animate={leaving ? { opacity: 0, scale: reduce ? 1 : 0.98 } : { opacity: 1, scale: 1 }}
-      transition={{ duration: leaving ? 0.32 : DURATION.base, ease: EASE }}
+      animate={transitionStep !== 'idle' ? { opacity: 0, scale: reduce ? 1 : 0.98 } : { opacity: 1, scale: 1 }}
+      transition={{ duration: 0.25, ease: EASE }}
     >
       {/* Illustration */}
       <section className="relative hidden flex-1 flex-col justify-between overflow-hidden rounded-shell bg-silver/40 p-12 lg:flex">
@@ -309,28 +340,6 @@ export function LoginScreen() {
         </p>
       </section>
     </motion.div>
-
-    {/* Login → dashboard splash: stacked xl lockup on Clean White. */}
-    <AnimatePresence>
-      {leaving && (
-        <motion.div
-          role="status"
-          aria-label="Opening BrandDNA"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-paper"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: DURATION.fast, ease: EASE }}
-        >
-          <motion.div
-            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: DURATION.base, delay: 0.08, ease: EASE }}
-          >
-            <Logo variant="horizontal" size="xl" reveal decorative />
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
     </>
   );
 }

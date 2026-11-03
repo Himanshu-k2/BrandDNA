@@ -184,6 +184,21 @@
   }
 }
 
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #E8E8E8 0%, #F4F4F4 50%, #E8E8E8 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s infinite linear;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mono *,
   .mono *::before,
