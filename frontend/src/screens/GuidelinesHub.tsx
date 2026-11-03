@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft,
-  ArrowRight,
   ArrowUpRight,
   BookMarked,
   Check,
@@ -45,12 +43,12 @@ export function GuidelinesHub() {
   const brandKey = searchParams.get('brand') || 'novafit';
   const brandConfig = BRAND_GUIDELINES[brandKey] || BRAND_GUIDELINES.novafit;
 
-  // Active category from URL parameter
+  // Active category from URL parameter (default facts)
   const categoryParam = searchParams.get('category') as Filter | null;
   const initialFilter: Filter =
     categoryParam && ['facts', 'terms', 'disclaimers', 'tone'].includes(categoryParam)
       ? categoryParam
-      : 'all';
+      : 'facts';
 
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [inCategorySearch, setInCategorySearch] = useState('');
@@ -65,7 +63,7 @@ export function GuidelinesHub() {
     if (categoryParam && ['facts', 'terms', 'disclaimers', 'tone'].includes(categoryParam)) {
       setFilter(categoryParam);
     } else if (!categoryParam) {
-      setFilter('all');
+      setFilter('facts');
     }
   }, [categoryParam]);
 
@@ -248,15 +246,6 @@ export function GuidelinesHub() {
           <span className="text-caption font-semibold tracking-wider text-graphite uppercase">
             Rule categories · Select a card to inspect
           </span>
-          {isCardOpen && (
-            <button
-              type="button"
-              onClick={() => handleSelectCategory('all')}
-              className="press flex items-center gap-1.5 text-caption font-semibold text-brand-orange hover:underline cursor-pointer"
-            >
-              <ArrowLeft className="size-3.5" {...ICON} /> Close card view
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -269,7 +258,7 @@ export function GuidelinesHub() {
               focusRing,
               'bg-brand-orange text-ink hover:scale-[1.01] hover:shadow-soft',
               filter === 'facts'
-                ? 'ring-4 ring-ink/30 border-2 border-ink shadow-lift'
+                ? 'shadow-lift'
                 : 'opacity-95 hover:opacity-100'
             )}
           >
@@ -299,7 +288,7 @@ export function GuidelinesHub() {
               focusRing,
               'bg-ink text-paper hover:scale-[1.01] hover:shadow-soft',
               filter === 'terms'
-                ? 'ring-4 ring-brand-orange/50 border-2 border-brand-orange shadow-lift'
+                ? 'shadow-lift'
                 : 'opacity-95 hover:opacity-100'
             )}
           >
@@ -328,7 +317,7 @@ export function GuidelinesHub() {
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
               focusRing,
               filter === 'disclaimers'
-                ? 'ring-4 ring-brand-orange/40 border-2 border-brand-orange shadow-lift'
+                ? 'border-graphite shadow-soft'
                 : ''
             )}
           >
@@ -362,7 +351,7 @@ export function GuidelinesHub() {
               'group/card relative flex min-h-36 flex-col justify-between rounded-panel border border-silver bg-paper p-6 text-left shadow-soft transition-all duration-200 cursor-pointer hover:border-graphite/40 hover:scale-[1.01]',
               focusRing,
               filter === 'tone'
-                ? 'ring-4 ring-brand-orange/40 border-2 border-brand-orange shadow-lift'
+                ? 'border-graphite shadow-soft'
                 : ''
             )}
           >
@@ -510,10 +499,10 @@ export function GuidelinesHub() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* ── Category 2: Terminology / Lexicon (Matches Attachment 8) ── */}
+          {/* ── Category 2: Terminology / Lexicon (Clean 2-Col Grid) ── */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeSection.id === 'terms' && (
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredRows.map(row => {
                 const rowKey = `term-${row.label}`;
                 const isCopied = copiedKey === rowKey;
@@ -521,73 +510,64 @@ export function GuidelinesHub() {
                 return (
                   <div
                     key={row.label}
-                    className="flex flex-col gap-4 rounded-2xl border border-silver/80 bg-paper p-5 sm:p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-silver/80 bg-paper p-6 shadow-xs transition-all duration-200 hover:border-graphite/40 hover:shadow-soft"
                   >
-                    {/* Comparison Block: DO NOT USE -> APPROVED STANDARD */}
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] items-center gap-3">
-                      {/* Prohibited Term Box */}
-                      <div className="flex flex-col justify-center rounded-xl border border-silver/80 bg-silver/15 p-4 min-h-[76px]">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-mid">
-                          DO NOT USE
+                    {/* Top Row: Eyebrow + Approved Tag + Copy Button */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold tracking-wider text-graphite uppercase">
+                          Lexicon Standard
                         </span>
-                        <p className="mt-1 font-sans text-base font-semibold text-graphite line-through decoration-graphite/80">
-                          {row.label}
-                        </p>
-                      </div>
-
-                      {/* Directional Transition Arrow */}
-                      <div className="flex items-center justify-center py-1 md:py-0">
-                        <span className="flex size-8 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange border border-brand-orange/30">
-                          <ArrowRight className="size-4 shrink-0" {...ICON} />
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <Check className="size-3 text-emerald-600 stroke-[3]" /> Approved
                         </span>
                       </div>
 
-                      {/* Approved Standard Term Box */}
-                      <div className="flex flex-col justify-center rounded-xl border border-brand-orange/40 bg-brand-orange/5 p-4 min-h-[76px]">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
-                          APPROVED STANDARD
-                        </span>
-                        <p className="mt-1 font-sans text-base font-bold text-ink">
-                          {row.value}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bottom Metadata & Copy */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-silver/40">
-                      <p className="text-caption text-graphite leading-relaxed">
-                        <strong className="text-ink font-semibold">Rationale: </strong>
-                        {row.note}
-                      </p>
-
-                      <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
-                        {row.source && (
-                          <span className="inline-flex items-center gap-1 rounded-md border border-silver/80 bg-silver/20 px-2 py-0.5 text-[11px] font-medium text-graphite">
-                            <BookMarked className="size-3 text-mid" {...ICON} />
-                            {row.source}
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => copy(rowKey, row.value)}
+                          title="Copy approved standard term"
                           className={cn(
-                            'press flex items-center gap-1.5 rounded-full border px-3 py-1 text-caption font-semibold transition-colors cursor-pointer',
+                            'flex size-7 items-center justify-center rounded-full border transition-colors cursor-pointer',
                             isCopied
                               ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                              : 'border-silver bg-paper text-ink hover:border-ink hover:bg-silver/20'
+                              : 'border-silver/80 bg-paper text-graphite hover:border-ink hover:text-ink'
                           )}
                         >
-                          {isCopied ? (
-                            <>
-                              <Check className="size-3.5 text-emerald-600" /> Copied
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="size-3.5" /> Copy Term
-                            </>
-                          )}
+                          {isCopied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
                         </button>
                       </div>
+                    </div>
+
+                    {/* Middle: Approved Term & Prohibited Phrasing */}
+                    <div className="flex flex-col gap-2">
+                      <p className="font-display text-subheading font-bold tracking-tight text-ink">
+                        {row.value}
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-mid">
+                          Do not use:
+                        </span>
+                        <span className="inline-block rounded-md bg-silver/30 px-2 py-0.5 text-caption font-medium text-graphite line-through decoration-rose-500/70">
+                          {row.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Metadata: Rationale & Source */}
+                    <div className="flex flex-col gap-2 pt-2 border-t border-silver/40">
+                      <p className="text-caption leading-relaxed text-graphite">
+                        <strong className="text-ink font-semibold">Rationale: </strong>
+                        {row.note}
+                      </p>
+                      {row.source && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-mid">
+                          <BookMarked className="size-3 shrink-0" {...ICON} />
+                          <span className="truncate">{row.source}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -731,18 +711,7 @@ export function GuidelinesHub() {
             </div>
           )}
         </section>
-      ) : (
-        /* Prompt when no card is clicked yet */
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-silver/90 bg-silver/10 p-10 text-center">
-          <div className="flex size-11 items-center justify-center rounded-full bg-paper border border-silver/80 shadow-xs mb-3">
-            <Sparkles className="size-5 text-brand-orange" {...ICON} />
-          </div>
-          <h3 className="font-display text-lg font-bold text-ink">Select a Card Above</h3>
-          <p className="max-w-md text-caption text-graphite mt-1">
-            Click on Approved facts, Terminology, Mandatory disclaimers, or Tone of voice to open its dedicated page below.
-          </p>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }
