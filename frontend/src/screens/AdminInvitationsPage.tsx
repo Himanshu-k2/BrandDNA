@@ -270,8 +270,8 @@ export function AdminInvitationsPage() {
                       {req.roleTitle}
                     </span>
 
-                    <span className="text-caption text-graphite mt-0.5">
-                      {req.name} and you are now connected · <strong className="text-ink">{req.brand}</strong>
+                    <span className="text-caption font-semibold text-ink mt-0.5">
+                      {req.brand}
                     </span>
 
                     <span className="text-[12px] text-mid mt-0.5">
