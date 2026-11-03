@@ -63,11 +63,50 @@ export function AdminInvitationsPage() {
       req.email
     )}&name=${encodeURIComponent(req.name)}&role=${req.role}&brand=${encodeURIComponent(req.brand)}&token=${req.activationToken}`;
 
+    const roleName = req.role === 'brand_manager' ? 'Brand Manager' : 'Content Creator';
+
+    const plainTextMessage = `BrandDNA
+Your BrandDNA access request has been accepted!
+Hello ${req.name},
+
+Platform Administrator Jordan Blake has approved your workspace joining request for ${req.brand} as a ${roleName}.
+
+Please click the button below to create your password and launch your personalized brand workspace:
+
+[ Activate Account & Set Password → ] : ${link}
+
+Direct link: ${link}`;
+
+    const htmlMessage = `
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+  <div style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 12px; letter-spacing: -0.5px;">Brand<span style="color: #EA580C;">DNA</span></div>
+  <h2 style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 12px 0;">Your BrandDNA access request has been accepted!</h2>
+  <p style="font-size: 14px; line-height: 1.5; color: #334155; margin: 0 0 10px 0;">Hello <strong>${req.name}</strong>,</p>
+  <p style="font-size: 14px; line-height: 1.5; color: #334155; margin: 0 0 18px 0;">Platform Administrator <strong>Jordan Blake</strong> has approved your workspace joining request for <strong>${req.brand}</strong> as a <strong>${roleName}</strong>.</p>
+  <p style="font-size: 14px; line-height: 1.5; color: #334155; margin: 0 0 20px 0;">Please click the button below to create your password and launch your personalized brand workspace:</p>
+  <div style="margin: 22px 0;">
+    <a href="${link}" style="display: inline-block; background-color: #0b0f19; color: #ffffff !important; padding: 14px 28px; border-radius: 9999px; text-decoration: none; font-size: 14px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: 0.2px;">Activate Account &amp; Set Password &rarr;</a>
+  </div>
+  <p style="font-size: 12px; color: #64748B; margin-top: 20px; word-break: break-all;">Direct link: <a href="${link}" style="color: #2563EB;">${link}</a></p>
+</div>`;
+
     try {
-      await navigator.clipboard.writeText(link);
-      notify(`Copied activation link for ${req.name}!`, 'success');
+      if (typeof ClipboardItem !== 'undefined') {
+        const textBlob = new Blob([plainTextMessage], { type: 'text/plain' });
+        const htmlBlob = new Blob([htmlMessage], { type: 'text/html' });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/plain': textBlob,
+            'text/html': htmlBlob,
+          })
+        ]);
+      } else {
+        await navigator.clipboard.writeText(plainTextMessage);
+      }
+      notify(`Copied invitation message & activation link for ${req.name}!`, 'success');
     } catch {
-      notify(`Activation link: ${link}`, 'info');
+      await navigator.clipboard.writeText(plainTextMessage);
+      notify(`Copied invitation for ${req.name}!`, 'success');
     }
   };
 
