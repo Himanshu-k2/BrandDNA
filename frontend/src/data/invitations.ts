@@ -24,7 +24,7 @@ const INITIAL_REQUESTS: JoiningRequest[] = [
   {
     id: 'req-1',
     name: 'Alfred Harris',
-    email: 'alfred.harris@designagency.com',
+    email: 'spa210012ak@gmail.com',
     role: 'creator',
     roleTitle: 'UX Lead',
     brand: 'NovaFit Health',
